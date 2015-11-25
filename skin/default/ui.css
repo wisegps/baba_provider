@@ -1,0 +1,145 @@
+	.ui_car_d {
+		font-size: 16px;
+		padding: .5em .8em;
+		line-height: 1.4em;
+		background-color: #fff;
+		margin-bottom: .8em;
+		color: #333;
+		padding-bottom: .3em;
+		border-bottom: 1px solid #e5e4e2;
+		border-top: 1px solid #e5e4e2;
+	}
+	
+	.ui_car_d th {
+		font-weight: 100;
+		text-align: left;
+		padding: .3em 0 .5em 0;
+	}
+	
+	.ui_car_d th>[name='value'] {
+		margin-left: .5em;
+	}
+	
+	.ui_car_d th>img {
+		width: 1.5em;
+		vertical-align: top;
+	}
+	
+	.ui_car_d [name='tip'] {
+		text-align: right;
+		color: #80D9F5;
+		font-size: 14px;
+	}
+	
+	.ui_car_d .name {
+		color: #c3c2c2;
+		margin-right: .2em;
+	}
+	
+	.ui_car_d td {
+		font-size: 14px;
+		width: 50%;
+    	vertical-align: top;
+	}
+	
+	.ui_car_d [name='comment'] {
+		color: #FF8F00;
+	}
+	
+	.ui_car_d [name='comment'] .mui-icon {
+		font-size: 16px;
+	}
+	
+	.ui_car_d table {
+		width: 100%;
+	}
+	
+	.ui_car_d footer {
+		padding: .6em 0 .4em;
+		text-align: right;
+		border-top: 1px solid #e5e4e2;
+		margin-top: .5em;
+	}
+	
+	.ui_car_d .mui-btn,.W_primary{
+		border: none;
+		margin-left: .5em;
+	}
+	
+	.ui_car_d .mui-btn-primary,.W_primary{
+		color: #fff;
+		background: #50B7DF;
+	}
+	
+	.ui_car_d .mui-btn:enabled:active,.W_primary:enabled:active{
+		border: none
+	}
+	
+	.ui_car_d footer>.text {
+		float: left;
+		color: #c3c2c2;
+		line-height: 2em;
+	}
+	
+	
+	
+	/*搜索框*/
+	.mui-search {
+		font-size: 15px;
+		color: #888;
+		background-color: #fff;
+		margin: 5px;
+		height: 34px;
+		line-height: 34px;
+		border-radius: 34px;
+		text-align: center;
+	}
+	.mui-search .mui-input-clear{
+		background-color: #fff;
+		border-radius: 34px;
+	}
+	/*搜索框*/
+
+
+	/*到店*/
+	.checkin_box .W_primary{
+		margin: 0;
+		width: 45%;
+	}
+	.alert_view .mui-icon-close{
+		position: absolute;
+	    right: 5px;
+	    top: 5px;
+	}
+	
+	
+	.sxj_div{
+		position:relative;line-height: 2.5em;
+	}
+	
+	.sxj {
+	    position: absolute;
+	    top: .95em;
+	    left:2em
+	}
+	.sxj:after {
+	    content: "";
+	    border-left: 5px solid transparent;
+	    border-right: 5px solid transparent;
+	    border-top: 5px solid #000;
+	}
+		
+	.sxj_div .sxj_t{
+		position:absolute;left:.8em;top: 1px;
+	}
+	.sxj_div>input{
+		padding-left: 2.8em;
+	}
+	
+	.ui_child_table{
+		    width: 100%;
+    text-align: center;
+    border-color: #eee;
+	}
+	
+	.ui_child_table td{padding: .5em;}

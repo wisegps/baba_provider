@@ -1,0 +1,191 @@
+<!--
+	作者：刘啸
+	时间：2015-11-23
+	描述：快速搜索页面
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+
+		<title>快速搜索</title>
+		<script src="../wslib/WiStorm.js"></script>
+		
+		<!--按皮肤引入css-->
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+
+		<script src="ui/ui.js"></script>
+
+		<script src="../wslib/api/WUserApi.js" defer="defer"></script>
+	<style>
+		body{background-color: #EFEFF4;font-family: "微软雅黑";}
+		.his{padding: .5em .8em;background-color: #fff;border-top: 1px solid #000;}
+		#his_list{margin-top: 20px;}
+		.his_clear{width: 100%;height: 45px;padding:10px 0;text-align: center;cursor: pointer;background-color:#fff;border: 1px solid #ccc;}
+		.creatUser{width: 100%;height: 45px;padding:10px 0;display: none; text-align: center;cursor: pointer;background-color:#fff;border: 1px solid #ccc;margin-top: 40px;}
+		.ui_car_d{margin-bottom: 0;}
+	</style>
+	<script>
+	var con;
+	
+	window.onload=function (){
+			W("#cle_hst").innerHTML='<div id="his_clear" class="his_clear" onclick="clearHis()">清空历史记录</div><div id="cUser" class="creatUser">新建客户</div>';					
+			creathis();//显示历史记录
+		}
+		/*
+		 显示历史记录
+		 **/
+		function creathis(){
+			W("#his_list").innerHTML='';
+			/*
+			 取出本地存储的历史记录并且添加清除历史记录和新建客户
+			 * */
+			var cname=W.ls("cname");
+			var uname=W.ls("uname");
+			var last_maintain=W.ls("last_maintain");
+			if(cname!=null){			
+				for(i=0;i<cname.length;i++){
+					con=new WiStormUI("div");
+					con.className="ui_car_d";
+		  			con.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_8_100.png"><span name="value">'+cname[i]+'</span></th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+uname[i]+'</span></td><td><span class="name">最后一次到店：</span><span class="value">'+last_maintain[i]+'天前</span></td></tr>';
+					W("#his_list").appendChild(con);
+				}
+			}else{
+				W("#his_clear").style.display='none';				
+			}
+		}
+		/**
+		 * 清空历史记录
+		 * clearHis
+		 */
+		function clearHis(){
+			W("#his_list").innerHTML="";
+			var cname=W.ls("cname");
+			var uname=W.ls("uname");
+			var last_maintain=W.ls("last_maintain");
+			localStorage.removeItem("cname");
+			localStorage.removeItem("uname");
+			localStorage.removeItem("last_maintain");
+			if(W("#his_list").children.length == 0){
+				W("#his_clear").style.display='none';
+			}
+		}
+	</script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<h1 class="mui-title">快速搜索</h1>
+		</header>
+		<div class="mui-content">
+			<div class="mui-input-row mui-search">
+				<input id="search" type="search" class="mui-input-clear" placeholder="输入车牌号查询车辆" oninput="creatCar()">
+			</div>
+			<div id="sc_list"></div>
+			<div id="his_list"></div>
+			<div id="cle_hst"></div>
+		</div>
+	</body>
+	<script>
+		function sc(data){
+			var obj=new WiStormUI("div");//创建一个div组件
+			
+			obj.merge(this);//将原型sc.prototype中的方法赋予当前obj
+			
+			obj.className="ui_car_d";//设置div的class属性
+			
+			obj.setData(data);//设置obj的内容,setData()在下面sc.prototype中定义
+			
+			return obj;//最后记得要返回组件
+		}
+		//给组件添加对象方法
+		sc.prototype.getData=function(){
+			return this.data;
+		}
+var scname,suname,slast_maintain;//车牌号，客户名，最后一次到店时间	
+		sc.prototype.setData=function(data){
+			W('#sc_list').innerHTML='';
+			if(data!=null){
+				scname = data.obj_name;
+				suname = data.nick_name;
+				var lastTime = data.maintain_last_date.slice(0,10);
+				lastTime=lastTime.replace(/-/g,'/');
+				slast_maintain = new Date(lastTime);//将日期转换成时间戳
+				var timestamp = new Date();
+				slast_maintain = timestamp-slast_maintain;
+				slast_maintain =Math.floor(slast_maintain/(1000 * 60* 60* 24));
+				
+				this.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_8_100.png"><span name="value">'+data.obj_name+'</span></th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+data.nick_name+'</span></td><td><span class="name">车型:</span><span class="value">'+data.car_type+'</span></td></tr><tr><td><span class="name">最后一次到店:</span><span class="value">'+slast_maintain+'天前</span></td><td><span class="name">车架号:</span><span class="value">'+data.engine_no+'</span></td></tr><tr><td><span class="name">行驶里程:</span><span class="value">56000公里</span></td><td><span class="name">保养后里程:</span><span class="value">3500公里</span></td></tr><tr><td><span class="name">到店次数:</span><span class="value">5</span></td><td><span class="name">评价次数:</span><span class="value">3</span></td></tr></table><footer><span class="text">设备未激活</span></footer>'
+	
+				this.querySelector("footer").appendChild(new ui_checkInBtn(2015));//给其中的按钮添加点击事件监听，使用sc.editData来处理点击事件
+					
+				this.data=data;//直接把数据缓存进入组件（按需求，如果数据是需要重复用的就这样缓存）
+				/*
+				 设置本地存储的历史记录	
+				 * */
+			}else{
+				console.log("未连接到服务器。");
+			}
+
+		}
+
+/**
+ * 搜索显示的车辆信息
+ */
+	function creatCar(){
+		W.userApi.getCarList(function(res){
+
+			if(res==null || res.length==0){
+				W("#cUser").style.display="block";
+			}else{
+				if(!W.dom.carList)
+					W.dom.carList=W("#sc_list");//缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
+												 //W.dom是一个json，专门用于缓存元素
+												 								 
+				/*创建DocumentFragment碎片；
+				构造列表时不要每创建一个元素就添加到页面里，这样会造成性能低下，把元素添加到DocumentFragment，
+				最后再把DocumentFragment添加到页面*/
+				var list=document.createDocumentFragment();
+				
+				for(var i=/*res.length-1*/1;i>=0;i--){
+					list.appendChild(new sc(res[i]));//创建一个sc组件，并添加到DocumentFragment里		
+				}
+				/**
+				 * 把多条数据加入到数组存储到本地
+				 */
+				var cname = W.ls("cname");
+				var uname = W.ls("uname");
+				var last_maintain =W.ls("last_maintain");
+				
+				if(cname==null){
+					cname = new Array(); 
+					uname = new Array(); 
+					last_maintain = new Array(); 					
+				}
+				if(cname.length>=5){
+					cname.shift();
+				}
+				cname.push(scname);
+	    		uname.push(suname);	
+				last_maintain.push(slast_maintain);
+				W.setLS("cname",cname);//这个是h5 存储
+				W.setLS("uname",uname);
+				W.setLS("last_maintain",last_maintain);
+	
+				W.dom.carList.appendChild(list);//车辆信息
+				
+			}	
+			W("#his_clear").style.display="none";
+			W("#his_list").style.display="none";
+		});
+	};
+	//至此，一个页面就基本完成了
+			
+
+	</script>
+</html>

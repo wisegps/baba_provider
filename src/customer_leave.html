@@ -1,0 +1,231 @@
+<!--
+	作者：cyy
+	时间：2015-11-11
+	描述：客户到店/离店
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+
+		<title>客户到店/离店</title>
+		<!--必须最先引入WiStorm.js文件-->
+		<script src="../wslib/WiStorm.js"></script>
+
+		<!--使用link()引入css文件，无需写路径，直接写文件名即可,尽量少引入css，样式如果少（小于10k为少），
+		可以直接写在style元素里，放到body元素后面-->
+		<script>
+			link("W.css")
+		</script>
+
+		<!--其他js文件需在css文件后面引入，如果是在加载完页面之后才会用到的，使用defer属性异步加载;或者直接放到body后面；
+			同样尽量少引入js文件；
+			现在接口可能需要你们自己封装，参考wslib/api/WUserApi.js里的封装方式
+			-->
+		<script src="../wslib/api/WUserApi.js" defer="defer"></script>
+		<!--默认的同步加载js（用于加载有严格加载顺序的外部js文件）-->
+		<script src="../wslib/ui/WiStormUI.js"></script>
+		<script src="../wslib/ui/DateTime.js"></script>
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-right"></a>
+			<h1 class="mui-title">客户到店/离店</h1>
+		</header>
+		<div class="mui-content">
+			
+			
+			<div class="preview">
+				<table>
+					<tbody>
+						<tr>
+							<td class="td_preview">
+								今日到店：<font color="#0062CC">10</font>
+							</td>
+							<td class="td_preview">
+								今日离店：<font color="#0062CC">6</font>
+							</td>
+							<td class="td_preview">
+								今日评价：<font color="#0062CC">3</font>
+							</td>
+						</tr>
+						<tr>
+							<td class="td_preview">
+								当月到店：<font color="#0062CC">10</font>
+							</td>
+							<td class="td_preview">
+								当月离店：<font color="#0062CC">6</font>
+							</td>
+							<td class="td_preview">
+								当月评价：<font color="#0062CC">3</font>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="tab" >
+				<span class="tab_condition" >在店(5)</span>
+				<span class="tab_condition">离店(10)</span>
+				
+			</div>
+			<div class="condition">
+				<span>
+						<script id="selectDate" class="bbb" data-ccc="ccc" style="border: none; background: rgba(0,0,0,0);width: 50%;">
+									echo(new DateSelector())
+								</script>
+				</span>
+				<span>
+					<label id="label_codition" width: 50% onclick="document.getElementById('list_condition').style.display='block'">全部</label>
+				</span>
+
+			</div>
+			<div id="car_list"></div>
+
+		</div>
+
+		<div id="list_condition">
+			<div class="list_row" onclick="select('全部')">全部</div>
+			<div class="list_row" onclick="select('已到店')">已到店</div>
+			<div class="list_row" onclick="select('已离店')">已离店</div>
+			<div class="list_row" onclick="select('已评价')">已评价</div>
+		</div>
+	</body>
+	<style>
+		body {
+			background-color: #EFEFF4;
+		}
+		
+		table {
+			width: 100%;
+		}
+		.tab {
+			width: 100%;
+		}
+		
+		td {
+			width: 50%;
+			padding: .5em;
+		}
+		.td_preview{
+			width: 33.3%;
+			padding: .5em;
+		}
+		
+		.tab_condition {
+			width: 49%;
+			align-content: center;
+			display: inline-block;
+			padding: .7em;
+			text-align: center;
+		}
+		
+		
+		#list_condition {
+			display: none;
+			position: absolute;
+			top: 10%;
+			width: 90%;
+			height: auto;
+			background-color: white;
+			z-index: 1002;
+			overflow: auto;
+			text-align: center;
+			margin-right: auto;
+			margin-left: 5%;
+			border: 1px solid black;
+		}
+		
+		.list_row {
+			position: relative;
+			padding: .5em;
+			line-height: 1.8em;
+			font-weight: 700;
+			color: #6B6464;
+			text-align: center;
+			border-bottom: solid #999999 1px;
+		}
+		
+		#list_condition>div:active {
+			background: rgba(0, 0, 0, .1);
+		}
+		
+		#list_condition>div {
+			position: relative;
+			display: inline-block;
+			width: 90%;
+			text-align: center;
+		}
+	</style>
+
+	<script>
+		//自定义一个对象用于测试
+		function CarData() {
+			this.carNumber = "粤B888888"; //车牌号
+			this.customer = "邓小平"; //客户姓名
+			this.mileage = "5000"; //行驶里程
+			this.arriveTime = "2015-12-12"; //到店时间
+			this.leaveTime = "2015-12-13"; //离店时间
+			this.model = "奥迪a6"; //车型号
+			this.maintenance = "保养"; //维修类型
+			this.review = "未评价"; //是否评价
+		}
+		//车辆列表中的一项，的对象
+		function cv(data) {
+			var obj = new WiStormUI("div"); //创建一个div组件
+			obj.merge(this); //将原型cv.prototype中的方法赋予当前obj
+			obj.className = "cv"; //设置div的class属性
+			obj.setData(data); //设置obj的内容,setData()在下面cv.prototype中定义
+			return obj; //最后记得要返回组件
+		}
+		//给组件添加对象方法
+		cv.prototype.getData = function() {
+			return this.data;
+		}
+		cv.prototype.setData = function(data) {
+				this.innerHTML = '<div><table class = "tb_content"> <tbody><tr class = "tr_content"><td class = "td_carNumber"> <font size = "4" >车牌:' + data.carNumber + '<font></td><td>离店时间:' + data.leaveTime + '</td></tr><tr><td>客户姓名:' + data.customer + '</td><td>车型号:' + data.model + '</td></tr><tr><td>行驶里程:' + data.mileage + '</td><td>维修类型:' + data.maintenance + '</td></tr><tr><td>到店时间:' + data.arriveTime + '</td><td>是否评价:' + data.review + '</td> </tr><tr></tr><tr><td><button>完工离店</button></td><td><button>直接离店</button></td></tr><tr><hr></tr></tbody></table></div>';
+				//this.querySelector(".edit").addEvent("click",cv.editData); //给其中的按钮添加点击事件监听，使用cv.editData来处理点击事件
+				this.data = data; //直接把数据缓存进入组件（按需求，如果数据是需要重复用的就这样缓存）
+			}
+			/**
+			 * 这种定义方式与上面的cv.prototype不一样，只是单纯的定义一个方法而已，不会被对象使用；
+			 * 使用时直接   cv.editData();   这样使用，好处是节省命名空间，同时表示了方法与组件之间有联系；
+			 * 阅读起来更方便;
+			 * 如这个方法是被组件内 “完善资料”按钮所调用的，使用在setData时会添加为该按钮的事件处理器
+			 */
+		cv.editData = function() {
+				("跳转到完善资料页面");
+			}
+			//监听 html加载完成事件
+		window.addEventListener("DOMContentLoaded", function() {
+			if (!W.dom.carList)
+				W.dom.carList = W("#car_list"); //缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
+			//W.dom是一个json，专门用于缓存元素
+			var list = document.createDocumentFragment();
+			for (var i = 5; i >= 0; i--) {
+				var data = new CarData();
+				list.appendChild(new cv(data)); //创建一个cv组件，并添加到DocumentFragment里
+			}
+			W.dom.carList.appendChild(list); //把整个列表添加到页面
+			setDefaultDate();
+		});
+
+		function setDefaultDate() {
+			var current = new Date();
+			document.getElementById('selectDate').value = current.WtoString().slice(0, 10);
+		}
+
+		function select(value) {
+			document.getElementById('list_condition').style.display = 'none';
+			var label = document.getElementById('label_codition').innerText = value;
+		}
+	</script>
+
+</html>

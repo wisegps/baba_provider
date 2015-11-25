@@ -1,0 +1,10 @@
+{
+	"WiStorm":{
+		"description": "WiStorm框架的配置信息",
+		"app_key":"开发者key",
+		"app_secret":"开发者秘钥",
+		"skin":"default",
+		"default_language":"zh-cn",
+		"update_url":"http://192.168.2.233/update/version.json"
+	}
+}

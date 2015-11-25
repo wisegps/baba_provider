@@ -1,0 +1,15 @@
+{
+	"login":"login",
+	"account":"account",
+	"account_tip":"Please input your account",
+	"psw":"password",
+	"psw_tip":"Please input your password",
+	"setting_error":"Get setting error",
+	"change_skin":"change skin",
+	"date_k":["S","M","T","W","T","F","S"],
+	"date_K":["sun","Mon","Tues","Wed","Thur","Fri","Sat"],
+	"date_m":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"],
+	"date_M":["January","February","March","April","May","June","July","Aguest","September","October","November","December"],
+	"ok":"OK",
+	"cancel":"CANCEL"
+}

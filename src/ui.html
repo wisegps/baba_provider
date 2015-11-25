@@ -1,0 +1,193 @@
+<!--
+	作者：小吴
+	时间：2015-11-20
+	描述：公共组件测试页面
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+			
+		<title>叭叭商户版</title>
+		<script src="../wslib/WiStorm.js"></script>
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+		
+		<script src="ui/ui.js"></script>
+		<script src="../wslib/api/WFileApi.js" defer="defer"></script>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-right"></a>
+			<h1 class="mui-title">公共组件测试页面</h1>
+		</header>
+		
+		<div class="mui-content">
+		<div class="mui-input-row mui-search">
+			<input type="search" class="mui-input-clear" placeholder="输入车牌号查询车辆">
+		</div>
+			
+			<div class="ui_car_d">
+				<table>
+					<tr>
+						<th><img src="http://img.wisegps.cn/logo/m_8_100.png"><span name="value">粤B614D1</span></th>
+					</tr>
+					<tr>
+						<td><span class="name">客户名称:</span>
+							<span class="value">梅长苏</span></td>
+						<td><span class="name">车型:</span>
+							<span class="value">宝马X3 2012款</span></td>
+					</tr>
+					<tr>
+						<td><span class="name">行驶里程:</span>
+							<span class="value">56000公里</span></td>
+						<td><span class="name">维修类型:</span>
+							<span class="value">保养</span></td>
+					</tr>
+					<tr>
+						<td><span class="name">到店时间:</span>
+							<span class="value">11-03 16:30</span></td>
+						<td><span class="name">离店时间:</span>
+							<span class="value">11-03 16:30</span></td>
+					</tr>
+					<tr>
+						<td name="comment"><span class="name">评价:</span>
+							<span class="value">
+								<span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-starhalf"></span>
+							</span></td>
+					</tr>
+				</table>
+			</div>
+			
+			<div class="ui_car_d">
+				<table>
+					<tr>
+						<th><img src="http://img.wisegps.cn/logo/m_8_100.png"><span name="value">粤B614D1</span></th>
+						<th name="tip">5分钟前到店</th>
+					</tr>
+					<tr>
+						<td><span class="name">客户名称:</span>
+							<span class="value">梅长苏</span></td>
+						<td><span class="name">车型:</span>
+							<span class="value">宝马X3 2012款</span></td>
+					</tr>
+					<tr>
+						<td><span class="name">行驶里程:</span>
+							<span class="value">56000公里</span></td>
+						<td><span class="name">维修类型:</span>
+							<span class="value">保养</span></td>
+					</tr>
+					<tr>
+						<td><span class="name">到店时间:</span>
+							<span class="value">11-03 16:30</span></td>
+						<td><span class="name">离店时间:</span>
+							<span class="value">11-03 16:30</span></td>
+					</tr>
+				</table>
+				<footer>
+					<button type="button" class="mui-btn mui-btn-warning">完工离店</button>
+					<button type="button" class="mui-btn mui-btn-primary">直接离店</button>
+				</footer>
+			</div>
+			
+			<div class="ui_car_d">
+				<table>
+					<tr>
+						<th><img src="http://img.wisegps.cn/logo/m_8_100.png"><span name="value">粤B614D1</span></th>
+					</tr>
+					<tr>
+						<td><span class="name">客户名称:</span>
+							<span class="value">梅长苏</span></td>
+						<td><span class="name">车型:</span>
+							<span class="value">宝马X3 2012款</span></td>
+					</tr>
+					<tr>
+						<td><span class="name">最后一次到店:</span>
+							<span class="value">15天前</span></td>
+						<td><span class="name">车架号:</span>
+							<span class="value">xxxxxxxxxxx</span></td>
+					</tr>
+					<tr>
+						<td><span class="name">行驶里程:</span>
+							<span class="value">56000公里</span></td>
+						<td><span class="name">保养后里程:</span>
+							<span class="value">3500公里</span></td>
+					</tr>
+					<tr>
+						<td><span class="name">到店次数:</span>
+							<span class="value">5</span></td>
+						<td><span class="name">评价次数:</span>
+							<span class="value">3</span></td>
+					</tr>
+				</table>
+				<footer>
+					<span class="text">设备未激活</span>
+					<button type="button" class="mui-btn mui-btn-warning">设备激活</button>
+					<!--
+                    	作者：小吴
+                    	时间：2015-11-23
+                    	描述：确认到店按钮组件
+                    -->
+					<script>echo(new ui_checkInBtn(2015))</script>
+				</footer>
+			</div>
+			
+			
+			<!--
+            	作者：小吴
+            	时间：2015-11-23
+            	描述：选择车牌省份组件
+            -->
+			<div class="sxj_div">
+				<span class="sxj"></span>
+				<span class="sxj_t" onclick="ui_areaBox()">粤</span>
+				<input type="text" placeholder="选填">
+			</div>
+			<script>
+				//最好使用下面这种方法来调用
+				W(".sxj_t").addEvent("click",ui_areaBox);
+			</script>
+			
+			
+			<div id="car_picker" style="padding: .5em;background: #fff;margin: .5em 0;">点击选择车型</div>
+			<script>
+				//最好使用下面这种方法来调用
+				W("#car_picker").addEvent("click",ui_carSeries);
+				
+				//如果需要预加载，可以调用这个方法
+				ui_carSeries.preLoad();
+			</script>
+			
+			
+			<div>
+				<label for="inputf">选择文件</label>
+				<input type="file" id="inputf" name="inputf" style="display: none;" onchange="fileUpload(this)">
+			</div>
+			<script>
+				function fileUpload(h){
+					if(!h.files.length){
+						return;
+					}
+					var type;
+				    type=h.value.slice(-3);
+					var file =h.files[0];
+				    if((type!="jpg"&&type!="png")||file.size>1024000){
+				        h.value="";
+				        h.files=null;
+				        alert("抱歉，仅支持小于1m的jpg或png图片");
+				        return;
+				    }
+				    W.fileApi.upload(function(s){
+				    	alert(s);
+				    },file);
+				}
+			</script>
+			
+		</div>
+	</body>
+</html>

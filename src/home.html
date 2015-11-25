@@ -1,0 +1,224 @@
+<!--
+	作者：小吴
+	时间：2015-11-11
+	描述：首页
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>叭叭商户版</title>
+		<script src="../wslib/WiStorm.js"></script>
+		<script>link("W.css")</script>
+		
+		<script src="../wslib/api/WUserApi.js" defer="defer"></script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<div class="search-bar" id="search">快速搜索</div>
+		</header>
+		<nav class="mui-bar mui-bar-tab">
+			<a class="mui-tab-item mui-active" href="#a" id="home">
+				<span class="w_icon icon_home"></span>
+				<span class="mui-tab-label">首页</span>
+			</a>
+			<a class="mui-tab-item" href="#a" id="msg">
+				<span class="w_icon icon_message"><span class="W-badge W-mini-badge"></span></span>
+				<span class="mui-tab-label">消息</span>
+			</a>
+			<a class="mui-tab-item" href="#a" id="setting">
+				<span class="w_icon icon_my"></span>
+				<span class="mui-tab-label">我的</span>
+			</a>
+		</nav>
+		<div class="mui-content">
+			<div id="head">
+				<div style="background-color: rgba(0,0,0,.2);">
+					<!--<img src="../img/icon_new.png" id="logo">-->
+					<div class="shop_name">小晨养车（西丽店）</div>
+					<div style="display: table;width: 100%;background-color: rgba(0,0,0,.4);">
+						<div class="a">
+							<span>0</span><br><span>今日到店</span>
+						</div>
+						<div class="a">
+							<span>0</span><br><span>今日离店</span>
+						</div>
+						<div class="a">
+							<span>0</span><br><span>今日评价</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="main">
+				<div class="card-row">
+					<div class="card">
+						<span class="card-icon w_icon icon_stores" style="color: #FF5D5B;"></span>
+						<span class="card-name">客户到店</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_establish" style="color: #FFCC4F;"></span>
+						<span class="card-name">新建客户</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_abnormal" style="color: #42D7C1;color: #ccc;"></span>
+						<span class="card-name">异常车况</span>
+					</div>
+				</div>
+				<div class="card-row">
+					<div class="card" id="car_manage">
+						<span class="card-icon w_icon icon_vehicle" style="color: #66CAEE;"></span>
+						<span class="card-name">车辆管理</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_equipment" style="color: #FF6A68;color: #ccc;"></span>
+						<span class="card-name">设备管理</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_remind" style="color: #FFD87D;color: #ccc;"></span>
+						<span class="card-name">提醒设置</span>
+					</div>
+				</div>
+				<div class="card-row">
+					<div class="card">
+						<span class="card-icon w_icon icon_consultation" style="color: #68DECD;color: #ccc;"></span>
+						<span class="card-name">客户咨询</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_store_management" style="color: #FFCC4F;"></span>
+						<span class="card-name">店面管理</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_set" style="color: #42D7C1;"></span>
+						<span class="card-name">设置中心</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<style>
+		body{text-align: center;}
+		header.mui-bar.mui-bar-nav{background-color: #eee;}
+		.search-bar{
+			font-size: 15px;color: #888;
+			background-color: #fff;margin: 5px 0;height: 34px;line-height: 34px;border-radius: 34px;text-align: center;
+		}
+		.search-bar:before{
+			font-size: 18px;
+			font-family: Muiicons;
+			content: '\e466';
+		}
+		#head{
+			/*background-image: url(../img/shop.jpg);*/
+			background-size: cover;
+			color: rgba(255,255,255,.7);
+			font-size: 12px;
+			line-height: 2em;
+			color: #fff;
+		}
+		#logo{
+			width: 80px;
+			height: 80px;
+			background-color: #fff;
+			border: 2px solid #fff;
+			border-radius: 50%;
+			margin-top: 10px;
+		}
+		.a{
+			display: table-cell;
+			line-height: 1.2em;
+			padding: .8em;
+		}
+		#main{display: table;width: 100%;}
+		.card{
+			display: table-cell;
+			padding: 1em;
+			font-size: 13px;
+			color: #4D4D4D;
+			border-bottom: 1px solid #eee;
+			border-right: 1px solid #eee;
+		}
+		.card:active{background: #ccc;}
+		.card-icon{display: block;font-size: 2.5em;}
+		.card-row{display: table-row;}
+		.shop_name{line-height: 5em;font-size: 2em;text-shadow: 2px 3px 3px rgba(0,0,0,.7);}
+	</style>
+	<script>
+		window.addEventListener("DOMContentLoaded",function(){
+			//页面加载完
+			getShopData();//获取并展示店铺当天数据（包括店铺图片）
+			addEvent();
+		})
+		window.onload=function(){
+			window.plus.webview.create("search.html");
+			window.plus.webview.create("new_file.html","msg.html");
+			window.plus.webview.create("new_file.html","setting.html");
+		}
+		
+		function addEvent(){//添加事件监听器
+			W.dom.search=W("#search");
+			W.dom.msg=W("#msg");
+			W.dom.setting=W("#setting");
+			W.dom.home=W("#home");
+			W.dom.nav=W("nav");
+			
+			W.dom.msg.addEvent("click",showWeb);
+			W.dom.setting.addEvent("click",showWeb);
+			
+			W.dom.search.addEvent("click",function(){
+				W.dom.nav.style.display="none";
+				showWeb.call(this);
+			});
+			W.dom.home.addEvent("click",function(){
+				window.plus.webview.currentWebview().show();
+			});
+			
+			var cards=W(".card",true);
+			for(var i=cards.length-1;i>=0;i--){
+				cards[i].addEvent("click",openView);
+			}
+			
+			window.addEventListener("popstate",function(){
+				var ref=location.href.split("/").pop();
+				var t=W(".mui-active");
+				t.classList.remove("mui-active");
+				if(ref.indexOf(".html"))
+					t=W.dom.home;
+				else if(ref=="msg")
+					t=W.dom.msg;
+				else if(ref=="setting")
+					t=W.dom.setting;
+				else
+					return;
+				t.classList.add("mui-active");
+				W.dom.nav.style.display="block";
+			});
+		}
+		
+		function openView(){//点击打开新webview
+			W.dom.nav.style.display="none";
+			var view=window.plus.webview.getWebviewById(this.id);
+			if(view){
+				view.show();
+				return;
+			}
+			var url=this.id+".html";
+			window.plus.webview.open(url,this.id);
+		}
+		
+		function showWeb(){//显示预加载的页面
+			window.plus.webview.show(this.id+".html");
+		}
+		
+		function getShopData(){
+			//调用api获取店面当天信息并显示
+			
+			W("#head").style.backgroundImage="url(../img/shop.jpg)";
+		}
+	</script>
+</html>

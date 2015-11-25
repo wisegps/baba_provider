@@ -1,0 +1,130 @@
+<!--
+	作者：cyy
+	时间：2015-11-20
+	描述：设置中心
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+
+		<title>主界面</title>
+		<script src="../wslib/WiStorm.js"></script>
+		<script>
+			link("W.css")
+		</script>
+
+		<script src="../wslib/api/WUserApi.js" defer="defer"></script>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-right"></a>
+			<h1 class="mui-title">设置中心</h1>
+		</header>
+		<div class="mui-content">
+			
+			<!--
+            	描述：上面商家信息
+            -->
+			<div class="shop">
+				<span class="shop_logo"> <img id="img_logo" src="../img/shop.jpg"/></span>
+				<span class="shop_infos"> 
+					<span class="shop_info"><h4>小晨养车</h4></span>
+				<span class="shop_info">南山区留仙大道</span>
+				<span class="shop_info">1001000</span>
+				</span>
+			</div>
+			<div class="setting" id="account">
+				<span class="icon"><img src="../img/icon_new.png"/></span>
+				<span class="label">我的账号: </span>
+				<span class="value">133218989 </span>
+			</div>
+			<div class="setting" id="password">
+				<span class="icon"><img src="../img/icon_new.png"/></span>
+				<span class="label">登录密码: </span>
+				<span class="right">修改<span class="mui-icon mui-icon-arrowright"></span></span>
+			</div>
+			<div class="setting" id="comments">
+				<span class="icon"><img src="../img/icon_new.png"/></span>
+				<span class="label">意见反馈: </span>
+				<span class="right"><span class="mui-icon mui-icon-arrowright"></span></span>
+			</div>
+			<div class="setting" id="about">
+				<span class="icon"><img src="../img/icon_new.png"/></span>
+				<span class="label">关于: </span>
+				<span class="right"><span class="mui-icon mui-icon-arrowright"></span></span>
+			</div>
+			<div class="exit">
+				<input type="button" class="mui-btn mui-btn-block" value="退出登录">
+			</div>
+		</div>
+	</body>
+
+	<style>
+		.mui-content {
+			padding: 10px;
+		}
+		
+		.shop {
+			width: 100%;
+		}
+		
+		.shop_infos {
+			width: 40%;
+			display: inline-block;
+		}
+		
+		.shop_info {
+			display: block;
+			padding: 5px;
+		}
+		
+		#img_logo {
+			width: 100px;
+			height: 80px;
+		}
+		
+		.setting {
+			width: 100%;
+			padding: 10px;
+			margin: 10pxs;
+		}
+		
+		.icon img {
+			width: 30px;
+			height: 30px;
+		}
+		
+		.right {
+			float: right;
+		}
+		
+		.exit {
+			text-align: center;
+		}
+		
+		.mui-btn.mui-btn-block {
+			margin-top: 1em;
+			height: 40px;
+			width: 90%;
+			align-content: center;
+			border-radius: 20px;
+			color: #fff;
+			background-color: #50B7DE;
+			border: none;
+			padding: 0;
+			font-size: 16px;
+		}
+		
+		.mui-btn.mui-btn-block:active {
+			background-color: #3B89A7;
+		}
+	</style>
+
+</html>
