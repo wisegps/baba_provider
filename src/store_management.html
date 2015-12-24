@@ -1,0 +1,281 @@
+<!--
+	作者：小刘
+	时间：2015-11-24
+	描述：店面管理
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+			
+		<title>店面管理</title>
+		<script src="../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		
+		<script src="../wslib/api/Wapi.js" defer="defer"></script>
+		<style>
+			body{background-color: #F0F0F0;}
+			.mui-content{padding:1.2em;}
+			.mui-content a{color: #000;}
+			.selectPhotos{margin-bottom: 10px; width: 75px;color: #E1E1E1;height: 75px;background-color: #fff;border-radius: 4px;font-size:4.3em;float: left;}
+			.tab{display: table;width: 100%;background: #fff;margin-top: 20px;border-radius: 4px;}
+			.int_d{display: table-row;margin-top: 20px;height: auto;}
+			.int_d span{padding: 7px 0 0 10px;display: table-cell;width: 5em;font-size: 15px;color: #CBCBCB;}
+			.int_d input{display: table-cell;border: 0;height: auto;margin: 4px 0;font-size: 14px;padding: 7px;}
+			.mui-content div textarea{height: 100%; border: 0;font-size: 14px;}
+			#img_a{margin-top:20px;}
+			.clear{clear: both;}	
+			.img{width: 75px;height: 75px;border-radius: 4px;}
+			.img_v{height: 75px;margin-right:10px;float: left;position: relative;margin-bottom: 10px;}
+			#img_div{height: 75px;margin: 30px 0;}
+			.remove_b{
+				background: #BD0606;
+			    width: 20px;
+			    height: 20px;
+			    display: block;
+			    color: #fff;
+			    position: absolute;
+			    top: -5px;
+			    right: -5px;
+			    border-radius: 10px;
+			    font-size: 25px;
+			    text-align: center;
+			    line-height: 20px;
+			}
+			.remove_b:before{
+				content: "-";
+			}
+		</style>
+	</head>
+
+	<body>
+		
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<h1 class="mui-title">店面管理</h1>				
+		</header>
+		<div class="mui-content">
+			<div id="img_div">
+				<div id="show_img" class="selectPhotos mui-icon mui-icon-plusempty"></div>
+			</div>
+			<div class="tab">
+				<div class="int_d">
+					<span>商户名称</span>
+					<input type="text" id="mName" class="mui-input-clear" placeholder="请输入商户名称" />
+				</div>
+			</div>
+			<div class="tab">
+				<div class="int_d">
+					<span>门店地址</span>
+					<input type="text" id="address" class="mui-input-clear" placeholder="请输入门店地址" />
+				</div>
+			</div>
+			<div class="tab">			
+				<div class="int_d">
+					<span>联系电话</span>
+					<input type="text" id="phone" class="mui-input-clear" placeholder="请输入联系电话" />
+				</div>				
+			</div>		
+			<div style="height: 120px;padding: .5em;border-radius: .3em;background-color: #fff;margin-top: 20px;">
+				<textarea id="profile" type="text" class="mui-input-clear" placeholder="请输入门店简介" /></textarea>
+			</div>
+			<button type="button" class="mui-btn mui-btn-block w" id="submit">保存</button>
+
+		</div>
+		<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<!--<a href="#file" style="z-index: 1;">选择照片</a>-->
+					<label for="inputf">
+						<div>
+							选择文件
+							<input type="file" capture="camera" id="inputf" name="inputf" style="display: none;"accept="image/*" onchange="fileUpload(this)"/>
+						</div>
+					</label>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<a id="noActive">取消</a>
+				</li>
+			</ul>
+		</div>
+	</body>
+	<script>
+	
+                
+var user=_user;
+var img_URL;
+	if(user.photo.length!=0){
+		img_URL= user.photo;   //图片在服务器的地址	
+	}else{
+		img_URL = new Array();
+	}
+	window.onload = function(){
+			W("#submit").addEvent("click",storeM);
+			if(user.address!=undefined)
+				W("#address").value = user.address;
+				
+			if(user.cust_name!=undefined)
+				W("#mName").value = user.cust_name;
+				
+			if(user.remark!=undefined)
+				W("#profile").value = user.remark;
+				
+			if(user.tel!=undefined)
+				W("#phone").value = user.tel;	
+				
+			for(var i=0;i<img_URL.length;i++){
+				insertImg(img_URL[i],i);
+			}
+			W("#show_img").addEvent('click',showPicture);		
+			W("#noActive").addEvent('click',hidePicture);
+	}
+	
+	
+	
+	//在界面上插入一张图片
+	function insertImg(url,index){
+		var img=document.createElement("img");
+		img.className='img';
+		img.src=url;
+		var img_div=W("#img_div");
+		var div=document.createElement("div");
+		div.className="img_v";
+		div.appendChild(img);
+		var btn=document.createElement("span");
+		btn.className="remove_b";
+		btn.addEvent("click",removeImg);
+		btn._i=index;
+		div.appendChild(btn);
+		img_div.insertBefore(div,W("#show_img"));
+	}
+	
+	//从界面和photo数组删除一张图片
+	function removeImg(){
+		user.photo.splice(this._i,1);
+		var img_v=this.parentElement;
+		img_v.parentElement.removeChild(img_v);
+		storeM(true);
+	}
+	function showPicture(){
+		W("#picture").classList.add('mui-active');
+		
+		W("#picture").style.display='block';
+		var tem=W(".mui-backdrop");
+		if(tem)
+			tem.style.display="block";
+		else{
+			var odiv=document.createElement('div');
+			odiv.className="mui-backdrop mui-backdrop-action mui-active";
+			odiv.addEvent("click",hidePicture);
+			W("body").appendChild(odiv);
+		}
+	}
+	function hidePicture(){
+		W("#picture").classList.remove('mui-active');
+		W(".mui-backdrop").style.display="none";
+	}
+/**
+ * 照片上传
+ * @param {Object} h
+ */
+	function fileUpload(h){
+/**
+ * 选择图片前 把遮罩隐藏
+ */
+		W("#picture").style.display='none';
+		W("#picture").className='mui-popover mui-popover-action mui-popover-bottom';
+		document.body.removeChild(W(".mui-backdrop"));
+		
+		if(!h.files.length){
+			W.toast("未选择文件");
+			return;
+		}
+		var type;
+	    type=h.value.slice(-3).toLocaleLowerCase();
+		var file =h.files[0];
+	    if((type!="jpg"&&type!="png")){
+	        h.value="";
+	        h.files=null;
+	        W.alert("抱歉，仅支持的jpg或png图片");
+	        return;
+	    }
+		var fr= new FileReader();
+		fr.onload = function (e){
+			insertImg(e.target.result);
+		}
+		fr.readAsDataURL(file);
+/**
+ * 图片上传成功后弹出提示成功
+ */
+		fileUpload.code=1;//利用方法的全局调用 直接给方法添加属性 可以避免命名污染  
+		W.loading("正在上传文件，请稍等");
+		W.fileApi.upload(function (res){
+			W.loading();
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			img_URL.push(res.image_file_url);
+			fileUpload.code=2;
+			storeM(true);//保存但不跳回首页
+		},file);
+
+	}
+
+/**
+ * 提交店面管理的数据
+ */ 
+	function storeM(b){
+		if(!fileUpload.code|| fileUpload.code==2){
+		var mName=W("#mName").value;	   	//商户名称
+		var address=W("#address").value;   //门店地址
+		var phone=W("#phone").value;	  //联系电话
+		var profile=W("#profile").value; //店铺简介
+			if(mName!=null && mName!=""){
+				var data={
+					cust_id:user.cust_id,
+					access_token:_user.access_token,				
+					cust_name:mName,
+					remark:profile,
+					address:address,
+					tel:phone,
+					photo:JSON.stringify(img_URL)
+				}
+				W.userApi.update(function (res){
+					if(res.status_code==0){
+						user.address=address;
+						user.remark=profile;
+						user.tel=phone;
+						user.cust_name=mName;
+						user.photo=img_URL;
+						W.setSetting("user",user);
+						
+						if(typeof b=="boolean"){
+							W.toast("已更新");
+						}else{
+							W.toast("已保存");
+							setTimeout(function(){
+								top.location="home.html";
+							},2000)
+						}
+						
+					}else{
+						W.toast('保存出错了');
+					}
+				},data);
+			}else{
+				W.toast("商户名称未填写！");
+			}
+		}else{
+			W.toast("您的图片还未上传成功.");			
+		}
+	}
+	</script>
+</html>

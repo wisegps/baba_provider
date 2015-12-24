@@ -1,0 +1,307 @@
+<!--
+	作者：cyy
+	时间：2015-12-03
+	描述：提醒设置
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+
+		<title>提醒设置</title>
+		<!--必须最先引入WiStorm.js文件-->
+		<script src="../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<!--使用link()引入css文件，无需写路径，直接写文件名即可,尽量少引入css，样式如果少（小于10k为少），
+		可以直接写在style元素里，放到body元素后面-->
+		<script>
+			link("W.css")
+		</script>
+		<script>
+			link("ui.css")
+		</script>
+
+		<!--其他js文件需在css文件后面引入，如果是在加载完页面之后才会用到的，使用defer属性异步加载;或者直接放到body后面；
+			同样尽量少引入js文件；
+			现在接口可能需要你们自己封装，参考wslib/api/WUserApi.js里的封装方式
+			-->
+		<script src="../wslib/api/Wapi.js" defer="defer"></script>
+		<!--默认的同步加载js（用于加载有严格加载顺序的外部js文件）-->
+		<script src="../wslib/ui/WiStormUI.js"></script>
+		<script src="../wslib/ui/DateTime.js"></script>
+		<script src="ui/ui.js"></script>
+		<script src="js/string_factory.js"></script>
+
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<a class="mui-icon mui-action-menu mui-icon-plusempty mui-pull-right new-remind"></a>
+			<h1 class="mui-title">提醒设置</h1>
+		</header>
+		<div class="mui-content">
+
+			<div class="list_item_templet" hidden="true">
+				<div class="list_item">
+					<div class="edit">
+						<div class="item_reminder">
+							<label id="rmd_name">保养提醒</label>
+							<label id="create_time"></label>
+						</div>
+						<div class="item_brand" name="div_brand">
+							<span><label class="car_label">品牌:</label> <label  id="car_brand"  class="car_value"></label></span>
+						</div>
+
+						<div class="item_car_number" name="div_car">
+							<span><label class="car_label">车辆:</label> <label  id="car_name"   class="car_value"></label></span>
+						</div>
+					</div>
+					<hr/>
+					<div class="item_delete">
+						<button type="button" id="btn_delete" onclick="deleteReminder()" class="mui-btn  mui-btn-outlined m_btn_delete">删除</button>
+					</div>
+					<div class="" hidden="true" name="option_id" data-option_id="">
+					</div>
+
+				</div>
+			</div>
+			<div id="reminder_list"></div>
+
+		</div>
+
+	</body>
+	<style>
+		body {
+			background-color: #f0f0f0;
+		}
+		
+		.list_item {
+			width: 100%;
+			padding-left: 10px;
+			padding-top: 10px;
+			padding-bottom: 10px;
+			background: white;
+			margin-bottom: 10px;
+		}
+		
+		.item_reminder,
+		.item_delete {
+			padding-right: 15px;
+		}
+		
+		#rmd_name {
+			font-size: large;
+			font: bold;
+		}
+		
+		#create_time {
+			float: right;
+			color: #80D9F5;
+		}
+		
+		.item_delete {
+			text-align: right;
+		}
+		
+		#btn_delete {
+			width: 6em;
+			color: #7ac9e7;
+			border: 1px solid #7ac9e7;
+			border-color: #7ac9e7;
+		}
+		
+		#btn_delete:active {
+			color: white;
+			border-color: #7ac9e7;
+			background-color: #7ac9e7;
+		}
+		
+		.item_reminder,
+		.item_brand,
+		.item_car_number {
+			padding-top: 5px;
+			padding-bottom: 5px;
+		}
+		
+		.car_label {
+			color: #999999;
+		}
+		
+		hr {
+			color: #eeeeee;
+			opacity: 0.3;
+			background: #000000;
+			margin-top: 5px;
+			margin-bottom: 10px;
+		}
+	</style>
+
+	<script>
+		W(".new-remind").addEventListener("click", function() {
+			location = "new_remind.html";
+		});
+		var MAX_ID = 0,
+			param = {
+				seller_id: _user.cust_id,
+				access_token: _user.access_token,
+				max_id: MAX_ID
+			};
+		window.addEventListener("DOMContentLoaded", function() {
+			loadMore();
+		});
+
+		function loadMore() {
+			Wapi.user.getSchemaList(showMore, param);
+		}
+
+		function showMore(res) {
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			var resData = res.data;
+			if (!W.dom.reminder_list)
+				W.dom.reminder_list = W("#reminder_list"); //缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
+			var target = W.dom.reminder_list;
+			
+			//重置清空数据
+			if (MAX_ID == 0) {
+				while (target.hasChildNodes()) //当div下还存在子节点时 循环继续
+				{
+					target.removeChild(target.firstChild);
+				}
+				target.data = new Array();
+			}
+			if (!target.data)
+				target.data = new Array();
+			var list = document.createDocumentFragment();
+			for (var i = resData.length - 1; i >= 0; i--) {
+				list.appendChild(new dv(resData[i])); //创建一个dv组件，并添加到DocumentFragment里
+				target.data.push(resData[i]); //保存节点
+				if (resData[i].option_id > MAX_ID)
+					MAX_ID = resData[i].option_id;
+			}
+			if (res.total > target.data.length) {
+				param.max_id = MAX_ID;
+				var autoLoad;
+				if (target.autoLoad) {
+					autoLoad = target.autoLoad;
+				} else if (WiStorm.agent.ios)
+					autoLoad = new ui_autoLoad(W(".mui-content"), loadMore);
+				else
+					autoLoad = new ui_autoLoad(document, loadMore);
+				list.appendChild(autoLoad);
+				target.autoLoad = autoLoad;
+			} else if (target.autoLoad) {
+				//删除自动加载组件,释放内存
+				target.autoLoad.remove();
+				delete target.autoLoad;
+			}
+			target.appendChild(list); //把整个列表添加到页面
+		}
+		//提醒列表中的一项，的对象
+		function dv(data) {
+			var obj = new WiStormUI("div"); //创建一个div组件
+			obj.merge(this); //将原型cv.prototype中的方法赋予当前obj
+			obj.className = "ui_reminder"; //设置div的class属性
+			obj.setData(data); //设置obj的内容,setData()在下面cv.prototype中定义
+			return obj; //最后记得要返回组件
+		}
+		//给组件添加对象方法
+		dv.prototype.getData = function() {
+			return this.data;
+		}
+		dv.prototype.setData = function(data) {
+			this.innerHTML = W(".list_item_templet").innerHTML;
+			initText(this, "rmd_name", data.option_name);
+			var ele = this.querySelector("[name=option_id]");
+			if (ele != null) {
+				ele.setAttribute("data-option_id", $V(data.option_id));
+			}
+			var objType = data.object_type; //目标类型 0:全部  1:品牌  2:车辆
+			if (objType == 0) {
+				initText(this, "car_brand", "全部");
+				initText(this, "car_name", "全部");
+			} else if (objType == 1) {
+				initText(this, "car_brand", data.object_name);
+				hiddencomponent(this, "div_car");
+			} else if (objType == 2) {
+				initText(this, "car_name", data.object_name);
+				hiddencomponent(this, "div_brand");
+			}
+			initText(this, "create_time", $T_All(data.update_time));
+			//存到本地
+			sessionStorage.setItem(data.option_id, JSON.stringify(data));
+			this.querySelector(".edit").addEvent("click", dv.editData).option_id = data.option_id; //给其中的按钮添加点击事件监听，使用cv.editData来处理点击事件
+			this.data = data; //直接把数据缓存进入组件（按需求，如果数据是需要重复用的就这样缓存）
+		}
+		dv.editData = function() {
+				location = "new_remind.html?option_id=" + this.option_id;
+			}
+			/**
+			 * 传入元素的名字，设置值
+			 * @param {Object} ctx  this,上下文
+			 * @param {Object} name  
+			 * @param {Object} value
+			 */
+		function initText(ctx, name, value) {
+			var ele = ctx.querySelector("[id =" + name + "]");
+			if (ele != null) {
+				ele.innerText = $V(value);
+			}
+		}
+		/**
+		 * 隐藏组件
+		 */
+		function hiddencomponent(ctx, name) {
+			var ele = ctx.querySelector("[name =" + name + "]");
+			if (ele != null) {
+				ele.setAttribute("hidden", true);
+			}
+		}
+		/**
+		 * 删除提醒
+		 */
+		function deleteReminder() {
+			var target = event.target;
+			var json = {
+				"title": "删除提醒",
+				"content": "您确定删除这条提醒吗？",
+				"y": "确定",
+				"n": "取消",
+				"callback": function(b) {
+					if (b) {
+						var ele = W.parents(target, 2).querySelector("[name=option_id]");
+						var option_id = ele.dataset.option_id;
+						var param = {
+							access_token: _user.access_token,
+							option_id: option_id
+						}
+						W.userApi.deleteSchema(deleteCallBack, param);
+					} else {}
+				}
+			}
+			W.confirm(json);
+		}
+		
+		/**
+		 * 删除提醒回调
+		 * @param {Object} res
+		 */
+		function deleteCallBack(res){
+			if (res.status_code == 0) {
+				MAX_ID = 0;
+				loadMore();
+				W.toast("删除成功");
+			} else {
+				W.alert(res.msg);
+			}
+		}
+	</script>
+
+</html>

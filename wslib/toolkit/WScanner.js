@@ -46,11 +46,12 @@ if(WiStorm.agent.weixin){//如果是微信端
 					W.scanner={
 						//补充对象方法
 						start:function(callback){
+							wx._scanner_callback=callback;
 							wx.scanQRCode({
 								needResult: 1,
 								desc: 'scanQRCode desc',
 								success: function(res) {
-									callback(res.resultStr);
+									wx._scanner_callback(res.resultStr);
 								}
 							});
 						}
@@ -65,8 +66,8 @@ if(WiStorm.agent.weixin){//如果是微信端
 	};
 	
 	var script=document.createElement("script");
-	script.src=WiStorm.config.wx_sdk;
 	script.onload=W.wx.onload;//加载完js
+	script.src=WiStorm.config.wx_sdk;
 	W("head").appendChild(script);
 	
 	W.wx.ticket=W.getCookie("wxTicket");//获取jssdk的ticket，调用任何api都需要用到
@@ -76,19 +77,21 @@ if(WiStorm.agent.weixin){//如果是微信端
 				W.wx.ticket=data.ticket;
 				var expires=-parseInt(data.expires/60);//计算有效时间，转换成分钟
 				W.setCookie("wxTicket",data.ticket,expires);//保存到cookie里
-				if(W.wx.loaded)//如果此时已经加载完微信的jssdk，则马上执行配置方法
+				if(W.wx.loaded){//如果此时已经加载完微信的jssdk，则马上执行配置方法
 					W.wx.onload();
+				}
 			}
 		);
 	}
 }else{
+	//非微信端
 	if(window.plus){
 		W.scanner=plus.barcode;
 		var evt = document.createEvent("HTMLEvents");
 		evt.initEvent("scannerReady", false, false);
 		window.dispatchEvent(evt);//触发window的scannerReady事件
 	}else{
-		document.
+		
 	}
 }
 

@@ -49,7 +49,14 @@ function https_request($url){
     curl_close($curl);
     return $data;
 }
-echo "<script>self.location='../../index.html?open_id=".$userinfo["openid"]."&headimgurl=".$userinfo["headimgurl"]."'</script>";
+
+setcookie("_wx_user_", json_encode($userinfo), time()+86400,"/",$_SERVER['HTTP_HOST']);
+$cookie_url=$_COOKIE["__login_redirect_uri__"];
+if(strpbrk($cookie_url,"?"))
+	$url=$cookie_url."&open_id=".$userinfo["openid"];
+else 
+	$url=$cookie_url."?open_id=".$userinfo["openid"];
+header("Location: ".$url);
 exit;
 ?>
 
@@ -72,6 +79,15 @@ exit;
         城市：<?php echo $userinfo["city"]; ?><br>
         特权：<?php echo $userinfo["privilege"]; ?><br>
         <?php print_r($userinfo); ?>
+    </p>
+    <p>
+    	cookie回调地址：<?php echo urldecode($_COOKIE["__login_redirect_uri__"]); ?><br>
+    	openid：<?php echo $userinfo["openid"]; ?><br>
+    	头像地址：<?php echo $userinfo["headimgurl"]; ?><br>
+    	最后的跳转地址：<?php echo $url; ?><br>
+    		<br>
+    			<?php echo json_encode($userinfo); ?>
+    			
     </p>
 </div>
 </body>

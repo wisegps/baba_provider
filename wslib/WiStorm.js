@@ -2,23 +2,24 @@
  * WiStorm框架的基础文件，要使用框架必须引入本文件；
  * 里面整合了mui.js的代码，还包括了框架一些非常基础的东西，例如WAPI的入口、UI类的基类、基本工具等；
  */
-var	debugIp="192.168.3.233";
+var	WiStorm_root="http://"+location.host+"/baba_wx/";
 var u = navigator.userAgent;
 var WiStorm={
 	test_mode:true,
 	debug:true,
 	config:{
 		"description": "WiStorm框架的配置信息",
-		"app_key": "开发者key",
-		"app_secret": "开发者秘钥",
-		"wx_app_id":"微信公众号id",
+		"app_key": "9410bc1cbfa8f44ee5f8a331ba8dd3fc",
+		"app_secret": "21fb644e20c93b72773bf0f8d0905052",
+		"wx_app_id":"wxa5c196f7ec4b5df9",
 		"skin": "default",
 		"default_language": "zh-cn",
-		"update_url": "http://"+debugIp+"/update/version.json",
-		"wx_ticket_url":"http://"+debugIp+"/baba_wx/wslib/toolkit/WX.TokenAndTicket.php?action=ticket",
+		"update_url": WiStorm_root+"/update/version.json",
+		"wx_ticket_url":WiStorm_root+"wslib/toolkit/WX.TokenAndTicket.php?action=ticket",
 		"wx_sdk":"http://res.wx.qq.com/open/js/jweixin-1.0.0.js",
-		"wx_login":"http://"+debugIp+"/baba_wx/wslib/toolkit/oauth2.php",
-		"safety_url":"http://"+debugIp+"/baba_wx/wslib/toolkit/Safety.php"
+		"wx_login":WiStorm_root+"wslib/toolkit/oauth2.php",
+		"safety_url":WiStorm_root+"wslib/toolkit/Safety.php",
+		"test_code":"bba2204bcd4c1f87a19ef792f1f68404"
 	},
 	setting:{},//用户设置，由W.getSetting(name)和W.setSetting(key,val)操作
 	included:[],//当前页面使用include(url)来包含的文件名
@@ -113,6 +114,30 @@ function jsonConcat(json1,json2){
 	for(key in json2){
 		json1[key]=json2[key];
 	}
+}
+
+/**
+ * 
+ * 兼容ios的字符串转日期对象
+ * @param {String} str
+ */
+function NewDate(str) {
+    var date = new Date();
+    if(!str)
+    	return date;
+    var str_before = str.split('T')[0]; //获取年月日
+    var str_after = str.split('T')[1]; //获取时分秒
+    var years = str_before.split('-')[0]; //分别截取得到年月日
+    var months = str_before.split('-')[1] - 1;
+    var days = str_before.split('-')[2];
+    var hours = str_after.split(':')[0];
+    var mins = str_after.split(':')[1];
+    var seces = str_after.split(':')[2].replace("Z", "");
+    var secs = seces.split('.')[0];
+    var smsecs = seces.split('.')[1];
+    date.setUTCFullYear(years, months, days);
+    date.setUTCHours(hours, mins, secs, smsecs);
+    return date;
 }
 
 /**
@@ -356,7 +381,7 @@ W._get=function(options){//同步的专用ajax
 }
 
 /**
- * 框架的ajax，mui的ajax转化而来，无依赖
+ * 框架的ajax
  * @param {String} url
  * @param {Object} options，具体可参考http://dev.dcloud.net.cn/mui/ajax/
  */
@@ -407,8 +432,7 @@ W.ajax=function(url,options) {
 						result = xmlhttp.responseXML;
 					} else if (dataType === 'json') {
 						result = JSON.parse(resultText);
-					}else
-						result=resultText;
+					}
 				} catch (e) {
 					error = e;
 				}
@@ -494,6 +518,7 @@ W.getJSON=function(url,data,success){
 	};
 	W.ajax(url,options);
 }
+
 
 /**
  * 热切换当前引用的css文件（切换皮肤）
@@ -973,30 +998,38 @@ W.getSearch=function(){
     var url=location.search;
     if(!url)return {};
     url=url.split("?")[1].split("&");
-    var arr=new Array();
+    var json={};
     var n=url.length;
     for(var i=0;i<n;i++){
-        arr[url[i].split("=")[0]]=decodeURIComponent(url[i].split("=")[1]);
+        json[url[i].split("=")[0]]=decodeURIComponent(url[i].split("=")[1]);
     }
-    return arr;
+    return json;
 }
 
 /**
- * 设置cookie，expiredays负数代表分钟，正数的单位为“天”（24小时）
+ * 设置cookie，expiredays负数代表分钟，正数的单位为“天”（24小时）path为cookie的有效路径
  * @param {String} c_name
  * @param {String} value
  * @param {Number} expiredays
+ * @param {String} path
  */
-W.setCookie=function(c_name,value,expiredays){
+W.setCookie=function(c_name,value,expiredays,path){
 	var exdate=new Date();
+	expiredays=expiredays||1;//默认为1天
 	if(expiredays>1)
 		exdate.setDate(exdate.getDate()+expiredays);
+	else if(expiredays>0)
+		exdate.setHours(exdate.getHours()+expiredays*24);
 	else 
-		if(expiredays>0)
-			exdate.setHours(exdate.getHours()+expiredays*24);
-		else 
-			exdate.setMinutes(exdate.getMinutes()-expiredays);
-	document.cookie=c_name+"="+escape(value)+((expiredays==null)?"":";expires="+exdate.toGMTString());
+		exdate.setMinutes(exdate.getMinutes()-expiredays);
+	var domain="";
+	if(path){
+		domain="; path="+path+";";
+	}else{
+		domain="; path=/; domain="+document.domain;
+	}
+	var tem=c_name+"="+encodeURIComponent(value)+((expiredays==null)?"":";expires="+exdate.toGMTString())+domain;
+	document.cookie=tem;
 }
 
 /**
@@ -1010,7 +1043,7 @@ W.getCookie=function(c_name){
 		    c_start=c_start + c_name.length+1;
 		    c_end=document.cookie.indexOf(";",c_start);
 		    if(c_end==-1)c_end=document.cookie.length;
-		    return unescape(document.cookie.substring(c_start,c_end));
+		    return decodeURIComponent(document.cookie.substring(c_start,c_end));
 	    } 
 	}
 }
@@ -1074,6 +1107,7 @@ W.logout=function(){
 	W.setSetting("user",null);
 	W.setSetting("pwd",null);
 	W._login=false;
+	top.location=WiStorm.root+'index.html?intent=logout';
 }
 
 W.wxLogin=function(){
@@ -1081,15 +1115,28 @@ W.wxLogin=function(){
 		var url = WiStorm.config.wx_login; //测试使用
 		url = url.replace(/\?\S*/, "");
 		url = W.encoded(url);
-		top.location = "https://open.weixin.qq.com/connect/oauth2/authorize?appid="+WiStorm.config.wx_app_id+"&redirect_uri=http://php.bibibaba.cn/jump.html&response_type=code&scope=snsapi_userinfo&state="+url+"#wechat_redirect";
+		top.location = "https://open.weixin.qq.com/connect/oauth2/authorize?appid="+WiStorm.config.wx_app_id+"&redirect_uri=http://h5.bibibaba.cn/jump.html&response_type=code&scope=snsapi_userinfo&state="+url+"#wechat_redirect";
 	}else{
+		W.setCookie("__login_redirect_uri__",location.href,-15);
 		top.location="https://open.weixin.qq.com/connect/oauth2/authorize?appid="+WiStorm.config.wx_app_id+"&redirect_uri="+WiStorm.config.wx_login+"&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
 	}				
 }
 
+/**
+ * 去字符串左右空格
+ * @param {Object} str
+ */
 W.trim=function(str) {
     str=str.replace(/(^\s*)|(\s*$)/g, "");
 	return str;
+}
+
+/**
+ * 输出api返回的错误信息
+ * @param {Object} code
+ */
+W.errorCode=function(json){
+    W.alert("error_code："+json.status_code+";error_msg:"+json.err_msg);
 }
 
 
@@ -1102,12 +1149,14 @@ var tem=location.href;
 var s=tem.search("/www/")+5;
 WiStorm.root=tem.slice(0,s);
 if(location.protocol=="http:"||location.protocol=="https:"){//浏览器环境
-	var name=location.pathname.split("/")[1];
-	WiStorm.root=location.protocol+"//"+location.host+"/"+name+"/";
+	WiStorm.root=WiStorm_root;
 	WiStorm.isWeb=true;
 }
 delete tem;
 delete s;
+
+//获取跳转参数 即 http://127.0.0.1:8020/baba_wx/src/customer_add.html?a=123&b=asd  问号后面部分
+_g=W.getSearch();
 
 
 //按语言加载文字资源
@@ -1143,7 +1192,7 @@ if(!WiStorm.isWeb){
 		"server_error":{
 			"no_account":"操作失败，账号不存在；",
 			"psw_error":"操作失败，密码错误；",
-			"code_error":"操作失败，登录auto_code已失效；",
+			"code_error":"操作失败，access_token已失效；",
 			"no_code":"操作失败，设备条码不存在；",
 			"visit_error":"操作失败，超过访问频率；",
 			"db_error":"数据库异常或者指令下发失败；",
@@ -1157,9 +1206,11 @@ if(!WiStorm.isWeb){
  * 在微信中每隔24小时会清理一次，所以基本上只能得到本次登录之后存储的数据
  */
 W._getSeting();
-if(W.getSetting("user"))
+var _user=W.getSetting("user");
+if(_user){
 	W._login=true;
-else 
+	_user.access_token=W.getSetting("access_token");
+}else 
 	W._login=false;
 
 //普通浏览器中部分实现html5+中的某些方法
@@ -1293,7 +1344,8 @@ if(WiStorm.isWeb){
 						obj.window=this.contentWindow;
 						obj.window._viewIndex=W._webview.length-1;
 						
-						this.style.height=obj.window.document.body.scrollHeight+"px";
+						//this.style.height=obj.window.document.body.scrollHeight+"px";
+						//alert(obj.window.document.body.scrollHeight);
 					});
 					obj.appendChild(iframe);
 					
@@ -1415,10 +1467,52 @@ W.plusReady(function(){
 	});
 });//5+准备好后执行
 
-//if(!W._login){
-//	if(location.pathname.indexOf("index.html")<0&&location.pathname.indexOf("login.html")<0&&location.pathname.indexOf("unitTest")<0)
-//		top.location=WiStorm.root+"index.html";
-//}
+if(!W._login&&location.pathname.indexOf("index.html")<0&&_g.intent!="logout"){
+	if(WiStorm.agent.weixin){
+		if(_g.open_id){
+			window.addEventListener("load",W.login);
+		}else
+			W.wxLogin();
+	}else{
+		W.setCookie("__login_redirect_uri__",location.href,-15);
+		top.location=WiStorm.root+"index.html";
+	}
+}
+
+W.login=function(){
+	if(_g.open_id){
+		W.userApi.sso_login(function(json){//登录
+			if (json.status_code) {//登录不成功
+				if (json.status_code == 1) {//未绑定
+					top.location=WiStorm.root+"index.html"+location.search;
+					return;
+				}else{//登录失败
+					W.errorCode(json);
+					return;
+				}
+			} else {
+				//登录成功
+				W.setSetting("openId",_g.open_id);
+				W.setSetting("access_token", json.access_token);
+				W.userApi.getUser(function(res) {//获取用户数据
+					if (res.status_code) {
+						W.alert(res.err_msg+"；获取用户信息失败；error_code:"+res.status_code);
+						return;
+					} else {
+						W._login = true;//表示已登录
+						W.setSetting("user",res);
+						top.location.reload();
+					}
+				}, {
+					cust_id: json.cust_id,
+					access_token: json.access_token
+				});
+			}
+		},_g.open_id);
+	}else{
+		W.alert("没有open_id");
+	}
+}
 
 window.addEventListener("DOMContentLoaded",function(){
 	var back=W(".W_back",true);
@@ -1426,4 +1520,9 @@ window.addEventListener("DOMContentLoaded",function(){
 		back[i].addEvent("click",W.back);
 	}
 	
+	var script=W("script",true);
+	for(var i=0;i<script.length;i++){
+		if(script.src)
+			WiStorm.included.push(script.src.replace(WiStorm.root,""));
+	}
 });

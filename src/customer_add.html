@@ -13,90 +13,371 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 
 		<title>新增客户</title>
+
 		<script src="../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script src="ui/ui.js"></script>
+		<script src="js/validate.js"></script>
 		<script>
 			link("W.css")
+			link("ui.css")
 		</script>
 
-		<script src="../wslib/api/WUserApi.js" defer="defer"></script>
+		<script src="../wslib/api/Wapi.js" defer="defer"></script>
 	</head>
 
 	<body>
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
-			<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-right"></a>
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
 			<h1 class="mui-title">新增客户</h1>
 		</header>
 		<div class="mui-content">
-			<form >
-				<div>
-					<span class="label">车牌号：</span>
-					
-					<select style="width:4em">
-						<option>粤</option>
-						<option>渝</option>
-						<option>川</option>
-						<option>湘</option>
-						<option>浙</option>
-						<option>皖</option>
-						<option>苏</option>
-					</select>
-					<input type="text" id="carNumber" value="" style="width: 10em;" />
-					<hr/>
-				</div>
+			<center>
+				<form style="font-size: 16px;padding: 0 1.2em;">
+					<div class="mui-input-row">
+						<label>车牌号</label>
+						<div class="input">
+							<div class="s_div">
+								<span class="s"></span>
+								<span id="short_province" class="s_text">粤</span>
+							</div>
+							<input type="text" id="car_number" placeholder="888888" required="required">
+						</div>
 
-				<div>
-					<span class="label">车架号：</span>
-					<input type="text" class="value c" name="carId" id="carId" value=""  />
-					<hr/>
-				</div>
+					</div>
+					<div class="mui-input-row">
+						<label>车架号</label>
+						<input type="text" id="vehicle_number" placeholder="请输入车架号" required="required">
+					</div>
 
-				<div>
-					<span class="label">车型：</span>
-					<input type="text"  class="value c" name="carMode" id="carMode" value=""  />
-					<hr/>
-				</div>
+					<div class="mui-input-row" id="car_picker">
+						<label>车型</label>
+						<input type="text" placeholder="请选择车型" class="value c" name="carType" id="car_type" value="" readonly="true" />
 
-				<div>
-					<span class="label">行驶里程：</span>
-					<input type="text"  class="value c" name="carMode" id="carMode" value=""  />
-					<hr/>
-				</div>
+					</div>
 
-				<div>
-					<span class="label">客户名称：</span>
-					<input type="text"  class="value c" name="customer_name" id="customer_name" value="" />
-					<hr/>
-				</div>
+					<div class="mui-input-row">
+						<label>行驶里程</label>
+						<input type="number" placeholder="请输入行驶里程" class="value c" name="mileage" id="mileage" value="" required="required" />
+					</div>
 
-				<div>
-					<span class="label">手机号：</span>
-					<input type="text"  class="value c" name="phone" id="phone" value="" />
-					<hr/>
-				</div>
+					<div class="mui-input-row">
+						<label>客户名称</label>
+						<input type="text" placeholder="请输入客户名称" class="value c" name="cust_name" id="cust_name" value="" required="required" />
+					</div>
 
-				<div>
-					<span class="label">确认到店：</span>
-					<input type="checkbox" />
-					<hr/>
-				</div>
+					<div class="mui-input-row">
+						<label>手机号</label>
+						<input type="tel" placeholder="请输入客户手机号" class="value c" name="phone" id="mobile" value="" required="required" />
+					</div>
 
-				<div>
-					<button type="button" class="mui-btn mui-btn-block">保存</button>
-				</div>
+					<div class="mui-input-row" id="arrive">
+						<label>确认到店</label>
+						<div class="mui-switch mui-switch-mini">
+							<div class="mui-switch-handle"></div>
+						</div>
+					</div>
 
-			</form>
+					<div>
+						<button id="save" type="button" class="mui-btn mui-btn-block w">保存</button>
+					</div>
+
+				</form>
+
+			</center>
 		</div>
 	</body>
 	<style type="text/css">
-		.label{
-			width: 30%;
-			display: inline-block;
-			padding-left: 10px;
+		body {
+			background: white;
 		}
-		.value.c{
-			width:14em;
+		
+		.mui-input-row {
+			margin-bottom: 15px;
+			margin-top: 15px;
+			border: solid #dddddd 1px;
+			border-radius: 5px;
+		}
+		
+		#short {
+			float: left;
+		}
+		
+		.mui-input-row label {
+			text-align: left;
+			width: 30%;
+		}
+		
+		.s_div {
+			/* position: absolute; */
+			line-height: 38px;
+			/* left: 75px; */
+			display: inline-block;
+			position: relative;
+			float: left;
+		}
+		
+		.mui-input-row label {
+			width: auto;
+			padding: 12px 15px;
+		}
+		
+		.s {
+			position: absolute;
+			top: 1em;
+			left: 1em
+		}
+		
+		.s {
+			content: "";
+			border-left: 5px solid transparent;
+			border-right: 5px solid transparent;
+			border-top: 5px solid #000;
+		}
+		
+		#icon_select {
+			position: absolute;
+			right: 5px;
+			top: .35em;
+			text-align: center;
+		}
+		
+		.mui-btn.mui-btn-block {
+			margin-top: 1em;
+			height: 50px;
+			align-content: center;
+			border-radius: 5px;
+			color: #fff;
+			background-color: #50B7DE;
+			border: none;
+			padding: 0;
+			font-size: 16px;
+		}
+		
+		.mui-btn.mui-btn-block:active {
+			background-color: #3B89A7;
+		}
+		
+		#save {
+			margin-top: 2em;
+		}
+		
+		.input {
+			display: inline-block;
+			width: 65%;
+			float: right;
+		}
+		
+		.input>input {
+			width: 80%;
+			margin-bottom: 0;
+			padding-left: 0;
+			border: 0;
+		}
+		
+		input {
+			font-size: 16px;
 		}
 	</style>
+	<script type="text/javascript">
+		//完善资料
+		//监听 html加载完成事件 
+		var updateCustId = ""; //待更新的客户id
+		var updateObjId = "";
+		var toPage = "customer_leave.html";
+		window.addEventListener("DOMContentLoaded", function() {
+			var mSession = _g;
+			if (mSession.intent != "edit") {
+				return;
+			}
+			if (mSession.params == "cusAdd_data") {
+				toPage = "car_manage.html";
+			}
+			//修改标题
+			W("title").innerText = "完善资料";
+			W(".mui-title").innerText = "完善资料";
+			//获取本地数据存储路径
+			var dataPath = mSession.params;
+			var obj = W.ls(dataPath);
+			/**
+			 * 初始化客户信息
+			 */
+			updateCustId = obj.cust_id;
+			updateObjId = obj.obj_id;
+			W("#cust_name").value = obj.cust_name; //用户名称
+			W("#mobile").value = $v(obj.mobile); //手机
+			var obj_name = obj.obj_name;
+			var short_province = obj_name.substr(0, 1);
+			var car_number = obj_name.substr(1, obj_name.length - 1)
+			W("#short_province").innerText = short_province; //粤，湘
+			W("#car_number").value = car_number; //号码 
+			W("#vehicle_number").value = $v(obj.frame_no); //车架号
+			W("#mileage").value = $v(obj.mileage); //行驶里程
+			//车型信息
+			commit_customer.car_brand_id = obj.car_brand_id; //品牌ID
+			commit_customer.car_brand = obj.car_brand;
+			commit_customer.car_series_id = obj.car_series_id; //车系ID
+			commit_customer.car_series = obj.car_series;
+			commit_customer.car_type_id = obj.car_type_id; //车款ID
+			commit_customer.car_type = obj.car_type; //车款
+			var carName = $v(obj.car_series) + " " + $v(obj.car_type);
+			W("#car_type").value = carName;
+			W("#arrive").hidden = true;
+		});
+		W("#save").addEvent("click", add); //点击保存
+		/**
+		 * undifine 空值处理
+		 * @param {Object} value
+		 */
+		function $v(value) {
+			if (value == undefined) {
+				value = "";
+			}
+			return value;
+		}
+		/*
+		 * 选择车型
+		 */
+		ui_carSeries.preLoad();
+		ui_carSeries.finish = function(res) {
+			//选择完车型，返回车的json
+			ui_carSeries.box.hide();
+			var carName = res.series + " " + res.type;
+			W("#car_type").value = carName;
+			commit_customer.car_brand_id = res.brandId; //品牌ID
+			commit_customer.car_brand = res.brand;
+			commit_customer.car_series_id = res.seriesId; //车系ID
+			commit_customer.car_series = res.series;
+			commit_customer.car_type_id = res.typeId; //车款ID
+			commit_customer.car_type = res.type; //车款
+		}
+		W("#car_picker").addEvent("click", ui_carSeries).setAttribute("data-param", "intent=brand&select=single"); //intent=type&select=multi
+		W("#short_province").addEvent("click", ui_areaBox);
+		W(".mui-switch").addEvent("toggle", toggle);
+		//点击确认到店按钮
+		function toggle() {
+			if (event.detail.isActive) {
+				var c = new ui_checkInBtn(2015);
+				ui_checkInBtn.showBox.call(c);
+				commit_customer.mode = "2"; // 创建模式 1:仅仅创建用户 2:同时创建用户,车辆,到店记录
+				commit_customer.if_arrive = "1"; //是否到店,/1 则需要传入到店类型和备注,/0 则不需要
+			} else {
+				commit_customer.mode = "1";
+				commit_customer.if_arrive = "0";
+				commit_customer.business_type = ""; //业务类型
+				commit_customer.business_content = ""; //业务内容
+			}
+		}
+		//选择确认到店操作返回
+		ui_checkInBtn.finish = function() {
+				var box = ui_checkInBtn.box;
+				var textarea = box.querySelector("textarea");
+				var type = this.getAttribute("data-type");
+				var text = textarea.value;
+				//维修保养业务等
+				commit_customer.business_type = type;
+				commit_customer.business_content = text;
+				box.hide();
+				textarea.value = "";
+				box.car_id = null;
+			}
+			/*
+			 * 创建客户信息
+			 */
+		var commit_customer = {
+			mode: "2", // 创建模式 1:仅仅创建用户 2:同时创建用户,车辆,到店记录
+			seller_id: "0", //商户ID,如果没有默认为0
+			access_token: _user.access_token,
+			cust_type: "1", //用户类型 1: 车主 2: 商户
+			cust_name: "", //用户名称
+			mobile: "", //手机
+			obj_name: "", //车牌号
+			frame_no: "", //车架号
+			car_brand_id: "", //品牌ID
+			car_brand: "", //品牌
+			car_series_id: "", //车系ID
+			car_series: "", //车系
+			car_type_id: "", //车款ID
+			car_type: "", //车款
+			mileage: "", //行驶里程
+			if_arrive: "0", //是否到店,/1 则需要传入到店类型和备注,/0 则不需要
+			business_type: "", //业务类型
+			business_content: "" //业务内容
+		};
+		/**
+		 * 添加客户
+		 */
+		function add() {
+			var eles = document.getElementsByTagName("input");
+			for (var i = 0; i < eles.length; i++) {
+				var ele = eles[i];
+				if (!ele.checkValidity()) {
+					var text = W.parents(ele, ".mui-input-row").querySelector("label").innerText;
+					W.toast(text + "不能为空");
+					return;
+				}
+			}
+			var seller_id = W.getSetting("user").cust_id;
+			var cust_name = W("#cust_name").value; //用户名称*
+			var mobile = W("#mobile").value; //手机*
+			var short_province = W("#short_province").innerText; //粤，湘
+			var car_number = W("#car_number").value;
+			var obj_name = short_province + car_number; ////组合车牌，号码 *
+			var frame_no = W("#vehicle_number").value; //车架号*
+			var mileage = W("#mileage").value; //行驶里程*
+			if (!isNumberOr_Letter(car_number)) {
+				W.toast("车牌号格式不正确");
+				return;
+			}
+			if (!isNumberOr_Letter(frame_no)) {
+				W.toast("车架号格式不正确");
+				return;
+			}
+			if (!isNumber(mileage)) {
+				W.toast("行驶里程输入有误");
+				return;
+			}
+			if (!checkMobile(mobile)) {
+				W.toast("手机号码格式不正确");
+				return;
+			}
+			commit_customer.seller_id = seller_id;
+			commit_customer.cust_name = cust_name;
+			commit_customer.mobile = mobile;
+			commit_customer.obj_name = obj_name;
+			commit_customer.frame_no = frame_no;
+			commit_customer.mileage = mileage;
+			if (_g.intent == "edit") {
+				//完善资料接口
+				commit_customer.cust_id = updateCustId;
+				Wapi.user.update(callback, commit_customer);
+				delete commit_customer.business_content;
+				delete commit_customer.business_type;
+				delete commit_customer.constructor;
+				delete commit_customer.cust_type;
+				delete commit_customer.if_arrive;
+				delete commit_customer.mode;
+				delete commit_customer.mobile;
+				delete commit_customer.seller_id;
+				commit_customer._obj_id = updateObjId;
+				Wapi.vehicle.update(function(res) {}, commit_customer);
+			} else {
+				//新增客户接口
+				Wapi.user.create(callback, commit_customer);
+			}
+		}
+		/**
+		 * 添加客户返回结果
+		 * @param {Object} res
+		 */
+		function callback(res) {
+			if (res.status_code == 0) {
+				history.pushState(null, "home.html", "home.html");
+				location = toPage;
+			} else {
+				W.errorCode(res);
+			}
+		}
+	</script>
 
 </html>

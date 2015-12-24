@@ -1,0 +1,398 @@
+<!--
+	作者：小刘
+	时间：2015-12-2
+	描述：客户咨询
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+			
+		<title>客户咨询</title>
+
+		<script src="../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		
+		<script src="../wslib/api/Wapi.js" defer="defer"></script>
+		<style>
+			body{ background-color: #EFEFF4;}
+			.mui-content{z-index: -1;}
+			.newList{background-color: white;padding:7px 10px 5px 10px;border-top: 1px solid #f2f2f2;}
+			.child_view{background-color:#F0F0F0;min-height: 100vh;height: auto;}
+			.bottom{z-index: 9999;background-color: #F9F9F9;padding: 5px 15px;bottom: 0;position: fixed;width: 100%;border-top: 1px solid #ccc;}
+			.bottom input{margin: 0;height: 20px;padding: 15px 0;display: inline-block;text-indent: 10px;line-height: 20px;border-radius: 3px;}
+			.lab{width: 35px;font-size: 14px;display: inline-block;text-align: right;color: #000;float: right;padding: 5px 0;}
+			.lab:active{color: #aaa;}
+			.text{overflow: hidden;}
+			.icon{height: 40px;width: 40px;float: left;margin-right: 20px;text-align: center;line-height: 40px;font-size: 25px;color: white;}
+			.d_Img{width: 40px;height: 40px;}
+			.icon_img{height: 40px;width: 40px;margin-left: 20px;text-align: center;line-height: 40px;font-size: 25px;color: white;}
+			.fr{float: right;}
+			.fl{float: left;}
+			.main-count{padding: 5px 0;min-height: 55px;}
+			.new_info{font-size: 14px;overflow: hidden;}
+			#news-add{padding-top: 50px;padding-bottom: 50px;}
+			.time{text-align: center;font-size:12px ;margin: 5px 0;}
+			
+			.new_r{overflow: hidden;padding:0 50px 0 6px;border-radius: 0.4em;position: relative;}
+			.tran_r{position:absolute;margin-top: 8px;width: 10px;height: 10px;background-color: white;transform: rotate(45deg);-webkit-transform:rotate(45deg);-moz-transform: rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);}
+			.news_r{width:auto;height:auto;line-height: 1.5em;max-width: 100%;display: inline-block;border-radius: .3em;font-size: 15px; word-wrap: break-word;background-color: white;padding: 9px 10px 9px 15px;margin-left: 4px;}
+			
+			.new_l{overflow: hidden;padding:0 6px 0 50px;border-radius: 0.4em;position: relative;}
+			.tran_l{right: 5px;position:absolute;margin-top: 8px;width: 10px;height: 10px;background-color:  #50B7DE;transform: rotate(45deg);-webkit-transform:rotate(45deg);-moz-transform: rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);}
+			.news_l{line-height: 1.5em;display: inline-block;max-width: 100%;font-size: 15px;border-radius: .3em;width:auto;height:auto;word-wrap: break-word;background-color: #50B7DE;color:white;padding: 9px 15px 9px 10px;margin-right: 4px;}
+			.icon_img_l{height: 40px;width: 40px;margin-right: 20px;text-align: center;line-height: 40px;font-size: 25px;color: white;}
+			.show_news{position: relative;}
+			.show_news span{  
+			    width: 1.5em;
+			    height: 1.5em;
+			    position: absolute;
+			    background-color: #F13F40;
+			    right: .5em;
+			    top: 0;
+			    color: white;
+			    text-align: center;
+			    vertical-align: top;
+			    line-height: 1.5em;
+			    border-radius: 100%;
+			    font-size: 12px;
+			 }
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<h1 class="mui-title">客户咨询</h1>				
+		</header>
+		<div class="mui-content"></div>
+		<div class="child_view has_nav fromRight" id="Details" style="display: none;">
+			<div class="mui-bar mui-bar-nav">
+				<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+				<h1 class="mui-title" id="name"></h1>				
+			</div>
+			<div id="news-add">
+			</div>
+		</div>
+		<div class="bottom">
+			<div class="lab">发送</div>
+			<div class="text">
+				<input id="new_text" type="text"  />
+			</div>
+		</div>
+	</body>
+	<script>
+/**
+ * 消息列表组件
+ * @param {Object} data
+ */
+	function cl(data){
+		var  obj =new WiStormUI("div");
+		obj.merge(this);
+		obj.className='newList';
+		obj.setAttribute('data-show','Details');
+		obj.setData(data);
+		obj.setSpan(data.unread_count);
+		obj.addEvent('click',show);
+		obj.data=data;
+		obj.friend_id=data.friend_id;
+		return obj;
+	}
+	cl.prototype.setData=function (data){
+		var uname=data.friend_name.slice(0,1);
+		var newtime = (new Date()-NewDate(data.send_time))/1000/60/60;
+		if(newtime<1)
+			newtime=parseInt(newtime*60)+"分钟前";
+		else if(newtime<24)
+		   	newtime=parseInt(newtime)+"小时前";
+		else
+			newtime=parseInt(newtime/24)+"天前";
+		var a=["#428bca",'#5cb85c','#5bc0de','#f0ad4e','#d9534f'];
+		this.innerHTML = '<div class="icon">'+uname+'</div><div class="new_info"><div><span class="fr" style="color:#ccc;font-size: 12px;">'+newtime+'</span><div style="overflow: hidden;"><span style="color: #676767;">'+data.friend_name+'</span></div></div><div class="show_news"><p style="color:#ccc;margin: 0 3.2em 0 0;overflow: hidden;white-space: nowrap;">'+data.content+'</p></div></div>';
+		var c=data.friend_id%5;
+		this.querySelector('.icon').style.backgroundColor=a[c];
+		this.id="W"+data.friend_id;
+		this.data=data;
+	}
+/**
+ * 当有新消息时创建span元素
+ */
+	cl.prototype.setSpan=function (unread_count){
+		var oSpan=this.lastChild.lastChild;
+		if(typeof unread_count=="number"){
+			this.data.unread_count=unread_count;
+		}else{
+			this.data.unread_count++;
+		}
+		
+		if(this.data.unread_count!=0){
+			if(oSpan.lastChild.tagName!='SPAN'){
+				var span =document.createElement('span');
+				oSpan.appendChild(span);
+				span.innerText=this.data.unread_count;
+			}else{
+				oSpan.lastChild.innerText=this.data.unread_count;
+			}
+			oSpan.firstChild.innerText=this.data.content;
+		}else{
+			if(oSpan.lastChild.tagName=='SPAN'){
+				oSpan.lastChild.remove();
+			}
+		}
+	}
+/**
+ * 更改content
+ */
+	cl.prototype.getContent=function (content){
+		this.lastChild.lastChild.firstChild.innerHTML=content;
+		this.data.content=content;
+	}
+/**
+ * 接收消息组件 
+ * @param {Object} data
+ */
+	function cs(data){
+		var obj = new WiStormUI('div');
+		obj.merge(this);
+		obj.className='main-count';
+		obj.setData(data);
+		return obj;
+	}
+	cs.prototype.getData=function(){
+		return this.data;
+	}
+	cs.prototype.setData=function (data){
+		var getTime=NewDate(data.create_time);
+		var gtime=W.ls("gtime");
+		gtime= new Date(gtime);
+		if((getTime-gtime)/1000/60>2){
+			W.setLS("gtime",getTime);
+			getTime=getTime.WtoString().slice(5,16)
+		}else
+			getTime='';
+		var a=["#428bca",'#5cb85c','#5bc0de','#f0ad4e','#d9534f'];
+		var c=data.sender_id%5;
+		var uname;
+		if(data.sender_id==_user.cust_id){
+			uname=_user.cust_name.slice(0,1);
+			this.innerHTML='<div class="time">'+getTime+'</div><div class="icon_img_l fr">'+uname+'</div><div class="new_l"><div class="tran_l"></div><span class="news_l fr">'+data.content+'</span></div>';			
+			this.querySelector('.icon_img_l').style.backgroundColor=a[c];
+		}else{
+			uname=W('#name').innerHTML.slice(0,1);
+			this.innerHTML='<div class="time">'+getTime+'</div><div class="icon_img fl">'+uname+'</div><div class="new_r"><div class="tran_r"></div><span class="news_r">'+data.content+'</span></div>';
+			this.querySelector('.icon_img').style.backgroundColor=a[c];
+		}
+		this.data=data;
+	}
+	
+
+/**
+ * 文档加载完毕
+ */
+var news_cust_id,dom={},MAX_ID=0,settime,localnews={};
+	window.onload = function (){
+		dom.newlist=W(".mui-content");
+		dom.newlists=W("#news-add");
+		dom.details=W("#Details");
+		newlist();//消息列表
+		W(".lab").addEvent('click',sendnew);
+		dom.bottom=W(".bottom");
+		dom.bottom.style.display="none";
+		getnews();
+	}
+	//监听地址变化，切换view
+		window.addEventListener("popstate",hide);
+	/**
+	 * 从消息列表滑动到具体消息
+	 * @param {Object} id
+	 */
+			function show(){
+				localnews[this.id].length=0;
+				this.setSpan(0);
+				W('#name').innerHTML=this.data.friend_name;
+				var fid=this.friend_id;
+				history.pushState(null,"customer_advisory.html?id="+fid,"customer_advisory.html?id="+fid);//	
+				if(news_cust_id!=-fid){
+					news_cust_id=fid;
+					dom.newlists.innerHTML="";
+					receives();
+				}
+				dom.details.style.display='block';		
+				dom.newlist.style.display='none';
+				if(WiStorm.isWeb&&top!=window)
+					plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="none";');
+				dom.bottom.style.display="block";
+			}
+									
+	
+	function hide(){
+		news_cust_id=-news_cust_id;
+		//dom.newlists.innerHTML="";
+		dom.details.style.display='none';
+		dom.newlist.style.display='block';
+		//dom.details.className='child_view has_nav toRight';
+		if(WiStorm.isWeb&&top!=window)
+			plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="block";');
+		dom.bottom.style.display="none";
+
+	}
+/**
+ * 接收新消息刷新消息列表
+ */
+
+	function getnews(){
+		var data={
+			user_id:_user.cust_id,
+			access_token:_user.access_token,	
+			max_id:MAX_ID				
+		};
+		Wapi.user.getChatList(function (res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+
+			if(res.data.length!=0){
+				var t,clObj;
+				for(var i=res.data.length-1;i>=0;i--){
+					t=localnews["W"+res.data[i].friend_id];//前面创建了空的数组  现在用friend_id判断是否存在这个属性
+					if(t){
+						t.push(res.data[i]);
+						if(MAX_ID!=0){
+							if(news_cust_id!=res.data[i].friend_id){
+								clObj=W("#W"+res.data[i].friend_id);//cl组件
+								clObj.setSpan();
+								clObj.getContent(res.data[i].content);
+							}else{
+								dom.newlists.appendChild(new cs(res.data[i]));
+								setScoll();
+							}
+						}
+					}else{
+						localnews["tem_W"+res.data[i].friend_id]=new Array();
+						localnews["tem_W"+res.data[i].friend_id].push(res.data[i]);
+						newlist();
+					}
+				}
+				MAX_ID=res.data[0].chat_id;
+				
+				//通知home页的导航栏有信息
+				if(i){
+					newMsg
+				}
+			}
+			settime=setTimeout(getnews,5000);
+		},data);
+	}
+/**
+ * 点击时加载对应的聊天记录
+ * 
+ */
+	function receives(){
+		var data={
+			user_id:_user.cust_id,
+			access_token:_user.access_token,	
+			friend_id:news_cust_id,
+			max_id:0				
+		};
+		Wapi.user.getChatList(function (res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			if(res.data.length!=0){
+					
+				localStorage.removeItem('gtime');
+				res = res.data;
+				var list= document.createDocumentFragment();
+				for(var i=res.length-1;i>=0;i--){
+					list.appendChild(new cs(res[i]));
+				}
+				dom.newlists.appendChild(list);	
+				setTimeout(setScoll,500);
+				setScoll();
+			}
+		},data);
+	}
+/**
+ * 设置滚动条到底部
+ */
+	function setScoll(){
+		var scoll=document.body;	
+		scoll.scrollTop=scoll.scrollHeight-window.innerHeight; //设置滚动条离顶部的距离是滚动条的高度
+	}
+/**
+ * 消息列表
+ */
+		function newlist(){
+			
+			dom.newlist.innerHTML='';
+			var data={
+				user_id:_user.cust_id,			
+				access_token:_user.access_token,	
+			};
+			Wapi.user.getRelationList(function (res){
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				var list = document.createDocumentFragment();
+				for(var i=res.data.length-1;i>=0;i--){
+					var f =res.data[i].friend_id;
+					if(!localnews['W'+f]){
+						list.appendChild(new cl(res.data[i]));
+						localnews["W"+f]=localnews["tem_W"+f]||new Array();
+						delete localnews["tem_W"+f];
+					}
+				}
+
+				dom.newlist.insertBefore(list,dom.newlist.childNodes[0]);
+				if(_g.id){
+					//微信直接点击进入聊天
+					show.call(W("#W"+_g.id));
+				}
+			},data);
+			
+		}
+/**
+ * 发送消息
+ */
+	function sendnew(){
+		var val= W('#new_text').value;
+		if(val.trim()!=''){
+			var data={
+				user_id:_user.cust_id,
+				access_token:_user.access_token,	
+				cust_name:_user.cust_name,
+				friend_id:news_cust_id,
+				type:'0',
+				content:val				
+			};
+			Wapi.user.sendChat(function (res){
+				
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				//"2015-12-15 09:58:17";
+				var temD=new Date();
+				temD.setHours(temD.getHours()-8);
+				var t=temD.WtoString().split(" ");
+				var str=t[0]+"T"+t[1]+".000Z";
+				data.create_time=str;//"2015-12-14T09:50:47.162Z"
+				data.chat_id=res.chat_id;
+				data.sender_id=_user.cust_id;
+				dom.newlists.appendChild(new cs(data));
+				
+				W('#new_text').value='';
+				var scoll=document.body;
+				scoll.scrollTop=scoll.scrollHeight; //设置每次发送  滚动条离顶部的距离是滚动条的高度				
+			},data);
+		}
+	}
+	</script>
+</html>

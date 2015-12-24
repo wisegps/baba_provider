@@ -15,173 +15,351 @@
 		<title>客户到店/离店</title>
 		<!--必须最先引入WiStorm.js文件-->
 		<script src="../wslib/WiStorm.js"></script>
-
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
 		<!--使用link()引入css文件，无需写路径，直接写文件名即可,尽量少引入css，样式如果少（小于10k为少），
 		可以直接写在style元素里，放到body元素后面-->
 		<script>
 			link("W.css")
+		</script>
+		<script>
+			link("ui.css")
 		</script>
 
 		<!--其他js文件需在css文件后面引入，如果是在加载完页面之后才会用到的，使用defer属性异步加载;或者直接放到body后面；
 			同样尽量少引入js文件；
 			现在接口可能需要你们自己封装，参考wslib/api/WUserApi.js里的封装方式
 			-->
-		<script src="../wslib/api/WUserApi.js" defer="defer"></script>
+		<script src="../wslib/api/Wapi.js" defer="defer"></script>
 		<!--默认的同步加载js（用于加载有严格加载顺序的外部js文件）-->
 		<script src="../wslib/ui/WiStormUI.js"></script>
 		<script src="../wslib/ui/DateTime.js"></script>
-
+		<script src="ui/ui.js"></script>
+		<script src="js/string_factory.js"></script>
 	</head>
 
 	<body>
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
-			<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-right"></a>
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<a class="mui-icon w_icon icon_add mui-pull-right btn_customer_add"></a>
 			<h1 class="mui-title">客户到店/离店</h1>
 		</header>
 		<div class="mui-content">
-			
-			
-			<div class="preview">
-				<table>
-					<tbody>
-						<tr>
-							<td class="td_preview">
-								今日到店：<font color="#0062CC">10</font>
-							</td>
-							<td class="td_preview">
-								今日离店：<font color="#0062CC">6</font>
-							</td>
-							<td class="td_preview">
-								今日评价：<font color="#0062CC">3</font>
-							</td>
-						</tr>
-						<tr>
-							<td class="td_preview">
-								当月到店：<font color="#0062CC">10</font>
-							</td>
-							<td class="td_preview">
-								当月离店：<font color="#0062CC">6</font>
-							</td>
-							<td class="td_preview">
-								当月评价：<font color="#0062CC">3</font>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+			<center>
+				<div class="preview">
+					<div class="t_row">
+						<div class="t_cell">
+							<label class="t_value" id="arrive_today">0</label>
+							<br/>
+							<label class="t_label">
+								今日到店
+							</label>
+						</div>
+						<div class="t_cell">
+							<label class="t_value" id="leave_today">0</label>
+							<br/>
+							<label class="t_label">
+								今日离店
+							</label>
+						</div>
+						<div class="t_cell">
+							<label class="t_value" id="review_today">0</label>
+							<br/>
+							<label class="t_label">
+								今日评价
+							</label>
+						</div>
 
-			<div class="tab" >
-				<span class="tab_condition" >在店(5)</span>
-				<span class="tab_condition">离店(10)</span>
-				
+					</div>
+					<div class="t_row">
+						<div class="t_cell">
+							<label class="t_value" id="arrive_month">0</label>
+							<br/>
+							<label class="t_label">
+								当月到店
+							</label>
+						</div>
+						<div class="t_cell">
+							<label class="t_value" id="leave_month">0</label>
+							<br/>
+							<label class="t_label">
+								当月离店
+							</label>
+						</div>
+						<div class="t_cell">
+							<label class="t_value" id="review_month">0</label>
+							<br/>
+							<label class="t_label">
+								当月评价
+							</label>
+						</div>
+					</div>
+				</div>
+
+			</center>
+			<div class="tab_inout">
+				<div style="display: table-row;">
+					<div class="tab_item" data-value="1" onclick="change(this)">
+						<label id="label_in" class="total_number">在店(0)</label>
+					</div>
+
+					<div class="tab_item" data-value="2" onclick="change(this)">
+						<label id="label_out" class="total_number" style="border-color: white">离店(0)</label>
+					</div>
+				</div>
+
 			</div>
-			<div class="condition">
-				<span>
-						<script id="selectDate" class="bbb" data-ccc="ccc" style="border: none; background: rgba(0,0,0,0);width: 50%;">
+			<div class="condition" hidden="true">
+				<div class="duration_div">
+					<center>
+
+						<button id="select_today" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(0)">今天</button>
+						<button id="select_week" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(1)">1周内</button>
+						<button id="select_month" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(2)">1个月内</button>
+						<button id="select_custom" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(3)">自选</button>
+					</center>
+				</div>
+				<hr style="height:1px;border:none;border-top:1px solid #dddddd;" />
+				<center>
+					<div class="time_box" hidden="true">
+						<span class="time">
+						<script id="begin_time"  class="ctime" data-ccc="ccc" style=" text-align:right;border: 0px #000000 solid; border-radius: 5px; width: 45%;">
 									echo(new DateSelector())
 								</script>
 				</span>
-				<span>
-					<label id="label_codition" width: 50% onclick="document.getElementById('list_condition').style.display='block'">全部</label>
+						<span class="time">至</span>
+						<span class="time" style="background: #007AFF;">
+						<script id="end_time"  class="ctime" data-ccc="ccc" style="border: 0px #000000 solid; border-radius: 5px;width: 45%;">
+									echo(new DateSelector())
+								</script>
 				</span>
-
+					</div>
+				</center>
 			</div>
+
 			<div id="car_list"></div>
 
+			<div id="car_list_left"></div>
+
 		</div>
 
-		<div id="list_condition">
-			<div class="list_row" onclick="select('全部')">全部</div>
-			<div class="list_row" onclick="select('已到店')">已到店</div>
-			<div class="list_row" onclick="select('已离店')">已离店</div>
-			<div class="list_row" onclick="select('已评价')">已评价</div>
+		<!--离店模板-->
+		<div class="ui_car_d" id="state_car_left" hidden="true">
+			<table>
+				<tr>
+					<th>
+						<img src="http://img.wisegps.cn/logo/m_8_100.png" onerror='javascript:this.src="../img/icon_car_moren.png"'><span name="value">粤B614D1</span></th>
+				</tr>
+				<tr>
+					<td><span class="name">客户名称:</span>
+						<span class="value" name="cust_name">梅长苏</span></td>
+					<td><span class="name">车型:</span>
+						<span class="value" name="car_type">宝马X3 2012款</span></td>
+				</tr>
+				<tr>
+					<td><span class="name">行驶里程:</span>
+						<span class="value" name="mileage">56000公里</span></td>
+					<td><span class="name">维修类型:</span>
+						<span class="value" name="business_type">保养</span></td>
+				</tr>
+				<tr>
+					<td><span class="name">到店时间:</span>
+						<span class="value" name="arrive_time">11-03 16:30</span></td>
+					<td><span class="name">离店时间:</span>
+						<span class="value" name="leave_time">11-03 16:30</span></td>
+				</tr>
+				<tr>
+					<td name="comment"><span class="name">评价:</span>
+						<span class="value" id="evaluate_level">
+								<span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-starhalf"></span>
+						</span>
+					</td>
+				</tr>
+			</table>
 		</div>
+
+		<!--
+        	作者：androidcyy
+        	时间：2015-11-25
+        	描述：在店
+        -->
+		<div class="ui_car_d" id="state_car_arrived" hidden="true">
+			<table>
+				<tr>
+					<th><img src="http://img.wisegps.cn/logo/m_8_100.png" onerror='javascript:this.src="../img/icon_car_moren.png"'><span name="value">粤B614D1</span></th>
+					<th name="tip" name="arrive_desc"><span name="arrive_desc_info">0分钟前到店</span></th>
+				</tr>
+				<tr>
+					<td><span class="name">客户名称:</span>
+						<span class="value" name="cust_name">梅长苏</span></td>
+					<td><span class="name">车型:</span>
+						<span class="value" name="car_type">宝马X3 2012款</span></td>
+				</tr>
+
+				<tr>
+					<td><span class="name">行驶里程:</span>
+						<span class="value" name="mileage">56000公里</span></td>
+					<td><span class="name">维修类型:</span>
+						<span class="value" name="business_type">保养</span></td>
+				</tr>
+
+				<tr>
+					<td><span class="name">到店时间:</span>
+						<span class="value" name="arrive_time">11-03 16:30</span></td>
+					<td><span class="name">离店时间:</span>
+						<span class="value" name="leave_time">11-03 16:30</span></td>
+				</tr>
+			</table>
+			<footer>
+				<button type="button" class="mui-btn mui-btn-warning" name="finish_leave">完工离店</button>
+				<button type="button" class="mui-btn mui-btn-primary" name="immediate_leave">直接离店</button>
+			</footer>
+		</div>
+
 	</body>
 	<style>
 		body {
-			background-color: #EFEFF4;
+			background-color: #f0f0f0;
 		}
 		
-		table {
+		.preview {
+			display: table;
+			background: white;
 			width: 100%;
 		}
-		.tab {
+		
+		.condition {
+			background: white;
+			margin-top: 12px;
+			padding-top: 13px;
+		}
+		
+		.mui-btn-outlined.mui-btn-label {
+			width: 20%;
+			color: #999999;
+			border: 1px solid #999999;
+			border-radius: 15px;
+		}
+		
+		.duration_div {
+			display: block;
+			background: white;
+		}
+		
+		.time {
+			color: #52b8e0;
+		}
+		
+		.t_row {
+			display: table-row;
+		}
+		
+		.t_cell {
+			display: table-cell;
+			padding-top: 15px;
+			padding-bottom: 15px;
+		}
+		
+		.t_value {
+			color: #50b7de;
+		}
+		
+		.t_label {
+			color: #999999;
+			font-size: small;
+		}
+		
+		.tab_inout {
+			display: table;
+			background: white;
 			width: 100%;
+			margin-bottom: 12px;
+			margin-top: 12px;
+			padding: 13px;
 		}
 		
-		td {
-			width: 50%;
-			padding: .5em;
-		}
-		.td_preview{
-			width: 33.3%;
-			padding: .5em;
-		}
-		
-		.tab_condition {
-			width: 49%;
-			align-content: center;
-			display: inline-block;
-			padding: .7em;
+		.tab_item {
+			display: table-cell;
 			text-align: center;
 		}
 		
-		
-		#list_condition {
-			display: none;
-			position: absolute;
-			top: 10%;
-			width: 90%;
-			height: auto;
-			background-color: white;
-			z-index: 1002;
-			overflow: auto;
-			text-align: center;
-			margin-right: auto;
-			margin-left: 5%;
-			border: 1px solid black;
-		}
-		
-		.list_row {
-			position: relative;
-			padding: .5em;
-			line-height: 1.8em;
-			font-weight: 700;
-			color: #6B6464;
-			text-align: center;
-			border-bottom: solid #999999 1px;
-		}
-		
-		#list_condition>div:active {
-			background: rgba(0, 0, 0, .1);
-		}
-		
-		#list_condition>div {
-			position: relative;
-			display: inline-block;
-			width: 90%;
-			text-align: center;
+		.tab_item>label {
+			padding: 7px;
+			border-bottom: 1.5px #50b7de solid;
+			font-size: medium;
 		}
 	</style>
 
 	<script>
-		//自定义一个对象用于测试
-		function CarData() {
-			this.carNumber = "粤B888888"; //车牌号
-			this.customer = "邓小平"; //客户姓名
-			this.mileage = "5000"; //行驶里程
-			this.arriveTime = "2015-12-12"; //到店时间
-			this.leaveTime = "2015-12-13"; //离店时间
-			this.model = "奥迪a6"; //车型号
-			this.maintenance = "保养"; //维修类型
-			this.review = "未评价"; //是否评价
+		W(".btn_customer_add").addEventListener("click", function() {
+			location = "customer_add.html";
+			return;
+		});
+		var StateCode = {
+			arrived: 1,
+			left: 2
+		};
+		var CarState = StateCode.arrived; //全局变量，离店，到店标识
+		var param = {
+			parent_cust_id: _user.cust_id,
+			max_id: 0,
+			access_token: _user.access_token
+		};
+		//到店对象
+		var dom_arrived = {
+			max_id: 0
+		};
+		//离店对象
+		var dom_left = {
+			max_id: 0
+		};
+		window.addEventListener("DOMContentLoaded", function() {
+			//页面加载完
+			getShopData(); //获取并展示店铺当天、当月数据getBusinessData
+			getBusinessData(CarState);
+			W("#begin_time").addEvent("change", function() {
+				select(4);
+			});
+			W("#end_time").addEvent("change", function() {
+				select(4);
+			});
+			W(".w_icon.icon_add").addEvent();
+		});
+		/**
+		 * 到店离店切换
+		 * @param {Object} obj
+		 */
+		function change(obj) {
+			var v = obj.getAttribute("data-value");
+			W("#label_in").style.borderColor = "white";
+			W("#label_out").style.borderColor = "white";
+			W("#label_in").style.color = "#999999";
+			W("#label_out").style.color = "#999999";
+			CarState = v;
+			if (v == StateCode.left) { //离店
+				W("#label_out").style.borderColor = "#50b7de";
+				W("#label_out").style.color = "black";
+				W("#car_list_left").style.display = "block";
+				W("#car_list").style.display = "none";
+				W(".condition").hidden = false;
+				if (dom_left.max_id == 0) {
+					select(0);
+				}
+			} else { //在店
+				W("#label_in").style.borderColor = "#50b7de";
+				W("#label_in").style.color = "black";
+				W("#car_list_left").style.display = "none";
+				W("#car_list").style.display = "block";
+				W(".condition").hidden = true;
+				if (dom_arrived.max_id == 0) {
+					getBusinessData(CarState);
+				}
+			}
 		}
 		//车辆列表中的一项，的对象
 		function cv(data) {
 			var obj = new WiStormUI("div"); //创建一个div组件
 			obj.merge(this); //将原型cv.prototype中的方法赋予当前obj
-			obj.className = "cv"; //设置div的class属性
+			obj.className = "ui_car_d"; //设置div的class属性
 			obj.setData(data); //设置obj的内容,setData()在下面cv.prototype中定义
 			return obj; //最后记得要返回组件
 		}
@@ -190,9 +368,30 @@
 			return this.data;
 		}
 		cv.prototype.setData = function(data) {
-				this.innerHTML = '<div><table class = "tb_content"> <tbody><tr class = "tr_content"><td class = "td_carNumber"> <font size = "4" >车牌:' + data.carNumber + '<font></td><td>离店时间:' + data.leaveTime + '</td></tr><tr><td>客户姓名:' + data.customer + '</td><td>车型号:' + data.model + '</td></tr><tr><td>行驶里程:' + data.mileage + '</td><td>维修类型:' + data.maintenance + '</td></tr><tr><td>到店时间:' + data.arriveTime + '</td><td>是否评价:' + data.review + '</td> </tr><tr></tr><tr><td><button>完工离店</button></td><td><button>直接离店</button></td></tr><tr><hr></tr></tbody></table></div>';
-				//this.querySelector(".edit").addEvent("click",cv.editData); //给其中的按钮添加点击事件监听，使用cv.editData来处理点击事件
-				this.data = data; //直接把数据缓存进入组件（按需求，如果数据是需要重复用的就这样缓存）
+			if (CarState == StateCode.left) { //离店
+				this.innerHTML = W("#state_car_left").innerHTML;
+				initEvaluate_level(data.evaluate_level);
+			} else {
+				this.innerHTML = W("#state_car_arrived").innerHTML;
+			}
+			initText(this, "value", data.obj_name);
+			initText(this, "arrive_desc_info", $ArriveDesc(data.arrive_time));
+			//initText(this, "arrive_desc_info","aaa");
+			initText(this, "cust_name", data.cust_name);
+			var ctype = $V(data.car_series) + " " + $V(data.car_type);
+			initText(this, "car_type", ctype);
+			initText(this, "mileage", data.mileage);
+			initText(this, "business_type", $BizType(data.business_type));
+			initText(this, "arrive_time", $T(data.arrive_time));
+			initText(this, "leave_time", $T(data.leave_time));
+			initLeaveEvent(this, data.business_id, data.obj_id, data.business_type, data.mileage);
+			this.querySelector("table").addEvent("click", cv.toDetail).obj_id = data.obj_id;
+			//this.querySelector(".edit").addEvent("click",cv.editData); //给其中的按钮添加点击事件监听，使用cv.editData来处理点击事件
+			this.data = data; //直接把数据缓存进入组件（按需求，如果数据是需要重复用的就这样缓存）
+		}
+		cv.toDetail = function() {
+				var tem = "?obj_id=" + this.obj_id;
+				location = "car_details.html" + tem;
 			}
 			/**
 			 * 这种定义方式与上面的cv.prototype不一样，只是单纯的定义一个方法而已，不会被对象使用；
@@ -203,28 +402,276 @@
 		cv.editData = function() {
 				("跳转到完善资料页面");
 			}
-			//监听 html加载完成事件
-		window.addEventListener("DOMContentLoaded", function() {
-			if (!W.dom.carList)
-				W.dom.carList = W("#car_list"); //缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
-			//W.dom是一个json，专门用于缓存元素
-			var list = document.createDocumentFragment();
-			for (var i = 5; i >= 0; i--) {
-				var data = new CarData();
-				list.appendChild(new cv(data)); //创建一个cv组件，并添加到DocumentFragment里
+			/**
+			 * 传入元素的名字，设置值
+			 * @param {Object} ctx  this,上下文
+			 * @param {Object} name  
+			 * @param {Object} value
+			 */
+		function initText(ctx, name, value) {
+			var ele = ctx.querySelector("[name=" + name + "]");
+			if (ele != null) {
+				ele.innerText = $V(value);
 			}
-			W.dom.carList.appendChild(list); //把整个列表添加到页面
-			setDefaultDate();
-		});
-
-		function setDefaultDate() {
-			var current = new Date();
-			document.getElementById('selectDate').value = current.WtoString().slice(0, 10);
+		}
+		/**
+		 * 设置点击离开事件
+		 * @param {Object} ctx
+		 * @param {Object} business_id
+		 */
+		function initLeaveEvent(ctx, business_id, obj_id, business_type, mileage) {
+			var data_leave = {
+				_business_id: business_id,
+				access_token : _user.access_token,
+				obj_id:obj_id,
+				mileage:mileage
+				
+			};
+			var finish_leave = ctx.querySelector("[name= finish_leave]");
+			var immediate_leave = ctx.querySelector("[name= immediate_leave]");
+			//完工离开
+			if (finish_leave != null) {
+				finish_leave.data_leave = data_leave;
+				finish_leave.data_leave.status = "2";
+				finish_leave.addEvent("click", leave);
+			}
+			//间接离开
+			if (immediate_leave != null) {
+				immediate_leave.data_leave = data_leave;
+				immediate_leave.data_leave.status = "3";
+				immediate_leave.addEvent("click", leave);
+			}
+		}
+		/**
+		 * 离店
+		 */
+		function leave() {
+			var data = this.data_leave;
+			
+			Wapi.vehicle.updateBusiness(function(res) {
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				
+				dom_arrived.max_id = 0;
+				getShopData(); //获取并展示店铺当天、当月数据getBusinessData
+				getBusinessData(CarState);
+			}, data);
+		}
+		/**
+		 * 
+		 * 设置评价等级
+		 * @param {Object} level
+		 */
+		function initEvaluate_level(level) {
+			if (level == undefined) {
+				level = 0;
+			}
+			var star = "";
+			for (var i = 1; i <= level; i++) {
+				star += "<span class='mui-icon mui-icon-star-filled'></span>";
+			}
+			W("#evaluate_level").innerHTML = star;
+		}
+		/**
+		 * 刷新车辆列表
+		 * @param {Object} carList
+		 */
+		function showMore(res) {
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			if (CarState == StateCode.left) { //离店
+				if (!dom_left.car_list) {
+					dom_left.car_list = W("#car_list_left");
+				}
+				refresh(dom_left, res);
+			} else {
+				if (!dom_arrived.car_list) {
+					dom_arrived.car_list = W("#car_list");
+				}
+				refresh(dom_arrived, res);
+			}
+			//////////////////////////////////////////////////////////////
 		}
 
-		function select(value) {
-			document.getElementById('list_condition').style.display = 'none';
-			var label = document.getElementById('label_codition').innerText = value;
+		function refresh(dom, res) {
+			var resData = res.data;
+			var target = dom.car_list;
+			//重置清空数据
+			if (dom.max_id == 0) {
+				while (target.hasChildNodes()) //当div下还存在子节点时 循环继续
+				{
+					target.removeChild(target.firstChild);
+				}
+				target.data = new Array();
+			}
+			if (!target.data) {
+				target.data = new Array();
+			}
+			var list = document.createDocumentFragment();
+			for (var i = resData.length - 1; i >= 0; i--) {
+				var data = resData[i];
+				list.appendChild(new cv(data)); //创建一个dv组件，并添加到DocumentFragment里
+				target.data.push(data); //保存节点
+				if (data.business_id > dom.max_id) {
+					dom.max_id = data.business_id;
+				}
+			}
+			if (res.total > target.data.length) {
+				var autoLoad;
+				if (target.autoLoad) {
+					autoLoad = target.autoLoad;
+				} else if (WiStorm.agent.ios)
+					autoLoad = new ui_autoLoad(W(".mui-content"), _load);
+				else
+					autoLoad = new ui_autoLoad(document, _load);
+				list.appendChild(autoLoad);
+				target.autoLoad = autoLoad;
+			} else if (target.autoLoad) {
+				//删除自动加载组件,释放内存
+				target.autoLoad.remove();
+				delete target.autoLoad;
+			}
+			target.appendChild(list); //把整个列表添加到页面
+		}
+		/**
+		 * 
+		 * 根据日期请求在店，离店的车辆信息
+		 * @param {Object} carList
+		 */
+		function getBusinessData(status, begin_time, end_time) {
+			param.status = status; //状态 1:在店 2:离店;
+			param.query_type = status; //状态 1:在店 2:离店;
+			//			param.begin_time = begin_time;
+			//			param.end_time = end_time;
+			if (begin_time != undefined) {
+				param.leave_time = begin_time + "@" + end_time;
+			}
+			if (CarState == StateCode.arrived) {
+				param.max_id = dom_arrived.max_id;
+			} else {
+				param.max_id = dom_left.max_id;
+			}
+			Wapi.vehicle.getBusinessList(function(res) {
+				var carList = res.data;
+				setTotalText(res.total);
+				showMore(res);
+			}, param);
+		}
+		/**
+		 * 加载更多，参数不变
+		 */
+		function _load() {
+			if (CarState == StateCode.arrived) {
+				param.max_id = dom_arrived.max_id;
+			} else {
+				param.max_id = dom_left.max_id;
+			}
+			WVehicleApi.prototype.getBusinessList(function(res) {
+				var carList = res.data;
+				setTotalText(res.total);
+				showMore(res);
+			}, param);
+		}
+		/**
+		 * 设置在店离店总数（total）
+		 * @param {Object} total
+		 */
+		function setTotalText(total) {
+			if (CarState == StateCode.arrived) {
+				W("#label_in").innerText = "在店(" + total + ")";
+			} else {
+				W("#label_out").innerText = "离店(" + total + ")";
+			}
+		}
+		/**
+		 * 调用api获取店面当天/当月信息并显示
+		 */
+		function getShopData() {
+			var begin_time = new Date();
+			var end_time = begin_time.WtoString();
+			begin_time.setHours(0, 0, 0, 0);
+			var data = {
+				begin_time: begin_time.WtoString(),
+				end_time: end_time,
+				access_token: _user.access_token,
+				parent_cust_id: _user.cust_id
+			}
+			W.userApi.getBusinessTotal(function(res) {
+				W("#arrive_today").innerText = res.arrive_count;
+				W("#leave_today").innerText = res.leave_count;
+				W("#review_today").innerText = res.evaluate_count;
+			}, data);
+			//月到店离店
+			var begin_time = new Date();
+			var end_time = begin_time.WtoString();
+			begin_time.setDate(1);
+			begin_time.setHours(0, 0, 0, 0);
+			var dataMonth = {
+				begin_time: begin_time.WtoString(),
+				access_token: _user.access_token,
+				end_time: end_time,
+				parent_cust_id: _user.cust_id
+			}
+			W.userApi.getBusinessTotal(function(res) {
+				W("#arrive_month").innerText = res.arrive_count;
+				W("#leave_month").innerText = res.leave_count;
+				W("#review_month").innerText = res.evaluate_count;
+			}, dataMonth);
+		}
+		/**
+		 * 点击时间段标签(今天0，1周1，1个月2，自选3，日期选择4)
+		 */
+		function select(index) {
+			/**
+			 * 其他label灰掉
+			 */
+			W("#select_today").style.color = "#999999";
+			W("#select_today").style.borderColor = "#999999";
+			W("#select_week").style.color = "#999999";
+			W("#select_week").style.borderColor = "#999999";
+			W("#select_month").style.color = "#999999";
+			W("#select_month").style.borderColor = "#999999";
+			W("#select_custom").style.color = "#999999";
+			W("#select_custom").style.borderColor = "#999999";
+			W(".time_box").hidden = true;
+			dom_left.max_id = 0;
+			switch (index) {
+				case 0:
+					W("#select_today").style.color = "#7ac9e7";
+					W("#select_today").style.borderColor = "#7ac9e7";
+					W("#begin_time").value = getBeginToday();
+					break;
+				case 1:
+					W("#select_week").style.color = "#7ac9e7";
+					W("#select_week").style.borderColor = "#7ac9e7";
+					W("#begin_time").value = getBeginWeek();
+					break;
+				case 2:
+					W("#select_month").style.color = "#7ac9e7";
+					W("#select_month").style.borderColor = "#7ac9e7";
+					W("#begin_time").value = getBeginMonth();
+					break;
+				case 3:
+					W("#select_custom").style.color = "#7ac9e7";
+					W("#select_custom").style.borderColor = "#7ac9e7";
+					W(".time_box").hidden = false;
+					return;
+				case 4:
+					W("#select_custom").style.color = "#7ac9e7";
+					W("#select_custom").style.borderColor = "#7ac9e7";
+					W(".time_box").hidden = false;
+					break;
+			}
+			if (index != 4) {
+				W("#end_time").value = getCurrentTime();
+			}
+			var begin = W("#begin_time").value + " 00:00:00";
+			var end = W("#end_time").value + " 00:00:00";
+			getBusinessData(StateCode.left, begin, end);
 		}
 	</script>
 

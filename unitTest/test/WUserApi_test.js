@@ -7,7 +7,7 @@ window.onload=function(){
 		function(){
 		   	W.userApi.login(
 				function(data){
-					deepEqual(data,{"status_code":0,"auth_code":data.auth_code,"user_type":1,"cust_id":178,"cust_name":"Eiby","tree_path":"","level":0});
+					deepEqual(data,{"cust_id": 1,"cust_name": data.cust_name,"cust_type": 2,"status_code": 0});
 				},
 				{
 					account: "13316891158",

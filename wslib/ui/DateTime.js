@@ -27,8 +27,13 @@ DateSelector.cancel=function(){
 DateSelector.ok=function(){
 	var date=DateSelector.picker.getDate();
 	var input=W.getFocus();
-	if(input)
+	if(input){
 		input.value=date.WtoString().slice(0,10);
+		var evt = document.createEvent("HTMLEvents");
+		evt.initEvent("change", false, false);
+		input.dispatchEvent(evt);
+	}
+		
 	W.blur()
 	DateSelector.picker.hide();
 	event.preventDefault();
@@ -130,6 +135,7 @@ DateSelector.chooseYear=function(){
 	var d=picker.getDate();
 	d.setFullYear(this.innerText);
 	picker.setDate(d);
+	setTimeout(DateSelector.hideYear,500);
 }
 
 DateSelector.hideYear=function(){
@@ -162,8 +168,6 @@ function DateSelectorPicker(){
 			li.className="active";
 		li.innerHTML="<span>"+i+"</span>";
 		li.addEvent("click",DateSelector.chooseYear);
-		li.addEvent("webkitTransitionEnd",DateSelector.hideYear);
-		li.addEvent("transitionend",DateSelector.hideYear);
 		ul.appendChild(li);
 	}
 

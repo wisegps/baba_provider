@@ -15,7 +15,7 @@
 		<title>车辆管理</title>
 		<!--必须最先引入WiStorm.js文件-->
 		<script src="../wslib/WiStorm.js"></script>
-		
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
 		<!--使用link()引入css文件，无需写路径，直接写文件名即可,尽量少引入css，样式如果少（小于10k为少），
 		可以直接写在style元素里，放到body元素后面-->
 		<script>link("W.css")</script>
@@ -25,7 +25,7 @@
 			同样尽量少引入js文件；
 			现在接口可能需要你们自己封装，参考wslib/api/WUserApi.js里的封装方式
 			-->
-		<script src="../wslib/api/WUserApi.js" defer="defer"></script>
+		<script src="../wslib/api/Wapi.js" defer="defer"></script>
 		<script src="ui/ui.js"></script>
 	</head>
 	<body>
@@ -37,6 +37,7 @@
 			<div class="mui-input-row mui-search">
 				<input type="search" class="mui-input-clear" id="search_input" placeholder="输入车牌号查询车辆">
 			</div>
+			<div id="search_list"></div>
 			<div id="car_list"></div>
 		</div>
 	</body>
@@ -61,12 +62,21 @@
 		}
 		
 		cv.prototype.setData=function(data){
-			this.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_8_100.png"><span name="value">'+data.obj_name+'</span></th><th name="tip">已安装设备</th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+data.nick_name+'</span></td><td><span class="name">车型:</span><span class="value">'+data.car_type+'</span></td></tr><tr><td><span class="name">行驶里程:</span><span class="value">56000公里</span></td><td><span class="name">维修类型:</span><span class="value">保养</span></td></tr></table><footer><button type="button" class="mui-btn mui-btn-warning edit">完善资料</button></footer>';
+			var text=data.device_id?"已安装设备":"无设备用户";
+			var last_arrive;
+			if(data.last_arrive_time)
+				last_arrive=NewDate(data.last_arrive_time).WtoString().slice(5,-3);
+			else
+				last_arrive="未到店";
+			this.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png" onerror=\'javascript:this.src="../img/icon_car_moren.png"\'><span name="value">'+data.obj_name+'</span></th><th name="tip">'+text+'</th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+data.cust_name+'</span></td><td><span class="name">车型:</span><span class="value">'+data.car_type+'</span></td></tr><tr><td><span class="name">最后到店:</span><span class="value">'+last_arrive+'</span></td><td><span class="name">车架号:</span><span class="value">'+data.frame_no+'</span></td></tr></table><footer><button type="button" class="mui-btn mui-btn-warning edit">完善资料</button></footer>';
 			
 			var a=this.querySelector(".edit");
 			a.addEvent("click",cv.editData);//给其中的按钮添加点击事件监听，使用cv.editData来处理点击事件
 			
-			this.querySelector("footer").appendChild(new ui_checkInBtn(data.obj_id));
+			if(data.business_status!=1){
+				this.querySelector("footer").appendChild(new ui_checkInBtn(data));
+			}
+			this.querySelector("table").addEvent("click",cv.toDetail).obj_id=data.obj_id;
 			
 			this.data=data;//直接把数据缓存进入组件（按需求，如果数据是需要重复用的就这样缓存）
 		}
@@ -78,36 +88,118 @@
 		 * 如这个方法是被组件内 “完善资料”按钮所调用的，使用在setData时会添加为该按钮的事件处理器
 		 */
 		cv.editData=function(){
-			alert("跳转到完善资料页面");
-			window.plus.webview.open("msg");
+			var p=W.parents(this,2);
+			W.setLS("cusAdd_data",p.data);
+			top.location="customer_add.html?intent=edit&params=cusAdd_data";
 		}
 		
+		cv.toDetail=function(){
+			var tem="?obj_id="+this.obj_id;
+			location="car_details.html"+tem;
+		}
+		
+		var dom={};
+		dom.searchList=W("#search_list");
 		//监听 html加载完成事件
 		window.addEventListener("DOMContentLoaded",function(){
-			W("#search_input")
-			
-			
-			//调用接口，获取用户车辆,并绘制到页面上
-			W.userApi.getCarList(function(res){
-				if(res&&res.status_code){
-					alert(res.msg+";"+res.err_msg);
+			W("#search_input").addEvent("keyup",searchInput).addEvent("blur",function(){
+				if(!this.value){
+					dom.carList.style.display="block";
+					dom.searchList.style.display="none";
 				}
-				if(!W.dom.carList)
-					W.dom.carList=W("#car_list");//缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
-												 //W.dom是一个json，专门用于缓存元素
-												 								 
-				/*创建DocumentFragment碎片；
-				构造列表时不要每创建一个元素就添加到页面里，这样会造成性能低下，把元素添加到DocumentFragment，
-				最后再把DocumentFragment添加到页面*/
-				var list=document.createDocumentFragment();
-				
-				
-				for(var i=res.length-1;i>=0;i--){
-					list.appendChild(new cv(res[i]));//创建一个cv组件，并添加到DocumentFragment里
-				}
-				W.dom.carList.appendChild(list);//把整个列表添加到页面
 			});
+			
+			var data={
+				parent_cust_id:_user.cust_id,
+				access_token:_user.access_token
+			}
+			//调用接口，获取用户车辆,并绘制到页面上
+			W.userApi.getVehicleList(makeCarList,data);
 		});
+
+		function makeCarList(res) {
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			if (!dom.carList)
+				dom.carList = W("#car_list"); //缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
+			var list = document.createDocumentFragment();
+			var cars = res.data;
+			var data = dom.carList.data||new Array();
+			var MAX_ID=dom.carList.max_id||0;
+			for (var i = cars.length - 1; i >= 0; i--) {
+				list.appendChild(new cv(cars[i])); //创建一个cv组件，并添加到DocumentFragment里
+				if(cars[i].obj_id>MAX_ID)
+					MAX_ID=cars[i].obj_id;
+			}
+			dom.carList.data=data.concat(cars);
+			if(res.total>dom.carList.data.length){
+				dom.carList.max_id=MAX_ID;
+				var autoLoad;
+				if(dom.carList.autoLoad){
+					autoLoad=dom.carList.autoLoad;
+				}else if(WiStorm.agent.ios)
+					autoLoad=new ui_autoLoad(W(".mui-content"),_load);
+				else
+					autoLoad=new ui_autoLoad(document,_load);
+				
+				autoLoad.param={
+					parent_cust_id:_user.cust_id,
+					access_token:_user.access_token,
+					max_id:MAX_ID
+				}
+				list.appendChild(autoLoad);
+				dom.carList.autoLoad=autoLoad;
+			}else if(dom.carList.autoLoad){
+				//删除自动加载组件,释放内存
+				dom.carList.autoLoad.remove();
+				delete dom.carList.autoLoad;
+			}
+			dom.carList.appendChild(list); //把整个列表添加到页面
+		}
+		
+		//自动加载下一页
+		function _load(){
+			W.userApi.getVehicleList(makeCarList,this.param);
+		}
+		
+		//输入搜索框时触发，搜索车牌号
+		function searchInput(){
+			var val=this.value;
+			if(val==""){
+				dom.carList.style.display="block";
+				dom.searchList.style.display="none";
+				return;
+			}
+			var data={
+				parent_cust_id:_user.cust_id,
+				max_id:"0",
+				access_token:_user.access_token,
+				obj_name:val
+			}
+			W.userApi.searchCustomerVehicle(showSearch,data);
+		}
+		function showSearch(res){
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			var cars=res.data;
+			dom.searchList.innerHTML="";
+			if(res.total){
+				dom.carList.style.display="none";
+				dom.searchList.style.display="block";
+			}else
+				return;
+			
+			var list=document.createDocumentFragment();
+			
+			for(var i=cars.length-1;i>=0;i--){
+				list.appendChild(new cv(cars[i]));//创建一个cv组件，并添加到DocumentFragment里
+			}
+			dom.searchList.appendChild(list);//把整个列表添加到页面
+		}
 		
 		//至此，一个页面就基本完成了
 	</script>

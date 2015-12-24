@@ -1,0 +1,369 @@
+<!--
+	作者：小吴
+	时间：2015-12-02
+	描述：设备管理页面
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+			
+		<title>叭叭商户版</title>
+		<script src="../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+		<script src="ui/ui.js"></script>
+		<script src="../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../wslib/toolkit/WScanner.js" defer="defer"></script>
+	</head>
+	<style>
+		.mui-icon.w_icon.icon_scanning{font-size: 30px;padding: 7px;}
+		.list{display: none;}
+		.list.active{display: block;}
+    	.device{
+    		background: #fff;
+		    margin-top: 10px;
+		    border-bottom: 1px solid #ddd;
+		    border-top: 1px solid #ddd;
+		    padding: 10px;
+		    font-size: 15px;
+    	}
+    	.device>.head>div{display: inline;font-size:1.1em}
+    	.device>.head>.status{float: right;color: #50B7DE;font-size: .95em;}
+    	.device>.content{
+    		display: table;
+    		table-layout: fixed;
+		    padding: 1em 0;
+		    width: 100%;
+		}
+		.device>.content>div{
+			display: table-cell;
+			text-align: center;
+			border-right: 1px solid #ddd;
+		}
+		.device>.content>div:last-child{border: none;}
+		.device>.content .name{color: #999;}
+		.device>footer{
+			padding-top: 10px;
+		    border-top: 1px solid #ddd;
+		    text-align: right;
+		}
+		.device>footer>button{width: 80px;}
+		.device>footer>.mui-btn-primary{
+			background: #50B7DE;
+		}
+		.device>footer>.mui-btn{border:none;}
+		.device>footer>.mui-btn:enabled:active{
+			border:none;
+		}
+		.device>footer>.mui-btn-primary:enabled:active{
+			background: #459EBF;
+		}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav noshadow">
+			<span class="mui-icon mui-icon-left-nav mui-pull-left W_back"></span>
+			<span class="mui-icon w_icon icon_scanning mui-pull-right"></span>
+			<h1 class="mui-title">设备管理</h1>
+		</header>
+		<nav class="mui-bar mui-bar-tab top">
+			<div class="tab_item active" data-target="all">
+				<span>全部</span>
+			</div>
+			<div class="tab_item" data-target="activation" data-type="3">
+				<span>已激活</span>
+			</div>
+			<div class="tab_item" data-target="unactivation" data-type="2">
+				<span>未激活</span>
+			</div>
+			<div class="tab_item" data-target="return" data-type="4">
+				<span>申请退货</span>
+			</div>
+		</nav>
+		<div class="mui-content">
+			<div class="list active" id="all">
+			</div>
+			<div class="list" id="activation">
+			</div>
+			<div class="list" id="unactivation">
+			</div>
+			<div class="list" id="return">
+			</div>
+		</div>
+	</body>
+	<script>
+		function payBtn(serial){
+			var obj=new WiStormUI("button");
+			obj.className="mui-btn mui-btn-warning";
+			obj.type="button";
+			obj.setAttribute("name","activation");
+			obj.innerText="激活";
+			obj.addEvent("click",dv.pay);
+			obj.serial=serial;
+			return obj;
+		}
+		function dv(data){
+			var obj=new WiStormUI("div");//创建一个div组件
+			
+			obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+			
+			obj.className="device";//设置div的class属性
+			
+			obj.setData(data);//设置obj的内容,setData()在下面dv.prototype中定义
+			
+			return obj;//最后记得要返回组件
+		}
+		dv.prototype.setData=function(data){
+			var statusText=["未出库","已出库","未激活","已激活","申请退货"]
+			var b="";
+			if(data.status==3)
+				b='<footer><button type="button" class="mui-btn mui-btn-primary" name="return">申请退货</button></footer>'
+			else if(data.status==2)
+				b='<footer><button type="button" class="mui-btn mui-btn-warning" name="activation">激活</button></footer>';
+			else if(data.status==1)
+				b='<footer><button type="button" class="mui-btn mui-btn-warning" name="confirm">确认收货</button></footer>';
+			
+			if(data.active_time)
+				data.active_time=NewDate(data.active_time).WtoString().slice(0,-9);
+			else
+				data.active_time="";
+			this.innerHTML='<div class="head"><div class="number">'+data.serial+'</div><div class="status"><span>设备状态：</span><span name="status_val">'+statusText[data.status]+'</span></div></div><div class="content"><div><div class="value">'+data.cust_name+'</div><div class="name">客户名称</div></div><div><div class="value">'+data.obj_name+'</div><div class="name">车牌号</div></div><div><div class="value">'+data.active_time+'</div><div class="name">激活时间</div></div></div>'+b;
+			
+				
+			var payBtn=this.querySelector("[name='activation']");
+			if(payBtn){
+				payBtn.serial=data.serial;
+				payBtn.addEvent("click",dv.pay);
+			}
+			
+			var returnBtn=this.querySelector("[name='return']");
+			if(returnBtn){
+				returnBtn.device_id=data.device_id;
+				returnBtn.addEvent("click",dv.return);
+				this.querySelector(".content").addEvent("click",dv.toDetail).obj_id=data.obj_id;
+			}
+			
+			var confirmBtn=this.querySelector("[name='confirm']");
+			if(confirmBtn){
+				confirmBtn.serial=data.serial;
+				confirmBtn.addEvent("click",dv.confirm);
+			}
+			
+			
+			
+			this.id="_"+data.device_id;
+			this.data=data;
+		}
+		
+		dv.toDetail=function(){
+			var tem="?obj_id="+this.obj_id;
+			location="car_details.html"+tem;
+		}
+		
+		//申请退货(把设备status字段更改为4,申请退货)
+		dv.return=function(){
+			var id=this.device_id;
+			var param={
+				_device_id:id,
+				status:"4",
+				access_token:_user.access_token
+			}
+			this.disabled="disabled";
+			var that=this;
+			W.confirm("如果对设备有疑问，建议先联系我们客服人员处理哦……确认需要对设备（"+this.serial+"）申请退货吗？",
+				function(b){
+					if(b){
+						Wapi.device.update(function (res){
+							if (res.status_code) {
+								W.errorCode(res);
+								that.disabled=false;
+								return;
+							}
+							W.parents(that,2).querySelector("[name='status_val']").innerText="申请退货";
+							W.toast("已经申请成功，请等待我们的售后人员联系您");
+						},param);
+					}
+				}
+			);
+		}
+		
+		//点击确认收货
+		dv.confirm=function(){
+			var id=this.serial;
+			var param={
+				_serial:id,
+				status:"2",
+				access_token:_user.access_token
+			}
+			this.disabled="disabled";
+			var that=this;
+			Wapi.device.update(function(res){
+				if (res.status_code) {
+					W.errorCode(res);
+					that.disabled=false;
+					return;
+				}
+				W.parents(that,2).querySelector("[name='status_val']").innerText="未激活";
+				var newBtn=new payBtn(that.serial);
+				that.parentElement.replaceChild(newBtn,that);
+				W.toast("已确认收货");
+			},param);
+		}
+		
+		
+		//点击调用支付
+		dv.pay = function() {
+			//this.serial="55621854091";
+			var data={
+				cust_id:_user.cust_id,
+				open_id:W.getSetting("openId"),
+				order_type: 1,
+				pay_key:this.serial,
+				product_name:"设备号码："+this.serial,
+				remark:"设备激活订单",
+				unit_price:0.01,
+				quantity:1,
+				total_price:0.01
+			}
+			W.confirm("确认下单激活设备："+this.serial+"吗？点击确认下单并跳转支付页面",
+				function(b){
+					if(b){
+						W.loading(true);
+						W.payApi.pay(paySuccess,data);
+					}
+				}
+			);
+		}
+		
+		function paySuccess(res){
+			W.loading();
+			if(res.status_code||res.err_msg!="get_brand_wcpay_request:ok"){
+				W.alert(res.msg+";"+res.err_msg);
+			}else{
+				W.alert("激活成功");
+			}
+		}
+		
+		var dom={},MAX_ID=0,param={
+				parent_cust_id: _user.cust_id,
+			    max_id:MAX_ID,
+			    access_token:_user.access_token,
+			};
+
+		window.onload=function(){
+			var item=W(".tab_item",true);
+			for(var i=0;i<item.length;i++){
+				item[i].addEvent("click",changeItem);
+				var id=item[i].getAttribute("data-target");
+				item[i].type=item[i].getAttribute("data-type");
+				item[i].list=W("#"+id);
+			}
+			dom.show=item[0];
+			changeItem.call(item[0]);
+			
+			W(".icon_scanning").addEvent("click",toScanner);
+		}
+		
+		//选择查看不同类型列表
+		function changeItem(){
+			dom.show.list.style.display="none";
+			dom.show.classList.remove("active");
+			this.classList.add("active");
+			this.list.style.display="block";
+			dom.show=this;
+			
+			if(this.type)
+				param.status=this.type;
+			else
+				delete param.status;
+			if(this.max_id)
+				MAX_ID=param.max_id=this.max_id;
+			else{
+				MAX_ID=0;
+				delete param.max_id;
+			}
+				
+			if(!this.list.data)
+				W.userApi.getDeviceList(show,param);
+		}
+		
+		//把传入数据生成列表添加到dom.show.list
+		function show(res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			var data=res.data;
+			var target=dom.show.list;
+			if(!target.data)
+				target.data=new Array();
+			var list=document.createDocumentFragment();
+			for(var i=data.length-1;i>=0;i--){
+				list.appendChild(new dv(data[i]));//创建一个dv组件，并添加到DocumentFragment里
+				target.data.push(data[i]);//保存节点
+				if(data[i].device_id>MAX_ID)
+					MAX_ID=data[i].device_id;
+			}
+				
+			if(res.total>target.data.length){
+				dom.show.max_id=MAX_ID;
+				param.max_id=MAX_ID;
+				var autoLoad;
+				if(target.autoLoad){
+					autoLoad=target.autoLoad;
+				}else if(WiStorm.agent.ios)
+					autoLoad=new ui_autoLoad(W(".mui-content"),_load);
+				else
+					autoLoad=new ui_autoLoad(document,_load);
+				list.appendChild(autoLoad);
+				target.autoLoad=autoLoad;
+			}else if(target.autoLoad){
+				//删除自动加载组件,释放内存
+				target.autoLoad.remove();
+				delete target.autoLoad;
+			}
+			target.appendChild(list);//把整个列表添加到页面
+		}
+		
+		//自动加载下一页
+		function _load(){
+			W.userApi.getDeviceList(show,param);
+		}
+		
+		//调用二维码扫描
+		function toScanner(){
+			if(W.scanner)
+				W.scanner.start(receive);
+			else{
+				if(toScanner.addEvent)
+					return;
+				W.toast("请稍等，正在准备扫描");
+				window.addEventListener("scannerReady",toScanner);
+				toScanner.addEvent=true;
+			}
+		}
+		
+		//二维码扫描返回
+		function receive(res){
+			var param={
+				serial:"_"+res,
+				status:"2",
+				access_token:_user.access_token
+			}
+			Wapi.device.update(receiveBack,param);
+		}
+		//已经发出确认收货请求,返回成功则继续调用扫描
+		function receiveBack(res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			toScanner();
+		}
+	</script>
+</html>

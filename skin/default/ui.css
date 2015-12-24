@@ -33,7 +33,13 @@
 	
 	.ui_car_d .name {
 		color: #c3c2c2;
-		margin-right: .2em;
+	    padding-right: .2em;
+	    display: table-cell;
+	    white-space: nowrap;
+	}
+	.ui_car_d .value{
+		display: table-cell;
+    	word-break: break-all;
 	}
 	
 	.ui_car_d td {
@@ -143,3 +149,8 @@
 	}
 	
 	.ui_child_table td{padding: .5em;}
+	
+	.ui_auto_load{
+		border-top: 1px solid #e5e4e2;
+		text-align: center;padding: 10px;background: #fff;
+	}

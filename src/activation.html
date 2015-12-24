@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<title>订单确认</title>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<style>
+			body{font-family: "微软雅黑";margin: 0;padding: 0;}
+			.nav{width: 100%; background-color:whitesmoke;border-bottom: 1px solid #ddd;position: fixed;}
+			.fl{float: left;}
+			.back{width: 10px;height: 10px;margin:16px 0 0 11px;border-bottom: 2px solid #3F3F3F;border-left: 2px solid #3F3F3F;transform:rotate(45deg);-webkit-transform:rotate(45deg);position: absolute;}
+			.mui-title{text-align: center;height: 25px;padding: 10px 0;overflow: hidden;width: 100%;}
+			.mui-content{padding-top: 45px;width: 100%;text-align: center;}
+			.main{top: 50%;font-size: 13px;color:#ccc;}
+			#money{font-size: 36px;font-weight: 500;color:#323232 ;margin-bottom: 0;margin-top: 14px;}
+			#money:before{content: "￥";}
+			#decimal:before{content: ".";}
+			.bottom{bottom: 10px;width: 100%;text-align: center;margin-top: 5em;}
+			.bottom div{color: white;font-size: 14px;border-radius: .4em;background-color: #3EB447;padding: 10px;height: 20px;margin: 1.4em 2.5em;;}
+			.bottom div:active{background: #329239;}
+		</style>
+	</head>
+	<script>
+	onerror=function(msg,url,l){
+		if(!WiStorm.debug)
+			return;
+	    var flie=self.location.href.split(/[\\\/.]/);
+	    var flieName=flie[flie.length-2];
+	    url=url.split(/[\\\/.]/);
+	    url=url[url.length-2];
+	    alert("错误："+msg+";\n界面："+flieName+";\n文件："+url+";\n行数："+l);
+	}
+	var order = {};
+	var url = location.search;
+	if (url){
+		url = url.split("?")[1].split("&");
+		var n = url.length;
+		for (var i = 0; i < n; i++) {
+			order[url[i].split("=")[0]] = decodeURIComponent(url[i].split("=")[1]);
+		}
+		if(!order.price)order.price="0.00";
+		order.price_int=order.price.split(".")[0];
+		order.price_decimal=order.price.split(".")[1];
+		if(!order.price_decimal)order.price_decimal="00";
+	}
+	var isWeixin=navigator.userAgent.indexOf('MicroMessenger') > -1;
+	
+	
+	function echo(str){
+		if(!str)str="";
+		document.write(str);
+	}
+	</script>
+	<body>
+		<div class="nav">
+			<div id="back" class="back fl"></div>
+			<div class="mui-title">订单确认</div>				
+		</div>
+		<div class="mui-content">
+			<img src="../img/icon_activation.png" style="width:120px;margin-top: 2em;max-width: 25%;">
+			<div style="color: #6D6D6D;margin-top: 10px;"><script>echo(order.title)</script></div>	
+			<div class="main">
+				<p id="money"><script>echo(order.price_int)</script><span style="font-size: 26px;" id="decimal"><script>echo(order.price_decimal)</script></span></p>
+				<p style="margin-top: 0;"><script>echo(order.detail)</script></p>
+			</div>
+		</div>		
+		<div class="bottom">
+			<div id="pay">确认支付</div>
+			<div style="background-color: #082F67;display: none;">银联支付</div>
+		</div>
+	</body>
+	<script>
+	function weixinCallback(res) {//微信支付返回
+		var str=JSON.stringify(res);
+		localStorage.setItem("_weixin_pay_res",str);
+		if (res.err_msg == "get_brand_wcpay_request:ok") {
+			history.back();
+		} else {
+			pay.canPay=false;
+			document.getElementById("pay").innerText="确认支付";
+		}
+	}
+	
+	function weixinPay(){//微信调起支付
+		var temStr=localStorage.getItem("_weixin_pay_args");
+		if(!temStr){
+			alert("无订单信息，请返回重新下单");
+			return;
+		}
+		localStorage.removeItem("_weixin_pay_args");
+		var pay_args=JSON.parse(temStr);
+		WeixinJSBridge.invoke('getBrandWCPayRequest',pay_args,weixinCallback);
+	}
+	
+	function pay() {
+		this.innerText="支付中……";
+		if(pay.canPay)
+			return;
+		pay.canPay=true;
+		if (isWeixin) {//微信下调用微信支付
+			if (typeof WeixinJSBridge == "undefined"){
+			    document.addEventListener('WeixinJSBridgeReady', weixinPay, false);
+			}else{
+			   weixinPay();
+			}
+		}else{
+			//调用支付宝支付
+			top.location=order.alipayUrl;
+		}
+	}
+	
+	window.onload = function() {
+		var payBtn = document.getElementById('pay');
+		payBtn.addEventListener("click",pay);
+		
+		var back = document.getElementById('back');
+		back.onclick = function() {
+			window.history.back(-1);
+		}
+	}
+	</script>
+</html>

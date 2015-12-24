@@ -1,0 +1,553 @@
+<!--
+	作者：小刘
+	时间：2015-12-3
+	描述：新增提醒
+	
+	修改：cyy
+	时间：2015-12-07
+	
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>新增提醒</title>
+		<script src="../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>
+			link("W.css")
+		</script>
+
+		<script src="ui/ui.js"></script>
+		<script src="ui/ui_picker.js"></script>
+		<script src="js/mui.picker.js"></script>
+		<script src="js/mui.poppicker.js"></script>
+		<script>
+			link("mui.picker.css");
+			link("mui.poppicker.css");
+		</script>
+
+		<script src="js/string_factory.js"></script>
+		<script src="../wslib/api/Wapi.js" defer="defer"></script>
+		<style>
+			body {
+				background-color: white;
+			}
+			
+			.content {
+				padding: 30px 15px;
+			}
+			
+			input {
+				color: #999999;
+			}
+			
+			.text_list {
+				border: 1px solid #E9E9E9;
+				padding: 8px;
+				border-radius: .3em;
+				margin-top: 10px;
+			}
+			
+			.fr {
+				float: right;
+			}
+			
+			.content p {
+				margin: 10px 0;
+				color: #000;
+			}
+			
+			.text_list>.test_val {
+				width: 60%;
+				height: 21px;
+				font-size: 13px;
+				margin: 0;
+				padding: 0;
+				border: 0;
+				line-height: 21px;
+			}
+			
+			.text_list>label {
+				width: 25px !important;
+			}
+			
+			.name {
+				width: 70px !important;
+				height: 21px;
+				font-size: 14px;
+				overflow: hidden;
+				color: #999999;
+			}
+			
+			.w_icon {
+				color: #ECECEC;
+			}
+			
+			.text_list>textarea {
+				height: 50px;
+				font-size: 14px;
+				line-height: 14px;
+				margin: 0;
+				padding: 0;
+				border: 0;
+			}
+			
+			#popDiv {
+				border: 1px #ECECEC solid;
+			}
+			
+			#popDiv>dl {
+				-webkit-margin-before: 0px;
+				-webkit-margin-after: 0px;
+			}
+			
+			#car_number_list>dt {
+				padding: 10px;
+				border-bottom: 1px #ECECEC solid;
+			}
+			
+			#car_number_list>dt:active {
+				background: #4D4D4D;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<h1 class="mui-title">新增提醒</h1>
+		</header>
+		<div class="mui-content">
+			<div class="content">
+				<div class="text_list">
+					<label class="fr" style="width: 30px;height: 21px;"></label>
+					<input id="rmd_name" class="test_val fr" type="text" maxlength="8" placeholder="请输入提醒名称（限8字内）" />
+					<div class="name">提醒名称</div>
+				</div>
+				<div class="text_list">
+					<label class="w_icon icon_next fr picker"></label>
+					<input id="rmd_type" class="test_val fr" type="text" placeholder="保养提醒" readonly="true" data-rmd_type="0" />
+					<div class="name">提醒类型</div>
+				</div>
+
+				<!--
+					保养提醒div 
+                -->
+
+				<div id="div_maintain">
+
+					<div class="text_list">
+						<label class="fr " style="color: #ECECEC;">km</label>
+						<input id="mileage" class="test_val fr" type="number" placeholder="请输入行驶里程" />
+						<div class="name">间隔里程</div>
+					</div>
+
+				</div>
+
+				<!--
+					未到店提醒div 
+                -->
+				<div id="div_arrive" hidden="true">
+
+					<div class="text_list">
+						<label class="fr " style="color: #ECECEC;">天</label>
+						<input id="rmd_duration" class="test_val fr" type="number" placeholder="请输入天数" />
+						<div class="name">持续时间</div>
+					</div>
+
+				</div>
+
+				<!--
+					故障提醒div 
+                -->
+				<div id="div_fault" hidden="true">
+
+					<div class="text_list">
+						<label class="w_icon icon_next fr"></label>
+						<input id="engine_status" class="test_val fr" type="text" placeholder="请选择发动机状态" readonly="true" />
+						<div class="name">发动机状态</div>
+					</div>
+					<p>发生频次</p>
+					<div class="text_list">
+						<label class="w_icon  fr">&nbsp;</label>
+						<input id="duration" class="test_val fr" type="text" placeholder="请选择持续时间" />
+						<div class="name">时长</div>
+					</div>
+					<div class="text_list">
+						<label class="fr">&nbsp;</label>
+						<input class="test_val fr" type="text" placeholder="请输入次数" />
+						<div class="name">发生频次</div>
+					</div>
+					<p>车况条件</p>
+					<div class="text_list">
+						<label class="w_icon icon_next fr"></label>
+						<input id="condition" class="test_val fr" type="text" placeholder="电瓶电压" readonly="true" />
+						<div class="name">车况数值</div>
+					</div>
+					<div class="text_list">
+						<label class="w_icon icon_next fr"></label>
+						<input class="test_val fr" type="text" />
+						<div class="name">异常条件</div>
+					</div>
+
+				</div>
+
+				<p>针对车辆<span style=" color: #666;"> (品牌与车牌2选1)</span></p>
+				<div class="text_list" id="car_picker" data-param="intent=brand&select=multi">
+					<label class="w_icon icon_next fr"></label>
+					<input id="car_brand" class="test_val fr" type="text" placeholder="点击选择品牌" readonly="true" data-brand="" />
+					<div class="name">车辆品牌</div>
+				</div>
+
+				<div class="text_list">
+					<label class="fr">&nbsp;</label>
+					<input id="car_number" class="test_val fr" type="text" placeholder="输入车牌号" data-obj_id="" />
+					<div class="name">车牌号</div>
+				</div>
+
+				<div id="popDiv" style="display:none;">
+					<dl id="car_number_list">
+					</dl>
+				</div>
+
+				<p>推送模版</p>
+				<div class="text_list">
+					<textarea id="msg_template" placeholder="推送消息"></textarea>
+				</div>
+				<button type="button" class="mui-btn mui-btn-block w" id="submit">保存</button>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		window.addEventListener("DOMContentLoaded", function() {
+			W("#rmd_type").addEvent("change", function() {
+				changeType(this.value)
+			});
+			initEditData();
+		});
+		W("#car_number").addEvent("click", function() {
+			W("#car_brand").value = "";
+		});
+		W("#rmd_type").addEventListener("click", picker);
+		W("#engine_status").addEventListener("click", picker);
+		//W("#duration").addEventListener("click", picker);
+		W("#condition").addEventListener("click", picker);
+		W("#car_picker").addEvent("click", function() {
+			W("#car_number").value = "";
+			ui_carSeries();
+		});
+		W("#car_number").addEvent("keyup", showDiv);
+		//提交后台的数据
+		var submit_data = {
+			access_token: _user.access_token,
+			option_name: "", //提醒名称
+			option_type: "", //提醒类型
+			/**
+			 * 保养提醒
+			 */
+			mileage: "", //间隔里程
+			/**
+			 * 未到店提醒
+			 */
+			duration: "", //间隔时间
+			/**
+			 * 故障提醒，待完善
+			 */
+			/**
+			 * 公共数据
+			 */
+			cust_id: _user.cust_id, //用户id
+			seller_id: _user.cust_id, //商户Id
+			object_type: "0", //目标类型 0:全部  1:品牌  2:车辆
+			object_name: "",
+			object: "", //针对目标, 如果为品牌, 则为品牌Id, 可以设置多品牌, 中间用逗号隔开, 如果为车辆, 则为车辆Id, 中间用逗号隔开, 如果为空, 则表示商户下所有车辆
+			msg_template: ""
+		}
+		W("#submit").addEvent("click", submit);
+		/* * 选择车型 */
+		ui_carSeries.preLoad("intent=brand&select=multi");
+		ui_carSeries.finish = function(res) { //选择完车型，返回车的json 
+				ui_carSeries.box.hide();
+				var band = "";
+				var bandId = "";
+				for (var i = 0; i < res.length; i++) {
+					band += res[i].brand + ",";
+					bandId += res[i].brandId + ",";
+				}
+				W("#car_brand").value = band;
+				W("#car_brand").dataset.brand = bandId;
+			}
+			/**
+			 * 修改提醒，初始化数据
+			 */
+		function initEditData() {
+			var option_id = _g.option_id; //在url中传递过来的obj_id
+			if (option_id == undefined) {
+				return;
+			}
+			var str = sessionStorage.getItem(option_id);
+			if (str == undefined || str == null) {
+				return;
+			}
+			//修改标题
+			W("title").innerText = "更新提醒";
+			W(".mui-title").innerText = "更新提醒";
+			var data = eval("(" + str + ")");
+			submit_data._option_id = data.option_id;
+			submit_data.option_name = data.option_name;
+			submit_data.option_type = data.option_type;
+			submit_data.mileage = data.mileage;
+			submit_data.duration = data.duration;
+			submit_data.object_type = data.object_type;
+			submit_data.object_name = data.object_name;
+			submit_data.object = data.object;
+			submit_data.msg_template = data.msg_template;
+			W("#rmd_name").value = data.option_name;
+			var type = $ReminderType(data.option_type);
+			W("#rmd_type").value = type;
+			changeType(type);
+			W("#mileage").value = data.mileage;
+			W("#rmd_duration").value = data.duration;
+			var object_type = data.object_type;
+			/**
+			 * 判断目标类型
+			 */
+			//object_type: Number,   //目标类型 0:全部  1:品牌  2:车辆
+			W("#car_number").value = "";
+			W("#car_brand").value = "";
+			if (object_type == 0) {
+				W("#car_number").value = "";
+				W("#car_brand").value = "";
+			} else if (object_type == 1) {
+				W("#car_brand").value = data.object_name;
+				W("#car_brand").setAttribute("data-brand", data.object);
+			} else if (object_type == 2) {
+				W("#car_number").value = data.object_name;
+				W("#car_number").setAttribute("data-obj_id", data.object);
+			}
+			W("#msg_template").value = data.msg_template;
+		}
+
+		function picker() {
+			if (this.id == "rmd_type") {
+				remind_type_picker(this.id);
+			} else if (this.id == "engine_status") {
+				engine_status_picker(this.id);
+			} else
+			if (this.id == "duration") {
+				duration_picker(this.id);
+			} else if (this.id == "condition") {
+				condition_picker(this.id);
+			}
+		}
+		/**
+		 * 搜索车牌号
+		 */
+		var user = W.getSetting("user");
+		var token = W.getSetting("access_token");
+
+		function showDiv() {
+			W("#popDiv").style.display = 'block';
+			//多个车牌号以逗号分隔，计算本次模糊查询输入内容
+			var val = this.value.trim();
+			var end = val.lastIndexOf(",") + 1;
+			var sl = end - val.length;
+			val = val.slice(sl);
+			var data = {
+				parent_cust_id: _user.user_id,
+				max_id: "0",
+				access_token: _user.access_token,
+				obj_name: val
+			}
+			var OP = {
+				fields: 'obj_name'
+			};
+			var carNumber = W("#car_number");
+			setCaretPosition(carNumber, carNumber.value.length);
+			W.userApi.searchCustomerVehicle(showSearch, data, OP);
+		}
+		var dom = {};
+		var inputTextDom = {};
+		/**
+		 * 返回了搜索结果
+		 * @param {Object} res
+		 */
+		function showSearch(res) {
+			if (!dom.car_number_list)
+				dom.car_number_list = W("#car_number_list");
+			var cars = res.data;
+			dom.car_number_list.innerHTML = "";
+			for (var i = cars.length - 1; i >= 0; i--) {
+				var objName = cars[i].obj_name;
+				var objId = cars[i].obj_id;
+				if (isExist(objName)) {
+					continue;
+				}
+				var obj = new WiStormUI("dt"); //创建一个div组件
+				obj.innerText = objName;
+				obj.dataset.obj_id = objId;
+				obj.addEventListener("click", closeDiv);
+				dom.car_number_list.appendChild(obj); //把整个列表添加到页面
+			}
+		}
+
+		function isExist(obj) {
+			var carNumber = W("#car_number");
+			var val = carNumber.value;
+			var strs = new Array();
+			strs = val.split(",");
+			for (var i = 0; i < strs.length; i++) {
+				if (strs[i] == obj) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		function closeDiv() {
+			W("#popDiv").style.display = 'none';
+			var tvalue = this.innerText;
+			var objId = this.dataset.obj_id;
+			var carNumber = W("#car_number");
+			var val = carNumber.value;
+			var index = val.lastIndexOf(",") + 1;
+			var lastValue = "";
+			var lastId = "";
+			if (index == 0) { //第一次设置值
+				lastValue = "";
+				lastId = "";
+			} else {
+				lastValue = val.substring(0, index);
+				lastId = carNumber.dataset.obj_id;
+			}
+			carNumber.dataset.obj_id = lastId + objId + ",";
+			carNumber.value = lastValue + tvalue + ",";
+			//把光标移到最后
+			var fcs = carNumber.value.length;
+			setCaretPosition(carNumber, fcs);
+		}
+		//设置光标位置
+		function setCaretPosition(ctrl, pos) {
+			if (ctrl.setSelectionRange) {
+				ctrl.focus();
+				ctrl.setSelectionRange(pos, pos);
+			} else if (ctrl.createTextRange) {
+				var range = ctrl.createTextRange();
+				range.collapse(true);
+				range.moveEnd('character', pos);
+				range.moveStart('character', pos);
+				range.select();
+			}
+		}
+
+		function changeType(v) {
+			W("#div_maintain").hidden =
+				true;
+			W("#div_arrive").hidden = true;
+			W("#div_fault").hidden = true;
+			if (v == '保养提醒') {
+				W("#div_maintain").hidden = false;
+			} else if (v == '未到店提醒') {
+				W("#div_arrive").hidden = false;
+			} else if (v == '故障提醒') {
+				W("#div_fault").hidden = false;
+			}
+		}
+
+		function submit() {
+			var rmdName = W("#rmd_name").value;
+			var rmdType = W("#rmd_type").dataset.rmd_type;
+			var mileage = W("#mileage").value;
+			var duration = W("#rmd_duration").value;
+			var msgTemplate = W("#msg_template").value;
+			if (check(rmdName, rmdType, mileage, duration, msgTemplate) == false) {
+				return;
+			}
+			submit_data.option_name = rmdName;
+			submit_data.option_type = rmdType;
+			submit_data.mileage = mileage;
+			submit_data.duration = duration;
+			var car_brand = W("#car_brand").value; //品牌
+			var car_brand_id = W("#car_brand").dataset.brand; //品牌id
+			var car_number = W("#car_number").value; //车牌号
+			var car_number_id = W("#car_number").dataset.obj_id; //车牌号id
+			/**
+			 * 去掉最后一个逗号
+			 */
+			car_brand = $trimComma(car_brand);
+			car_brand_id = $trimComma(car_brand_id);
+			car_number = $trimComma(car_number);
+			car_number_id = $trimComma(car_number_id);
+			/**
+			 * 判断目标类型
+			 */
+			//object_type: Number,   //目标类型 0:全部  1:品牌  2:车辆
+			if (car_brand != "") {
+				submit_data.object_type = "1";
+				submit_data.object = car_brand_id;
+				submit_data.object_name = car_brand;
+			} else if (car_number != "") {
+				submit_data.object_type = "2";
+				submit_data.object = car_number_id;
+				submit_data.object_name = car_number;
+			} else {
+				submit_data.object_type = "0";
+				submit_data.object = "";
+				submit_data.object_name = "";
+			}
+			submit_data.msg_template = msgTemplate;
+			if (submit_data._option_id == undefined) {
+				W.userApi.createSchema(callback, submit_data);
+			} else {
+				W.userApi.updataSchema(callback, submit_data);
+			}
+		}
+
+		function check(rmdName, rmdType, mileage, duration, msgTemplate) {
+			if (rmdName == undefined || rmdName == "") {
+				W.toast("请输入提醒名称");
+				return false;
+			}
+			// 提醒类型转换//提醒类别 0:保养到期 1:长时间未到店 2:故障
+			if (rmdType == 0) {
+				if (mileage == "") {
+					W.toast("请输入保养里程");
+					return false;
+				}
+				if (!isNumber(mileage)) {
+					W.toast("保养里程输入有误");
+					return false;
+				}
+			} else if (rmdType == 1) {
+				if (duration == "") {
+					W.toast("请输入持续时间");
+					return false;
+				}
+				if (!isNumber(duration)) {
+					W.toast("持续时间输入有误");
+					return false;
+				}
+				if (msgTemplate == undefined || msgTemplate == "") {
+					W.toast("请输入推送消息");
+					return false;
+				}
+				return true;
+			}
+
+			function callback(res) {
+				if (res.status_code == 0) {
+					location = "reminder_setting.html";
+				} else {
+					W.alert(res.msg);
+				}
+			}
+	</script>
+
+</html>
