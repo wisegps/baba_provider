@@ -28,6 +28,7 @@
 		<script src="ui/ui_picker.js"></script>
 		<script src="js/mui.picker.js"></script>
 		<script src="js/mui.poppicker.js"></script>
+		<script src="js/validate.js"></script>
 		<script>
 			link("mui.picker.css");
 			link("mui.poppicker.css");
@@ -540,9 +541,11 @@
 				}
 				return true;
 			}
+			}
 
 			function callback(res) {
 				if (res.status_code == 0) {
+					history.pushState(null,"home.html","home.html");
 					location = "reminder_setting.html";
 				} else {
 					W.alert(res.msg);

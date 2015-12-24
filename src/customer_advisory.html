@@ -138,6 +138,10 @@
 				oSpan.lastChild.innerText=this.data.unread_count;
 			}
 			oSpan.firstChild.innerText=this.data.content;
+			//通知home页的导航栏有信息
+			if(top!=window){
+				window.parent.newMsg();
+			}
 		}else{
 			if(oSpan.lastChild.tagName=='SPAN'){
 				oSpan.lastChild.remove();
@@ -193,7 +197,7 @@
 /**
  * 文档加载完毕
  */
-var news_cust_id,dom={},MAX_ID=0,settime,localnews={};
+var news_cust_id,dom={},MAX_ID="0",settime,localnews={};
 	window.onload = function (){
 		dom.newlist=W(".mui-content");
 		dom.newlists=W("#news-add");
@@ -223,7 +227,7 @@ var news_cust_id,dom={},MAX_ID=0,settime,localnews={};
 				}
 				dom.details.style.display='block';		
 				dom.newlist.style.display='none';
-				if(WiStorm.isWeb&&top!=window)
+				if(top!=window)
 					plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="none";');
 				dom.bottom.style.display="block";
 			}
@@ -235,7 +239,7 @@ var news_cust_id,dom={},MAX_ID=0,settime,localnews={};
 		dom.details.style.display='none';
 		dom.newlist.style.display='block';
 		//dom.details.className='child_view has_nav toRight';
-		if(WiStorm.isWeb&&top!=window)
+		if(top!=window)
 			plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="block";');
 		dom.bottom.style.display="none";
 
@@ -257,32 +261,31 @@ var news_cust_id,dom={},MAX_ID=0,settime,localnews={};
 			}
 
 			if(res.data.length!=0){
+				if(MAX_ID==="0"){//初始加载不执行下面代码
+					MAX_ID=res.data[0].chat_id;
+					settime=setTimeout(getnews,5000);
+					return;
+				}
+				MAX_ID=res.data[0].chat_id;
 				var t,clObj;
 				for(var i=res.data.length-1;i>=0;i--){
 					t=localnews["W"+res.data[i].friend_id];//前面创建了空的数组  现在用friend_id判断是否存在这个属性
 					if(t){
 						t.push(res.data[i]);
-						if(MAX_ID!=0){
-							if(news_cust_id!=res.data[i].friend_id){
-								clObj=W("#W"+res.data[i].friend_id);//cl组件
-								clObj.setSpan();
-								clObj.getContent(res.data[i].content);
-							}else{
-								dom.newlists.appendChild(new cs(res.data[i]));
-								setScoll();
-							}
+						
+						if(news_cust_id!=res.data[i].friend_id){
+							clObj=W("#W"+res.data[i].friend_id);//cl组件
+							clObj.setSpan();
+							clObj.getContent(res.data[i].content);
+						}else{
+							dom.newlists.appendChild(new cs(res.data[i]));
+							setScoll();
 						}
 					}else{
 						localnews["tem_W"+res.data[i].friend_id]=new Array();
 						localnews["tem_W"+res.data[i].friend_id].push(res.data[i]);
 						newlist();
 					}
-				}
-				MAX_ID=res.data[0].chat_id;
-				
-				//通知home页的导航栏有信息
-				if(i){
-					newMsg
 				}
 			}
 			settime=setTimeout(getnews,5000);

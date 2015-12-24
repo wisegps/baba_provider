@@ -517,6 +517,30 @@ WUserApi.prototype.getRelationList=function(callback,data,op){
 }
 
 
+/**
+ * 创建一条崩溃/错误记录
+ * @param {Object} data
+ * @param {Object} callback
+ * @param {Object} op
+ */
+WUserApi.prototype.createCrash=function(data,callback,op){
+	var OP={
+		fields:'status_code,exception_id'
+	};
+	this.jsonConcat(OP,op);
+	OP.method='wicare.crash.create';
+	
+	this.getApi(data,callback,OP);
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -987,3 +1011,26 @@ W.developerApi=Wapi.developer=new WDeveloperApi();//开发者
 W.userApi=Wapi.user=new WUserApi();//用户
 W.baseApi=Wapi.base=new WBaseApi();//基本
 W.commApi=Wapi.comm=new WCommApi();//通信
+
+
+
+
+//处理记录在本地的错误日志
+var __errorLog=localStorage.getItem("errorList");
+var __errorList;
+if(__errorLog){
+	try{
+		__errorList=JSON.parse(__errorLog);
+	}catch(e){
+		//TODO handle the exception
+		__errorList=[];
+	}
+	for(var __i=0;__i<__errorList.length;__i++){
+		Wapi.user.createCrash(__errorList[__i],function(res){});
+	}
+	localStorage.removeItem("errorList");
+}
+
+
+
+

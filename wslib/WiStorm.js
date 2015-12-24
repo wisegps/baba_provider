@@ -42,13 +42,47 @@ delete u;
 
 //执行错误直接弹出
 onerror=function(msg,url,l){
-	if(!WiStorm.debug)
-		return;
-    var flie=self.location.href.split(/[\\\/.]/);
+	var flie=self.location.href.split(/[\\\/.]/);
     var flieName=flie[flie.length-2];
     url=url.split(/[\\\/.]/);
     url=url[url.length-2];
-    alert("错误："+msg+";\n界面："+flieName+";\n文件："+url+";\n行数："+l);
+    var text="错误："+msg+";\n界面："+flieName+";\n文件："+url+";\n行数："+l;
+	if(WiStorm.debug){
+		alert(text);
+	}else{
+		var userText=localStorage.getItem("_WiStormUserSetting_");
+		var user,account;
+		if(userText){
+			try{
+				user=JSON.parse(userText);
+			}catch(e){
+				//TODO handle the exception
+				user={account:"解析用户信息出错"};
+			}
+		}else{
+			account="未登录";
+		}
+		account=user.account||"未登录";
+		var errorJson={"bug_report":text,"account":account};
+		if(Wapi){//如果已经加载了api文件，则直接发送错误
+			Wapi.user.createCrash(errorJson,function(res){});
+		}else{//否则存在本地，等Wapi加载完会自动发送
+			var errorLog=localStorage.getItem("errorList");
+			var errorList;
+			if(errorLog){
+				try{
+					errorList=JSON.parse(errorLog);
+				}catch(e){
+					//TODO handle the exception
+					errorList=[];
+				}
+			}else{
+				errorList=[];
+			}
+			errorList.push(errorJson);
+			localStorage.setItem("errorList",JSON.stringify(errorList));
+		}
+	}
 }
 
 //mui原代码
