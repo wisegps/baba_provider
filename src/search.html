@@ -22,7 +22,7 @@
 		<script src="ui/ui.js"></script>
 		<script src="../wslib/api/Wapi.js" defer="defer"></script>
 		<script src="js/search.js" defer="defer"></script>
-		<script src="../wslib/toolkit/WScanner.js" defer="defer"></script>
+		<script src="../wslib/toolkit/WxSdk.js" defer="defer"></script>
 	<style>
 		body{background-color: #EFEFF4;font-family: "微软雅黑";}
 		.his{padding: .5em .8em;background-color: #fff;border-top: 1px solid #000;}
@@ -40,12 +40,14 @@
 		var search_box=document.getElementById("search_d");
 	    search_box.style.width=(bodyW-W("#QRcode").offsetWidth-10)+"px";//搜索层的宽度
 		
-		W("#cle_hst").innerHTML='<div id="his_clear" class="his_clear" onclick="clearHis()">清空历史记录</div><div id="cUser" class="creatUser" onclick="creatUser()">新建客户</div>';					
+		W("#his_clear").addEvent("click",clearHis);
+		W("#cUser").addEvent("click",creatUser);
 		creathis();//显示历史记录 
 		W("#search").addEvent("keyup",creatCar);
-		}
+		W("#search").focus();
+	}
 	function creatUser(){
-		self.location = 'customer_add.html';
+		self.location = 'customer_add.html?obj_name='+W("#search").value;
 	}
 /**
  * 当窗口发生改变
@@ -109,7 +111,10 @@
 			<div class="clear"></div>
 			<div id="sc_list"></div>
 			<div id="his_list"></div>
-			<div id="cle_hst"></div>
+			<div id="cle_hst">
+				<div id="his_clear" class="his_clear">清空历史记录</div>
+				<div id="cUser" class="creatUser">新建客户</div>
+			</div>
 		</div>
 	</body>
 	<script>

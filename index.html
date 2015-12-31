@@ -5,7 +5,6 @@
 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
-	<script>var i;</script>
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -66,7 +65,7 @@
 		.child_view{    position: fixed;}
 		.mui-icon,.w_icon{font-size: 18px;}
 		.text{color: #ccc;text-align: center;font-size: 12px;}
-		.but{background:#ddd;line-height: 2em;border-radius: 4px;color: #fff;padding: 0 .8em;margin: 0 .5em;display: inline-block;}
+		.but{background:#ddd;line-height: 2em;text-align: center;border-radius: 4px;color: #fff;padding: 0 .8em;margin: 0 .5em;display: inline-block;}
 		.t_left{text-align: left;padding-left: 18px;}
 		.sms{float: right;margin: 0 0 0 .5em;line-height: 40px;height: 40px;vertical-align: top;}
 		.but.sms.fromSmall{border-radius: 20px;width: 40px;}
@@ -209,7 +208,7 @@
 					<input type="password" placeholder="重复密码" name="repwd">
 					<label><span class="w_icon icon_password"></span></label>
 				</div>
-				<div class="text">密码长度8~12位、可以是数字、大小写英文字母</div>
+				<div class="text">密码长度6~12位、可以是数字、大小写英文字母</div>
 				<button type="button" class="mui-btn mui-btn-block w">注册</button>
 			</form>
 				<div class="text">点击上面的注册按钮，即表示同意<a>叭叭软件许可</a>和<a>服务条款</a></div>
@@ -415,7 +414,7 @@
 			W.dom.rb.disabled="disabled";
 			W.userApi.checkExists(function(json){
 				if(json.exist){
-					W.alert("该店名已经被注册");
+					W.toast("该店名已经被注册");
 					checkName.pass=1;
 					addErr(W.dom.ni);
 				}else{
@@ -463,13 +462,15 @@
 			var REP=f.querySelector("[name=repwd]");
 			var rep=REP.value;
 			var p=P.value;
-			if(p.length<8||p.length>12){
+			if(p.length<6||p.length>12){
 				P.pass=1;
 				addErr(P);
+				W.toast("密码长度应该大于8位，小于12位");
 				return;
 			}else if(p.match(/\W/)){
 				P.pass=1;
 				addErr(P);
+				W.toast("密码不应该包含特殊字符");
 				return;
 			}else {
 				P.pass=2;
@@ -496,8 +497,9 @@
 				tem.style.background="#d9534f";
 				tem._iserr=b;
 			}else{
-				tem.innerHTML="&#10003";
+				tem.innerHTML="ok";
 				tem.style.background="#5cb85c";
+				tem.style.padding="0";
 			}
 			dom._err=tem;
 			dom.parentElement.parentElement.insertBefore(tem,dom.parentElement);

@@ -109,7 +109,6 @@
 		
 		function chooseT(h){//选择该品牌，获取该品牌车型，或者该车型下的车款
 			var main=W.parents(h,".main");
-			main.classList.add("no_scroll");
 		  Tid=main.id;//判断是选择车型还是车款
 		  var id=h.id.slice(3);
 		  var name=W.trim(h.innerText);
@@ -135,11 +134,13 @@
 		    		window.parent.ui_carSeries.finish(car);
 		  		}
 		  	}else{
+		  		main.classList.add("no_scroll");
 		  		car.brandId=id;
 		    	car.brand=name;
 		    	W.vehicleApi.getSeriess(getSeriesOrType,id);
 		  	}
 		  }else{
+		  	main.classList.add("no_scroll");
 		    car.series=name;
 		    car.seriesId=id;
 		    W.vehicleApi.getTypes(getSeriesOrType,id);
@@ -307,7 +308,7 @@
 		font-family: "微软雅黑";
 	}
 	.car.select:after{
-	    content: "\2714";
+	    content: "\2605";
 	    float: right;
 	    width: 2em;
 	    text-align: center;

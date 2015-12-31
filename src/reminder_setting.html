@@ -37,44 +37,6 @@
 		<script src="js/string_factory.js"></script>
 
 	</head>
-
-	<body>
-		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
-			<a class="mui-icon mui-action-menu mui-icon-plusempty mui-pull-right new-remind"></a>
-			<h1 class="mui-title">提醒设置</h1>
-		</header>
-		<div class="mui-content">
-
-			<div class="list_item_templet" hidden="true">
-				<div class="list_item">
-					<div class="edit">
-						<div class="item_reminder">
-							<label id="rmd_name">保养提醒</label>
-							<label id="create_time"></label>
-						</div>
-						<div class="item_brand" name="div_brand">
-							<span><label class="car_label">品牌:</label> <label  id="car_brand"  class="car_value"></label></span>
-						</div>
-
-						<div class="item_car_number" name="div_car">
-							<span><label class="car_label">车辆:</label> <label  id="car_name"   class="car_value"></label></span>
-						</div>
-					</div>
-					<hr/>
-					<div class="item_delete">
-						<button type="button" id="btn_delete" onclick="deleteReminder()" class="mui-btn  mui-btn-outlined m_btn_delete">删除</button>
-					</div>
-					<div class="" hidden="true" name="option_id" data-option_id="">
-					</div>
-
-				</div>
-			</div>
-			<div id="reminder_list"></div>
-
-		</div>
-
-	</body>
 	<style>
 		body {
 			background-color: #f0f0f0;
@@ -140,7 +102,48 @@
 			margin-bottom: 10px;
 		}
 	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<a class="mui-icon mui-action-menu mui-icon-plusempty mui-pull-right new-remind"></a>
+			<h1 class="mui-title">提醒设置</h1>
+		</header>
+		<div class="mui-content">
 
+			<div class="list_item_templet" hidden="true">
+				<div class="list_item">
+					<div class="edit">
+						<div class="item_reminder">
+							<label id="rmd_name">保养提醒</label>
+							<label id="create_time"></label>
+						</div>
+						<div class="item_brand" name="div_brand">
+							<span><label class="car_label">品牌:</label> <label  id="car_brand"  class="car_value"></label></span>
+						</div>
+
+						<div class="item_car_number" name="div_car">
+							<span><label class="car_label">车辆:</label> <label  id="car_name"   class="car_value"></label></span>
+						</div>
+					</div>
+					<hr/>
+					<div class="item_delete">
+						<button type="button" id="btn_delete" onclick="deleteReminder()" class="mui-btn  mui-btn-outlined m_btn_delete">删除</button>
+					</div>
+					<div class="" hidden="true" name="option_id" data-option_id="">
+					</div>
+
+				</div>
+			</div>
+			<div id="reminder_list"></div>
+			<div class="null_tip" id="null_tip" style="display: none;">
+				<h1>NULL</h1>
+				<p>
+					<label class="tip_text"></label>
+				</p>
+			</div>
+		</div>
+
+	</body>
 	<script>
 		W(".new-remind").addEventListener("click", function() {
 			location = "new_remind.html";
@@ -168,7 +171,6 @@
 			if (!W.dom.reminder_list)
 				W.dom.reminder_list = W("#reminder_list"); //缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
 			var target = W.dom.reminder_list;
-			
 			//重置清空数据
 			if (MAX_ID == 0) {
 				while (target.hasChildNodes()) //当div下还存在子节点时 循环继续
@@ -186,6 +188,17 @@
 				if (resData[i].option_id > MAX_ID)
 					MAX_ID = resData[i].option_id;
 			}
+			
+				/**
+			 * 数据不为空，隐藏提示信息
+			 */
+			if (target.data.length > 0) {
+				W("#null_tip").style.display = "none";
+			}else{
+				W("#null_tip").style.display = "block";
+				showTip();
+			}
+			
 			if (res.total > target.data.length) {
 				param.max_id = MAX_ID;
 				var autoLoad;
@@ -288,12 +301,11 @@
 			}
 			W.confirm(json);
 		}
-		
 		/**
 		 * 删除提醒回调
 		 * @param {Object} res
 		 */
-		function deleteCallBack(res){
+		function deleteCallBack(res) {
 			if (res.status_code == 0) {
 				MAX_ID = 0;
 				loadMore();
@@ -301,6 +313,13 @@
 			} else {
 				W.alert(res.msg);
 			}
+		}
+		/**
+		 * 显示提示：
+		 */
+		function showTip() {
+			W("#null_tip").style.display = "block";
+			W(".tip_text").innerText = "您还未对车辆异常数值进行设定，请及时设定，以方便您了解客户车辆是否发生异常。";
 		}
 	</script>
 

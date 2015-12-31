@@ -304,6 +304,7 @@ nav.mui-bar.mui-bar-tab.top~.mui-content{
     border: .5em;
     color: #fff;
     width: 80%;
+    left: 10%;
     position: fixed;
     top: 0;
     padding: 1em;
@@ -449,6 +450,26 @@ body{
 }
 .mui-btn.mui-btn-block.w:active{
 	background-color: #3B89A7;
+}
+
+.null_tip{
+	text-align: center;
+    padding: 10%;
+    color: #444;
+}
+.null_tip>h1{
+	display: none;
+}
+
+.null_tip:after{
+	content: "";
+    width: 60px;
+    background: url("../../img/icon_new.png");
+    height: 48px;
+    display: block;
+    margin: auto;
+    margin-top: 40px;
+    background-size: 100% 100%;
 }
 /**
  * 图标

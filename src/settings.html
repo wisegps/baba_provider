@@ -22,7 +22,8 @@
 		<script src="../wslib/api/Wapi.js" defer="defer"></script>
 		<script>
 			window.onload = function (){
-				var user =W.getSetting("user");
+				var account=W.getSetting("account");
+				var user =_user;
 				if(user.tel){
 					W("#phone").innerHTML = user.tel;
 				}else{
@@ -39,7 +40,7 @@
 					W("#cust_name").innerHTML ="";
 				}
 				if(account){
-					W(".value").innerHTML = W.getSetting("account");
+					W(".value").innerHTML = account;
 				}else{
 					W(".value").innerHTML ="";
 				}
@@ -51,93 +52,45 @@
 				W("#input_exit").addEvent('click',W.logout);
 				
 				W(".shop").addEvent("click",toManage);
+				
+				//showNav(true);
 			}
 			
 			function toManage(){
+				showNav();
+				top.history.pushState(null, "home.html", "home.html");
 				top.location="store_management.html";
 			}
 /**
  *修改密码 
  */
 			function setPwd(){
-				plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="none";');
+				showNav();
 				self.location = "../index.html?intent=forget";
 			}
 /**
  * 显示与隐藏关于页面
  */	
  			function show(){
+ 				showNav();
 				W(".child_view").style.display='block';
 			}
 			function hide(){
+				showNav(true);
 				W(".child_view").style.display='none';				
+			}
+			
+			function showNav(show){
+				if(top==window)
+					return;
+				if(show)
+					plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="block";');
+				else
+					plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="none";');
 			}
 		</script>
 		
 	</head>
-
-	<body>
-		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
-			<h1 class="mui-title">设置中心</h1>
-		</header>
-		<div class="mui-content" style="line-height: 2.4em;">
-
-			<!--
-            	描述：上面商家信息
-            -->
-			<div class="shop">
-				<span class="shop_logo"> <img id="img_logo" src="../img/shop.jpg"/></span>
-				<span class="shop_infos"> 
-					<label class="shop_info" id="cust_name"></label>
-				<label class="shop_info" id="address"></label>
-				<label class="shop_info" id="phone"></label>
-				</span>
-			</div>
-
-			<div class="div_account">
-				<div class="setting" id="account">
-					<label class="label">我的账号</label>
-					<label class="value" style="float: right;"></label>
-				</div>
-				<hr />
-				<div class="setting" id="password" onclick="setPwd()">
-					<label class="label">修改密码</label>
-					<span class="mui-icon mui-icon-arrowright"></span>
-				</div>
-			</div>
-
-			<div class="div_others">
-				<div class="setting" id="comments">
-					<label class="label">意见反馈</label>
-					<span class="right"><span class="mui-icon mui-icon-arrowright"></span></span>
-				</div>
-				<hr />
-				<div class="setting" id="about" onclick="show();">
-					<label class="label">关于叭叭</label>
-					<span class="right"><span class="mui-icon mui-icon-arrowright"></span></span>
-				</div>
-			</div>
-			<div class="exit">
-				<button id="input_exit" type="button" class="mui-btn mui-btn-block">退出登录</button>
-			</div>
-		</div>
-		<div class="child_view" id="about" style="display: none;position: fixed;">
-			<header class="mui-bar mui-bar-nav">
-				<a class="mui-icon mui-icon-left-nav mui-pull-left" onclick="hide();"></a>
-				<h1 class="mui-title">关于叭叭</h1>
-			</header>
-		    <div class="" style="text-align: center;padding-top: 50px;">
-		      <img src="../img/icon_new.png" style="width:40%;margin-top: 2em;">
-		      <div style="position: fixed;width: 100%;top: 50%;color: #4EA153;font-weight: 700;font-size: 15px;">叭叭商户版</div>
-		      <div style="  position: fixed;width: 100%;bottom: 0;line-height: 3em;">
-		        <a href="http://www.bibibaba.cn" style="color: #4EA153;" target="_blank">http://www.bibibaba.cn</a>
-		        <h6 style="color: #aaa;margin-bottom: 20px;">Copyright@2014 Bibibaba Inc.</h6>
-		      </div>
-		    </div>
-	  </div>
-	</body>
-
 	<style>
 		body {
 			background-color: #f0f0f0;
@@ -238,5 +191,65 @@
 			background-color: #3B89A7;
 		}
 	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<h1 class="mui-title">设置中心</h1>
+		</header>
+		<div class="mui-content" style="line-height: 2.4em;">
 
+			<!--
+            	描述：上面商家信息
+            -->
+			<div class="shop">
+				<span class="shop_logo"> <img id="img_logo" src="../img/shop.jpg"/></span>
+				<span class="shop_infos"> 
+					<label class="shop_info" id="cust_name"></label>
+				<label class="shop_info" id="address"></label>
+				<label class="shop_info" id="phone"></label>
+				</span>
+			</div>
+
+			<div class="div_account">
+				<div class="setting" id="account">
+					<label class="label">我的账号</label>
+					<label class="value" style="float: right;"></label>
+				</div>
+				<hr />
+				<div class="setting" id="password" onclick="setPwd()">
+					<label class="label">修改密码</label>
+					<span class="mui-icon mui-icon-arrowright"></span>
+				</div>
+			</div>
+
+			<div class="div_others">
+				<div class="setting" id="comments">
+					<label class="label">意见反馈</label>
+					<span class="right"><span class="mui-icon mui-icon-arrowright"></span></span>
+				</div>
+				<hr />
+				<div class="setting" id="about" onclick="show();">
+					<label class="label">关于叭叭</label>
+					<span class="right"><span class="mui-icon mui-icon-arrowright"></span></span>
+				</div>
+			</div>
+			<div class="exit">
+				<button id="input_exit" type="button" class="mui-btn mui-btn-block">退出登录</button>
+			</div>
+		</div>
+		<div class="child_view" id="about" style="display: none;position: fixed;">
+			<header class="mui-bar mui-bar-nav">
+				<a class="mui-icon mui-icon-left-nav mui-pull-left" onclick="hide();"></a>
+				<h1 class="mui-title">关于叭叭</h1>
+			</header>
+		    <div class="" style="text-align: center;padding-top: 50px;">
+		      <img src="../img/icon_new.png" style="width:40%;margin-top: 2em;">
+		      <div style="position: fixed;width: 100%;top: 50%;color: #4EA153;font-weight: 700;font-size: 15px;">叭叭商户版</div>
+		      <div style="  position: fixed;width: 100%;bottom: 0;line-height: 3em;">
+		        <a href="http://www.bibibaba.cn" style="color: #4EA153;" target="_blank">http://www.bibibaba.cn</a>
+		        <h6 style="color: #aaa;margin-bottom: 20px;">Copyright@2014 Bibibaba Inc.</h6>
+		      </div>
+		    </div>
+	  </div>
+	</body>
 </html>

@@ -36,186 +36,6 @@
 		<script src="ui/ui.js"></script>
 		<script src="js/string_factory.js"></script>
 	</head>
-
-	<body>
-		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
-			<a class="mui-icon w_icon icon_add mui-pull-right btn_customer_add"></a>
-			<h1 class="mui-title">客户到店/离店</h1>
-		</header>
-		<div class="mui-content">
-			<center>
-				<div class="preview">
-					<div class="t_row">
-						<div class="t_cell">
-							<label class="t_value" id="arrive_today">0</label>
-							<br/>
-							<label class="t_label">
-								今日到店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="leave_today">0</label>
-							<br/>
-							<label class="t_label">
-								今日离店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="review_today">0</label>
-							<br/>
-							<label class="t_label">
-								今日评价
-							</label>
-						</div>
-
-					</div>
-					<div class="t_row">
-						<div class="t_cell">
-							<label class="t_value" id="arrive_month">0</label>
-							<br/>
-							<label class="t_label">
-								当月到店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="leave_month">0</label>
-							<br/>
-							<label class="t_label">
-								当月离店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="review_month">0</label>
-							<br/>
-							<label class="t_label">
-								当月评价
-							</label>
-						</div>
-					</div>
-				</div>
-
-			</center>
-			<div class="tab_inout">
-				<div style="display: table-row;">
-					<div class="tab_item" data-value="1" onclick="change(this)">
-						<label id="label_in" class="total_number">在店(0)</label>
-					</div>
-
-					<div class="tab_item" data-value="2" onclick="change(this)">
-						<label id="label_out" class="total_number" style="border-color: white">离店(0)</label>
-					</div>
-				</div>
-
-			</div>
-			<div class="condition" hidden="true">
-				<div class="duration_div">
-					<center>
-
-						<button id="select_today" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(0)">今天</button>
-						<button id="select_week" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(1)">1周内</button>
-						<button id="select_month" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(2)">1个月内</button>
-						<button id="select_custom" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(3)">自选</button>
-					</center>
-				</div>
-				<hr style="height:1px;border:none;border-top:1px solid #dddddd;" />
-				<center>
-					<div class="time_box" hidden="true">
-						<span class="time">
-						<script id="begin_time"  class="ctime" data-ccc="ccc" style=" text-align:right;border: 0px #000000 solid; border-radius: 5px; width: 45%;">
-									echo(new DateSelector())
-								</script>
-				</span>
-						<span class="time">至</span>
-						<span class="time" style="background: #007AFF;">
-						<script id="end_time"  class="ctime" data-ccc="ccc" style="border: 0px #000000 solid; border-radius: 5px;width: 45%;">
-									echo(new DateSelector())
-								</script>
-				</span>
-					</div>
-				</center>
-			</div>
-
-			<div id="car_list"></div>
-
-			<div id="car_list_left"></div>
-
-		</div>
-
-		<!--离店模板-->
-		<div class="ui_car_d" id="state_car_left" hidden="true">
-			<table>
-				<tr>
-					<th>
-						<img src="http://img.wisegps.cn/logo/m_8_100.png" onerror='javascript:this.src="../img/icon_car_moren.png"'><span name="value">粤B614D1</span></th>
-				</tr>
-				<tr>
-					<td><span class="name">客户名称:</span>
-						<span class="value" name="cust_name">梅长苏</span></td>
-					<td><span class="name">车型:</span>
-						<span class="value" name="car_type">宝马X3 2012款</span></td>
-				</tr>
-				<tr>
-					<td><span class="name">行驶里程:</span>
-						<span class="value" name="mileage">56000公里</span></td>
-					<td><span class="name">维修类型:</span>
-						<span class="value" name="business_type">保养</span></td>
-				</tr>
-				<tr>
-					<td><span class="name">到店时间:</span>
-						<span class="value" name="arrive_time">11-03 16:30</span></td>
-					<td><span class="name">离店时间:</span>
-						<span class="value" name="leave_time">11-03 16:30</span></td>
-				</tr>
-				<tr>
-					<td name="comment"><span class="name">评价:</span>
-						<span class="value" id="evaluate_level">
-								<span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-starhalf"></span>
-						</span>
-					</td>
-				</tr>
-			</table>
-		</div>
-
-		<!--
-        	作者：androidcyy
-        	时间：2015-11-25
-        	描述：在店
-        -->
-		<div class="ui_car_d" id="state_car_arrived" hidden="true">
-			<table>
-				<tr>
-					<th><img src="http://img.wisegps.cn/logo/m_8_100.png" onerror='javascript:this.src="../img/icon_car_moren.png"'><span name="value">粤B614D1</span></th>
-					<th name="tip" name="arrive_desc"><span name="arrive_desc_info">0分钟前到店</span></th>
-				</tr>
-				<tr>
-					<td><span class="name">客户名称:</span>
-						<span class="value" name="cust_name">梅长苏</span></td>
-					<td><span class="name">车型:</span>
-						<span class="value" name="car_type">宝马X3 2012款</span></td>
-				</tr>
-
-				<tr>
-					<td><span class="name">行驶里程:</span>
-						<span class="value" name="mileage">56000公里</span></td>
-					<td><span class="name">维修类型:</span>
-						<span class="value" name="business_type">保养</span></td>
-				</tr>
-
-				<tr>
-					<td><span class="name">到店时间:</span>
-						<span class="value" name="arrive_time">11-03 16:30</span></td>
-					<td><span class="name">离店时间:</span>
-						<span class="value" name="leave_time">11-03 16:30</span></td>
-				</tr>
-			</table>
-			<footer>
-				<button type="button" class="mui-btn mui-btn-warning" name="finish_leave">完工离店</button>
-				<button type="button" class="mui-btn mui-btn-primary" name="immediate_leave">直接离店</button>
-			</footer>
-		</div>
-
-	</body>
 	<style>
 		body {
 			background-color: #f0f0f0;
@@ -288,17 +108,201 @@
 			font-size: medium;
 		}
 	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left" href="home.html"></a>
+			<a class="mui-icon w_icon icon_add mui-pull-right btn_customer_add"></a>
+			<h1 class="mui-title">客户到店/离店</h1>
+		</header>
+		<div class="mui-content">
+			<center>
+				<div class="preview">
+					<div class="t_row">
+						<div class="t_cell">
+							<label class="t_value" id="arrive_today">0</label>
+							<br/>
+							<label class="t_label">
+								今日到店
+							</label>
+						</div>
+						<div class="t_cell">
+							<label class="t_value" id="leave_today">0</label>
+							<br/>
+							<label class="t_label">
+								今日离店
+							</label>
+						</div>
+						<div class="t_cell">
+							<label class="t_value" id="review_today">0</label>
+							<br/>
+							<label class="t_label">
+								今日评价
+							</label>
+						</div>
 
+					</div>
+					<div class="t_row">
+						<div class="t_cell">
+							<label class="t_value" id="arrive_month">0</label>
+							<br/>
+							<label class="t_label">
+								当月到店
+							</label>
+						</div>
+						<div class="t_cell">
+							<label class="t_value" id="leave_month">0</label>
+							<br/>
+							<label class="t_label">
+								当月离店
+							</label>
+						</div>
+						<div class="t_cell">
+							<label class="t_value" id="review_month">0</label>
+							<br/>
+							<label class="t_label">
+								当月评价
+							</label>
+						</div>
+					</div>
+				</div>
+
+			</center>
+			<div class="tab_inout">
+				<div style="display: table-row;">
+					<div class="tab_item" data-value="1" onclick="change(this)">
+						<label id="label_in" class="total_number">在店(0)</label>
+					</div>
+
+					<div class="tab_item" data-value="2|3" onclick="change(this)">
+						<label id="label_out" class="total_number" style="border-color: white">离店(0)</label>
+					</div>
+				</div>
+
+			</div>
+			<div class="condition" hidden="true">
+				<div class="duration_div">
+					<center>
+
+						<button id="select_today" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(0)">今天</button>
+						<button id="select_week" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(1)">1周内</button>
+						<button id="select_month" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(2)">1个月内</button>
+						<button id="select_custom" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(3)">自选</button>
+					</center>
+				</div>
+				<hr style="height:1px;border:none;border-top:1px solid #dddddd;" />
+				<center>
+					<div class="time_box" hidden="true">
+						<span class="time">
+						<script id="begin_time"  class="ctime" data-ccc="ccc" style=" text-align:right;border: 0px #000000 solid; border-radius: 5px; width: 45%;">
+									echo(new DateSelector())
+								</script>
+				</span>
+						<span class="time">至</span>
+						<span class="time" style="background: #007AFF;">
+						<script id="end_time"  class="ctime" data-ccc="ccc" style="border: 0px #000000 solid; border-radius: 5px;width: 45%;">
+									echo(new DateSelector())
+								</script>
+				</span>
+					</div>
+				</center>
+			</div>
+
+			<div id="car_list"></div>
+
+			<div id="car_list_left"></div>
+			<div class="null_tip" id = "null_tip" >
+				<h1>NULL</h1>
+				<p ><label class="tip_text"></label></p>
+			</div>
+
+		</div>
+
+		<!--离店模板-->
+		<div class="ui_car_d" id="state_car_left" hidden="true">
+			<table>
+				<tr>
+					<th>
+						<img src="http://img.wisegps.cn/logo/m_8_100.png" onerror='javascript:this.src="../img/icon_car_moren.png"'><span name="value">粤B614D1</span></th>
+				</tr>
+				<tr>
+					<td><span class="name">客户名称:</span>
+						<span class="value" name="cust_name">梅长苏</span></td>
+					<td><span class="name">车型:</span>
+						<span class="value" name="car_type">宝马X3 2012款</span></td>
+				</tr>
+				<tr>
+					<td><span class="name">行驶里程:</span>
+						<span class="value" name="mileage">56000公里</span></td>
+					<td><span class="name">维修类型:</span>
+						<span class="value" name="business_type">保养</span></td>
+				</tr>
+				<tr>
+					<td><span class="name">到店时间:</span>
+						<span class="value" name="arrive_time">11-03 16:30</span></td>
+					<td><span class="name">离店时间:</span>
+						<span class="value" name="leave_time">11-03 16:30</span></td>
+				</tr>
+				<tr>
+					<td name="comment"><span class="name">评价:</span>
+						<span class="value" id="evaluate_level">
+								<span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-starhalf"></span>
+						</span>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+		<!--
+        	作者：androidcyy
+        	时间：2015-11-25
+        	描述：在店
+        -->
+		<div class="ui_car_d" id="state_car_arrived" hidden="true">
+			<table>
+				<tr>
+					<th><img src="http://img.wisegps.cn/logo/m_8_100.png" onerror='javascript:this.src="../img/icon_car_moren.png"'><span name="value">粤B614D1</span></th>
+					<th name="tip" name="arrive_desc"><span name="arrive_desc_info">0分钟前到店</span></th>
+				</tr>
+				<tr>
+					<td><span class="name">客户名称:</span>
+						<span class="value" name="cust_name">梅长苏</span></td>
+					<td><span class="name">车型:</span>
+						<span class="value" name="car_type">宝马X3 2012款</span></td>
+				</tr>
+
+				<tr>
+					<td><span class="name">行驶里程:</span>
+						<span class="value" name="mileage">56000公里</span></td>
+					<td><span class="name">维修类型:</span>
+						<span class="value" name="business_type">保养</span></td>
+				</tr>
+
+				<tr>
+					<td><span class="name">到店时间:</span>
+						<span class="value" name="arrive_time">11-03 16:30</span></td>
+					<td><span class="name"> </span>
+						<span class="value" name="leave_time"> </span></td>
+				</tr>
+			</table>
+			<footer>
+				<button type="button" class="mui-btn mui-btn-warning" name="finish_leave">完工离店</button>
+				<button type="button" class="mui-btn mui-btn-primary" name="immediate_leave">直接离店</button>
+			</footer>
+		</div>
+
+	</body>
 	<script>
 		W(".btn_customer_add").addEventListener("click", function() {
 			location = "customer_add.html";
 			return;
 		});
 		var StateCode = {
-			arrived: 1,
-			left: 2
+			arrived: "1",
+			left: "2|3"
 		};
 		var CarState = StateCode.arrived; //全局变量，离店，到店标识
+		
+		var showTipType = "5";//提示类型
 		var param = {
 			parent_cust_id: _user.cust_id,
 			max_id: 0,
@@ -329,6 +333,7 @@
 		 * @param {Object} obj
 		 */
 		function change(obj) {
+			W("#null_tip").style.display = "none";
 			var v = obj.getAttribute("data-value");
 			W("#label_in").style.borderColor = "white";
 			W("#label_out").style.borderColor = "white";
@@ -420,23 +425,28 @@
 		 * @param {Object} business_id
 		 */
 		function initLeaveEvent(ctx, business_id, obj_id, business_type, mileage) {
-			var data_leave = {
-				_business_id: business_id,
-				access_token : _user.access_token,
-				obj_id:obj_id,
-				mileage:mileage
-				
-			};
 			var finish_leave = ctx.querySelector("[name= finish_leave]");
 			var immediate_leave = ctx.querySelector("[name= immediate_leave]");
 			//完工离开
 			if (finish_leave != null) {
+				var data_leave = {
+					_business_id: business_id,
+					access_token: _user.access_token,
+					obj_id: obj_id,
+					mileage: mileage
+				};
 				finish_leave.data_leave = data_leave;
 				finish_leave.data_leave.status = "2";
 				finish_leave.addEvent("click", leave);
 			}
-			//间接离开
+			//直接离开
 			if (immediate_leave != null) {
+				var data_leave = {
+					_business_id: business_id,
+					access_token: _user.access_token,
+					obj_id: obj_id,
+					mileage: mileage
+				};
 				immediate_leave.data_leave = data_leave;
 				immediate_leave.data_leave.status = "3";
 				immediate_leave.addEvent("click", leave);
@@ -447,13 +457,12 @@
 		 */
 		function leave() {
 			var data = this.data_leave;
-			
+			data.leave_time = getFullCurrentTime();
 			Wapi.vehicle.updateBusiness(function(res) {
 				if (res && res.status_code) {
 					W.errorCode(res);
 					return;
 				}
-				
 				dom_arrived.max_id = 0;
 				getShopData(); //获取并展示店铺当天、当月数据getBusinessData
 				getBusinessData(CarState);
@@ -487,6 +496,7 @@
 				if (!dom_left.car_list) {
 					dom_left.car_list = W("#car_list_left");
 				}
+				
 				refresh(dom_left, res);
 			} else {
 				if (!dom_arrived.car_list) {
@@ -520,6 +530,18 @@
 					dom.max_id = data.business_id;
 				}
 			}
+			
+			/**
+			 * 数据不为空，隐藏提示信息
+			 */
+			if (target.data.length > 0) {
+				W("#null_tip").style.display = "none";
+			}else{
+				W("#null_tip").style.display = "block";
+				showTip();
+			}
+			
+			
 			if (res.total > target.data.length) {
 				var autoLoad;
 				if (target.autoLoad) {
@@ -545,6 +567,12 @@
 		function getBusinessData(status, begin_time, end_time) {
 			param.status = status; //状态 1:在店 2:离店;
 			param.query_type = status; //状态 1:在店 2:离店;
+			
+			
+			if(status==1){
+				showTipType = 5;
+			}
+			
 			//			param.begin_time = begin_time;
 			//			param.end_time = end_time;
 			if (begin_time != undefined) {
@@ -602,7 +630,10 @@
 			}
 			W.userApi.getBusinessTotal(function(res) {
 				W("#arrive_today").innerText = res.arrive_count;
-				W("#leave_today").innerText = res.leave_count;
+				//今天离店人数
+				var leaveNumber = res.leave_count;
+				W("#leave_today").innerText = leaveNumber;
+				W("#label_out").innerText = "离店(" + leaveNumber + ")";
 				W("#review_today").innerText = res.evaluate_count;
 			}, data);
 			//月到店离店
@@ -667,11 +698,27 @@
 					break;
 			}
 			if (index != 4) {
-				W("#end_time").value = getCurrentTime();
+				W("#end_time").value = getFullCurrentTime();
 			}
 			var begin = W("#begin_time").value + " 00:00:00";
-			var end = W("#end_time").value + " 00:00:00";
+			var end = W("#end_time").value;
+			
+			showTipType = index;
 			getBusinessData(StateCode.left, begin, end);
+		}
+		/**
+		 * 显示提示：type： 0今天，1，本周，2本月，3自定义时间段  ，4自定义时间段  ，5在店，
+		 */
+		function showTip() {
+			W("#null_tip").style.display = "block";
+			var t0 = "您好，当天还没有离店车辆";
+			var t1 = "您好，本周还没有离店车辆";
+			var t2 = "您好，本月还没有离店车辆";
+			var t3 = "您好，该时段还没有离店车辆";
+			var t4 = "您好，该时段还没有离店车辆";
+			var t5 = "您好，您目前还没有在店车辆，客户都去哪儿了";
+			var tips = new Array(t0, t1, t2, t3, t4,t5);
+			W(".tip_text").innerText= tips[showTipType];
 		}
 	</script>
 

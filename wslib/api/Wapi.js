@@ -17,6 +17,16 @@ WUserApi.prototype.login=function(callback,data,op){
 	this.getApi(data,callback,OP);			         //使用“GET”请求，异步获取数据
 }
 
+WUserApi.prototype.bind=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);				//把用户传入的配置覆盖默认配置
+	OP.method="wicare.user.bind"; 		//接口名称
+	
+	this.getApi(data,callback,OP);
+}
+
 /**
  * 第三方登录
  * 参数：
@@ -146,8 +156,10 @@ WUserApi.prototype.update=function(callback,data,op){
 		fields:'cust_id'			//默认返回的字段
 	};
 	this.jsonConcat(OP,op);
-	data._cust_id=data.cust_id;
-	delete data.cust_id;
+	if(data.cust_id){
+		data._cust_id=data.cust_id;
+		delete data.cust_id;
+	}
 	OP.method="wicare.user.update"; //接口名称
 	
 	this.getApi(data,callback,OP);	//调用新接口
@@ -304,17 +316,19 @@ WUserApi.prototype.getExceptionList=function(callback,data,op){
 /**
  * 删除异常车况
  * 参数:
- *     exc_id: 异常Id
+ *     exc_id: 异常Id,
+ * 	   token
  * 返回：
  *   status_code: 状态码
  */
-WUserApi.prototype.deleteException = function (callback,exc_id){
+WUserApi.prototype.deleteException = function (callback,data,op){
 	var OP={
-		fields:'status_code',
-		exception_id:exc_id,
-		method:'wicare.exception.delete'
+		fields:'status_code'
 	};
-	this.getApi(OP,callback);
+	this.jsonConcat(OP,op);
+	OP.method="wicare.exception.delete"; //接口名称
+	
+	this.getApi(data,callback,OP);	//调用新接口
 };
 
 /**

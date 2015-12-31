@@ -36,7 +36,7 @@
 			.fl{float: left;}
 			.main-count{padding: 5px 0;min-height: 55px;}
 			.new_info{font-size: 14px;overflow: hidden;}
-			#news-add{padding-top: 50px;padding-bottom: 50px;}
+			#news-add{padding-top: 45px;padding-bottom: 50px;}
 			.time{text-align: center;font-size:12px ;margin: 5px 0;}
 			
 			.new_r{overflow: hidden;padding:0 50px 0 6px;border-radius: 0.4em;position: relative;}
@@ -62,14 +62,18 @@
 			    border-radius: 100%;
 			    font-size: 12px;
 			 }
+			 .ui_auto_load{border-bottom: 1px solid #e5e4e2;text-align: center;padding: 10px;background: #fff;}
+			.op{text-align: center;background-color: white;padding: .5em 0;}
+			.null_tip{text-align: center;}
+			.mui-content{padding-bottom: 50px;}
 		</style>
 	</head>
-	<body>
+	<body id="body">
 		<header class="mui-bar mui-bar-nav">
 			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
 			<h1 class="mui-title">客户咨询</h1>				
 		</header>
-		<div class="mui-content"></div>
+		<div class="mui-content"><div class="null_tip"><h1>NULL</h1><p>您好，您目前还没有客户发起咨询。</p></div></div>
 		<div class="child_view has_nav fromRight" id="Details" style="display: none;">
 			<div class="mui-bar mui-bar-nav">
 				<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
@@ -104,13 +108,7 @@
 	}
 	cl.prototype.setData=function (data){
 		var uname=data.friend_name.slice(0,1);
-		var newtime = (new Date()-NewDate(data.send_time))/1000/60/60;
-		if(newtime<1)
-			newtime=parseInt(newtime*60)+"分钟前";
-		else if(newtime<24)
-		   	newtime=parseInt(newtime)+"小时前";
-		else
-			newtime=parseInt(newtime/24)+"天前";
+		var newtime = spliceDate(data.send_time);
 		var a=["#428bca",'#5cb85c','#5bc0de','#f0ad4e','#d9534f'];
 		this.innerHTML = '<div class="icon">'+uname+'</div><div class="new_info"><div><span class="fr" style="color:#ccc;font-size: 12px;">'+newtime+'</span><div style="overflow: hidden;"><span style="color: #676767;">'+data.friend_name+'</span></div></div><div class="show_news"><p style="color:#ccc;margin: 0 3.2em 0 0;overflow: hidden;white-space: nowrap;">'+data.content+'</p></div></div>';
 		var c=data.friend_id%5;
@@ -118,6 +116,7 @@
 		this.id="W"+data.friend_id;
 		this.data=data;
 	}
+
 /**
  * 当有新消息时创建span元素
  */
@@ -144,16 +143,32 @@
 			}
 		}else{
 			if(oSpan.lastChild.tagName=='SPAN'){
-				oSpan.lastChild.remove();
+				oSpan.removeChild(oSpan.lastChild);
 			}
 		}
 	}
 /**
- * 更改content
+ * 更改content和时间
  */
-	cl.prototype.getContent=function (content){
-		this.lastChild.lastChild.firstChild.innerHTML=content;
-		this.data.content=content;
+	cl.prototype.setContent=function (data){
+		this.lastChild.lastChild.firstChild.innerHTML=data.content;
+		this.lastChild.firstChild.firstChild.innerHTML=spliceDate(data.create_time);
+		this.data.send_time=data.create_time;
+		this.data.content=data.content;
+	}
+/**
+ *  计算时间
+ * @param {Object} time
+ */
+	function spliceDate(time){
+		var newtime = (new Date()-NewDate(time))/1000/60/60;
+		if(newtime<1)
+			newtime=parseInt(newtime*60)+"分钟前";
+		else if(newtime<24)
+		   	newtime=parseInt(newtime)+"小时前";
+		else
+			newtime=parseInt(newtime/24)+"天前";
+		return newtime;
 	}
 /**
  * 接收消息组件 
@@ -197,8 +212,8 @@
 /**
  * 文档加载完毕
  */
-var news_cust_id,dom={},MAX_ID="0",settime,localnews={};
-	window.onload = function (){
+var news_cust_id,dom={},MAX_ID="0",settime,localnews={},MIN_ID;
+	window.addEventListener("W.loginSuccess",function(){//框架的自定义事件，当页面load事件触发并且已经登录成功则会触发该事件,用于某些需要不经过登录页也可以直接访问，但是又需要用户授权登录的页面
 		dom.newlist=W(".mui-content");
 		dom.newlists=W("#news-add");
 		dom.details=W("#Details");
@@ -207,7 +222,7 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={};
 		dom.bottom=W(".bottom");
 		dom.bottom.style.display="none";
 		getnews();
-	}
+	})
 	//监听地址变化，切换view
 		window.addEventListener("popstate",hide);
 	/**
@@ -221,9 +236,12 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={};
 				var fid=this.friend_id;
 				history.pushState(null,"customer_advisory.html?id="+fid,"customer_advisory.html?id="+fid);//	
 				if(news_cust_id!=-fid){
+					delete MIN_ID;
 					news_cust_id=fid;
 					dom.newlists.innerHTML="";
 					receives();
+				}else{
+					news_cust_id=Math.abs(news_cust_id);
 				}
 				dom.details.style.display='block';		
 				dom.newlist.style.display='none';
@@ -234,6 +252,7 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={};
 									
 	
 	function hide(){
+		document.body.onscroll=null;
 		news_cust_id=-news_cust_id;
 		//dom.newlists.innerHTML="";
 		dom.details.style.display='none';
@@ -272,12 +291,11 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={};
 					t=localnews["W"+res.data[i].friend_id];//前面创建了空的数组  现在用friend_id判断是否存在这个属性
 					if(t){
 						t.push(res.data[i]);
-						
-						if(news_cust_id!=res.data[i].friend_id){
-							clObj=W("#W"+res.data[i].friend_id);//cl组件
+						clObj=W("#W"+res.data[i].friend_id);//cl组件
+						clObj.setContent(res.data[i]);
+						if(news_cust_id!=res.data[i].friend_id && res.data[i].sender_id!=_user.cust_id){
 							clObj.setSpan();
-							clObj.getContent(res.data[i].content);
-						}else{
+						}else if(res.data[i].sender_id!=_user.cust_id){
 							dom.newlists.appendChild(new cs(res.data[i]));
 							setScoll();
 						}
@@ -296,44 +314,86 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={};
  * 
  */
 	function receives(){
-		var data={
-			user_id:_user.cust_id,
-			access_token:_user.access_token,	
-			friend_id:news_cust_id,
-			max_id:0				
-		};
-		Wapi.user.getChatList(function (res){
+	var param={
+		user_id:_user.cust_id,
+		access_token:_user.access_token,	
+		friend_id:news_cust_id,
+		max_id:0				
+	};
+		Wapi.user.getChatList(function  (res){
 			if (res.status_code) {
 				W.errorCode(res);
 				return;
 			}
 			if(res.data.length!=0){
-					
+				MIN_ID=res.data[res.data.length-1].chat_id;				
 				localStorage.removeItem('gtime');
 				res = res.data;
 				var list= document.createDocumentFragment();
 				for(var i=res.length-1;i>=0;i--){
 					list.appendChild(new cs(res[i]));
 				}
-				dom.newlists.appendChild(list);	
+				dom.newlists.appendChild(list);
 				setTimeout(setScoll,500);
 				setScoll();
+				
+				//window.onscroll=getNextnews;
+				document.body.onscroll=getNextnews;
 			}
-		},data);
+		},param);
 	}
+/**
+ * 向上加载
+ */
+function getNextnews(){
+		var param={
+			user_id:_user.cust_id,
+			access_token:_user.access_token,	
+			friend_id:news_cust_id,
+			min_id:MIN_ID							
+		}
+		var Otop = document.body.getBoundingClientRect().top; //元素顶端到可见区域顶端的距离
+		if(Otop>=0){
+			Wapi.user.getChatList(function (res){
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				res=res.data;
+				var oHeight = dom.newlists.offsetHeight;
+				if(res.length!=0){
+					var list = document.createDocumentFragment();
+					MIN_ID=res[res.length-1].chat_id;				
+					for(var i=res.length-1;i>=0;i--){
+						list.appendChild(new cs(res[i]));
+					}
+					dom.newlists.insertBefore(list,dom.newlists.childNodes[0]);//把整个列表添加到页面
+				}else{
+					if(dom.newlists.childNodes[0].tagName!='P'){
+						var op= document.createElement('p');
+						op.className = 'op';
+						op.innerHTML='对不起，没有更多消息了';
+						dom.newlists.insertBefore(op,dom.newlists.childNodes[0]);
+					}
+				}
+				document.body.scrollTop=(dom.newlists.offsetHeight-oHeight);//当加载完成后滚动条位置在开始的消息上
+			},param)
+		}
+}
 /**
  * 设置滚动条到底部
  */
 	function setScoll(){
 		var scoll=document.body;	
 		scoll.scrollTop=scoll.scrollHeight-window.innerHeight; //设置滚动条离顶部的距离是滚动条的高度
+		
 	}
+
 /**
  * 消息列表
  */
 		function newlist(){
 			
-			dom.newlist.innerHTML='';
 			var data={
 				user_id:_user.cust_id,			
 				access_token:_user.access_token,	
@@ -343,20 +403,22 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={};
 					W.errorCode(res);
 					return;
 				}
-				var list = document.createDocumentFragment();
-				for(var i=res.data.length-1;i>=0;i--){
-					var f =res.data[i].friend_id;
-					if(!localnews['W'+f]){
-						list.appendChild(new cl(res.data[i]));
-						localnews["W"+f]=localnews["tem_W"+f]||new Array();
-						delete localnews["tem_W"+f];
+				if(res.data.length!=0){
+					dom.newlist.firstChild.style.display='none';
+					var list = document.createDocumentFragment();
+					for(var i=res.data.length-1;i>=0;i--){
+						var f =res.data[i].friend_id;
+						if(!localnews['W'+f]){
+							list.appendChild(new cl(res.data[i]));
+							localnews["W"+f]=localnews["tem_W"+f]||new Array();
+							delete localnews["tem_W"+f];
+						}
 					}
-				}
-
-				dom.newlist.insertBefore(list,dom.newlist.childNodes[0]);
-				if(_g.id){
-					//微信直接点击进入聊天
-					show.call(W("#W"+_g.id));
+					dom.newlist.insertBefore(list,dom.newlist.childNodes[0]);
+					if(_g.id){
+						//微信直接点击进入聊天
+						show.call(W("#W"+_g.id));
+					}
 				}
 			},data);
 			
@@ -381,21 +443,22 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={};
 					W.errorCode(res);
 					return;
 				}
-				//"2015-12-15 09:58:17";
-				var temD=new Date();
-				temD.setHours(temD.getHours()-8);
-				var t=temD.WtoString().split(" ");
-				var str=t[0]+"T"+t[1]+".000Z";
-				data.create_time=str;//"2015-12-14T09:50:47.162Z"
+
 				data.chat_id=res.chat_id;
-				data.sender_id=_user.cust_id;
-				dom.newlists.appendChild(new cs(data));
-				
-				W('#new_text').value='';
-				var scoll=document.body;
-				scoll.scrollTop=scoll.scrollHeight; //设置每次发送  滚动条离顶部的距离是滚动条的高度				
 			},data);
+			//"2015-12-15 09:58:17";
+			var temD=new Date();
+			temD.setHours(temD.getHours()-8);
+			var t=temD.WtoString().split(" ");
+			var str=t[0]+"T"+t[1]+".000Z";
+			data.create_time=str;//"2015-12-14T09:50:47.162Z"			dom.newlists.appendChild(new cs(data));			
+			data.sender_id=_user.cust_id;
+			dom.newlists.appendChild(new cs(data));
+			var scoll=document.body;
+			scoll.scrollTop=scoll.scrollHeight; //设置每次发送  滚动条离顶部的距离是滚动条的高度				
+			W('#new_text').value='';
 		}
 	}
-	</script>
+
+</script>
 </html>

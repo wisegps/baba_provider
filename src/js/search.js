@@ -25,8 +25,8 @@ W.dom.Search=W("#search");//缓存
 			suname = data.cust_name;
 			car_brand_id =data.car_brand_id;
 			//最后一次到店
-			if(data.leave_time){
-				var lastTime = data.leave_time.slice(0,10);
+			if(data.last_arrive_time){
+				var lastTime = data.last_arrive_time.slice(0,10);
 				lastTime=lastTime.replace(/-/g,'/');
 				slast_maintain = new Date(lastTime);//将日期转换成时间戳
 				var timestamp = new Date();
@@ -65,7 +65,7 @@ W.dom.Search=W("#search");//缓存
 			
 			this.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png" onerror=\'javascript:this.src="../img/icon_car_moren.png"\'><span name="value">'+data.obj_name+'</span></th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+data.cust_name+'</span></td><td><span class="name">车型:</span><span class="value">'+data.car_type+'</span></td></tr><tr><td><span class="name">最后一次到店:</span><span class="value">'+slast_maintain+'</span></td><td><span class="name">车架号:</span><span class="value">'+data.frame_no+'</span></td></tr><tr><td><span class="name">行驶里程:</span><span class="value">'+data.mileage+'公里</span></td><td><span class="name">保养后里程:</span><span class="value">'+next_mileage+'</span></td></tr><tr><td><span class="name">到店次数:</span><span class="value">'+arrive_num+'</span></td><td><span class="name">评价次数:</span><span class="value">'+evaluate_num+'</span></td></tr></table><footer><span class="text">'+device+'</span></footer>'
 
-			this.querySelector("footer").appendChild(new ui_checkInBtn(2015));//给其中的按钮添加点击事件监听，使用sc.editData来处理点击事件
+			this.querySelector("footer").appendChild(new ui_checkInBtn(data));//给其中的按钮添加点击事件监听，使用sc.editData来处理点击事件
 			
 			if(data.obj_id){
 				this.querySelector("table").addEvent("click",sc.toDetail).obj_id=data.obj_id;
@@ -206,7 +206,7 @@ function code(str){
 				W.errorCode(res);
 				return;
 		}
-		if(res.data!=null || res.data.length!=0){
+		if(res.data!=null && res.data.length!=0){
 			var device_id = res.data[0].device_id;
 			var deviceID={
 				access_token:_user.access_token,
@@ -218,14 +218,14 @@ function code(str){
 	}
 
 	function QRcode(){
-		if(W.scanner){//判断scanner是否存在
-			W.scanner.start(code);	
+		if(W.native){//判断scanner是否存在
+			W.native.scanner.start(code);	
 		}else{
 			W.toast("等待扫描二维码组件");
-			window.addEventListener("scannerReady",QRcode);
+			window.addEventListener("nativeSdkReady",QRcode);
 		}
 	}
-/*W.scanner={
+/*W.native.scanner={
 	start:function(callback){
 		callback("55621854091")
 	}

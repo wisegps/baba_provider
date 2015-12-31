@@ -19,7 +19,7 @@
 		<script>link("ui.css")</script>
 		<script src="ui/ui.js"></script>
 		<script src="../wslib/api/Wapi.js" defer="defer"></script>
-		<script src="../wslib/toolkit/WScanner.js" defer="defer"></script>
+		<script src="../wslib/toolkit/WxSdk.js" defer="defer"></script>
 	</head>
 	<style>
 		.mui-icon.w_icon.icon_scanning{font-size: 30px;padding: 7px;}
@@ -87,12 +87,28 @@
 		</nav>
 		<div class="mui-content">
 			<div class="list active" id="all">
+				<div class="null_tip">
+					<h1>NULL</h1>
+					<p>您好，您当前还没有设备，申请设备请<a href="tel:88362578">联系客服</a>。</p>
+				</div>
 			</div>
 			<div class="list" id="activation">
+				<div class="null_tip">
+					<h1>NULL</h1>
+					<p>您当前还没有已激活设备。</p>
+				</div>
 			</div>
 			<div class="list" id="unactivation">
+				<div class="null_tip">
+					<h1>NULL</h1>
+					<p>您当前还没有未激活设备。</p>
+				</div>
 			</div>
 			<div class="list" id="return">
+				<div class="null_tip">
+					<h1>NULL</h1>
+					<p>您当前还没有正在申请退货的设备。</p>
+				</div>
 			</div>
 		</div>
 	</body>
@@ -168,6 +184,7 @@
 		//申请退货(把设备status字段更改为4,申请退货)
 		dv.return=function(){
 			var id=this.device_id;
+			var device=W.parents(this,".device").data;
 			var param={
 				_device_id:id,
 				status:"4",
@@ -175,7 +192,7 @@
 			}
 			this.disabled="disabled";
 			var that=this;
-			W.confirm("如果对设备有疑问，建议先联系我们客服人员处理哦……确认需要对设备（"+this.serial+"）申请退货吗？",
+			W.confirm("如果对设备有疑问，建议先联系我们客服人员处理哦……确认需要对设备（"+device.serial+"）申请退货吗？",
 				function(b){
 					if(b){
 						Wapi.device.update(function (res){
@@ -187,6 +204,8 @@
 							W.parents(that,2).querySelector("[name='status_val']").innerText="申请退货";
 							W.toast("已经申请成功，请等待我们的售后人员联系您");
 						},param);
+					}else{
+						that.disabled=false;
 					}
 				}
 			);
@@ -309,6 +328,10 @@
 				if(data[i].device_id>MAX_ID)
 					MAX_ID=data[i].device_id;
 			}
+			
+			if(target.data.length){
+				target.querySelector(".null_tip").style.display="none";
+			}
 				
 			if(res.total>target.data.length){
 				dom.show.max_id=MAX_ID;
@@ -337,13 +360,13 @@
 		
 		//调用二维码扫描
 		function toScanner(){
-			if(W.scanner)
-				W.scanner.start(receive);
+			if(W.native)
+				W.native.scanner.start(receive);
 			else{
 				if(toScanner.addEvent)
 					return;
 				W.toast("请稍等，正在准备扫描");
-				window.addEventListener("scannerReady",toScanner);
+				window.addEventListener("nativeSdkReady",toScanner);
 				toScanner.addEvent=true;
 			}
 		}
@@ -351,7 +374,7 @@
 		//二维码扫描返回
 		function receive(res){
 			var param={
-				serial:"_"+res,
+				_serial:res,
 				status:"2",
 				access_token:_user.access_token
 			}

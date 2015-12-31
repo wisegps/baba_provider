@@ -68,11 +68,20 @@ function getBeginToday() {
 
 
 /**
- * 获取当前时间
+ * 获取当前时间 2015-10-10
  */
 function getCurrentTime() {
 	var date = new Date();
 	return date.WtoString().slice(0, -9);
+}
+
+
+/**
+ * 获取当前时间 2015-10-10 10:10:10
+ */
+function getFullCurrentTime() {
+	var date = new Date();
+	return date.WtoString();
 }
 
 /**
@@ -166,7 +175,7 @@ function $BizType(id) {
 	if (id == undefined) {
 		return id;
 	}
-	var type = ["维修", "保养", "美容", ""];
+	var type = ["","保养", "维修", "美容", "救援"];
 	return type[id];
 }
 

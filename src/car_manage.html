@@ -30,7 +30,8 @@
 	</head>
 	<body>
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<a class="mui-icon mui-icon-left-nav mui-pull-left" href="home.html"></a>
+			<a class="mui-icon w_icon icon_add mui-pull-right" href="customer_add.html"></a>
 			<h1 class="mui-title">车辆管理</h1>
 		</header>
 		<div class="mui-content">
@@ -38,7 +39,12 @@
 				<input type="search" class="mui-input-clear" id="search_input" placeholder="输入车牌号查询车辆">
 			</div>
 			<div id="search_list"></div>
-			<div id="car_list"></div>
+			<div id="car_list">
+				<div class="null_tip">
+					<h1>NULL</h1>
+					<p>您好，您目前还没有添加用户车辆，<a href="customer_add.html">添加用户</a>车辆可以方便您对车辆进店历史的查找。</p>
+				</div>
+			</div>
 		</div>
 	</body>
 	<style>
@@ -126,6 +132,9 @@
 				dom.carList = W("#car_list"); //缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
 			var list = document.createDocumentFragment();
 			var cars = res.data;
+			if(cars.length){
+				W(".null_tip").style.display="none";
+			}
 			var data = dom.carList.data||new Array();
 			var MAX_ID=dom.carList.max_id||0;
 			for (var i = cars.length - 1; i >= 0; i--) {

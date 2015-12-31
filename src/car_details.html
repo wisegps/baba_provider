@@ -427,16 +427,16 @@
 				access_token:_user.access_token,
 				obj_id: _g.obj_id,       //车辆ID
 				obj_name: _car.obj_name, //车牌号
-				car_brand_id: _car.car_brand_id, //品牌ID
-				car_series: _car.car_series, //车型
-				car_type: _car.car_type, //车款
+				car_brand_id: _car.car_brand_id||0, //品牌ID
+				car_series: _car.car_series||0, //车型
+				car_type: _car.car_type||0, //车款
 				seller_id: _user.cust_id, //商户ID
 				cust_id: _car.cust_id, //客户ID
 				cust_name: _car.cust_name, //客户名称
-				device_id: _car.device_id, //设备ID
-				maintain_last_mileage: _car.maintain_last_mileage, //最后保养里程
-				mileage: _car.mileage, //当前里程
-				last_arrive: _car.last_arrive, //最后到店时间
+				device_id: _car.device_id||0, //设备ID
+				maintain_last_mileage: _car.maintain_last_mileage||"", //最后保养里程
+				mileage: _car.mileage||"", //当前里程
+				last_arrive: _car.last_arrive||"", //最后到店时间
 				exp_reason: W("#mark_box textarea").value//异常原因			
 			}
 			Wapi.user.createException(function(res){

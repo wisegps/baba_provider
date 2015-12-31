@@ -18,9 +18,12 @@
  *      条件参数: key=value, 比如obj_id=1
  *      fields: 返回字段, 格式为key1,key2,key3, 比如cust_id,cust_name
  * list接口参数格式:
+ *      * list接口参数格式:
  *      查询参数:
  *          一般格式: key=value
  *          模糊搜索: key=^value, 比如obj_name=^粤B1234
+ *          比较搜索: key=>value, <value, <=value, >=value
+ *          或搜索: key=value1|value2|value3|...|value
  *          时间段: key=begin_time@end_time, 比如create_time=2015-11-01@2015-12-01
  *      fields: 返回字段, 格式为key1,key2,key3, 比如cust_id,cust_name
  *      sorts: 排序字段, 格式为key1,key2,key3, 如果为倒序在字段名称前加-, 比如-key1,key2
@@ -28,7 +31,6 @@
  *      min_id: 本页最小分页ID
  *      max_id: 本页最大分页ID
  *      limit: 返回数量
- *
  * 访问信令access_token:
  *      除了个别接口, 大部分的接口是需要传入access_token, 开发者需要在登录之后保存access_token,
  *      之后在调用其他接口的时候传入, access_token的有效期为24小时, 过期之后需要重新获取.

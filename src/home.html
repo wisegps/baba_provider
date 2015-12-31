@@ -18,6 +18,7 @@
 		<script>link("W.css")</script>
 		
 		<script src="../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../wslib/toolkit/WxSdk.js" defer="defer"></script>
 	</head>
 	<style>
 		body{text-align: center;}
@@ -158,11 +159,18 @@
 		</div>
 	</body>
 	<script>
+		function doubleClickBack(){
+			//实现双击返回关闭应用
+			history.pushState(null,"close","close");
+			history.pushState(null,"closeWindow","closeWindow");
+			history.pushState(null,"home.html","home.html");
+		}
 		window.addEventListener("DOMContentLoaded",function(){
 			//页面加载完
 			getShopData();//获取并展示店铺当天数据（包括店铺图片）
 			addEvent();
 			W(".shop_name").innerText=_user.cust_name;
+			doubleClickBack();
 		})
 		//监听 html加载完成事件
 		window.addEventListener("load",function(){
@@ -184,6 +192,7 @@
 			W.dom.search.addEvent("click",openView);
 			W.dom.home.addEvent("click",function(){
 				window.plus.webview.currentWebview().show();
+				doubleClickBack();
 			});
 			
 			var cards=W(".card",true);
@@ -194,14 +203,25 @@
 			window.addEventListener("popstate",function(){
 				var ref=location.href.split("/").pop();
 				var t=W(".mui-active");
-				t.classList.remove("mui-active");
-				if(ref.indexOf(".html"))
+				if(t)
+					t.classList.remove("mui-active");
+				if(ref.indexOf(".html")){
+					if(ref=="closeWindow"){
+						W.toast("再返回一次退出应用");
+						setTimeout("history.go(1)",5000);
+					}else if(ref=="close"){
+						if(WiStorm.agent.weixin&&W.native)
+							W.native.close();
+						else{
+							history.go(1);
+						}
+					}
 					t=W.dom.home;
-				else if(ref=="msg")
+				}else if(ref=="customer_advisory.html")
 					t=W.dom.msg;
-				else if(ref=="setting")
+				else if(ref=="settings.html")
 					t=W.dom.setting;
-				else
+				else 
 					return;
 				t.classList.add("mui-active");
 				W.dom.nav.style.display="block";
@@ -238,7 +258,7 @@
 		function showWeb(){//显示预加载的页面
 			var badge=this.querySelector(".W-badge.W-mini-badge");
 			if(badge)
-				badge.remove();
+				badge.parentElement.removeChild(badge);
 			history.pushState(null,"home.html","home.html");
 			window.plus.webview.show(this.id+".html");
 		}

@@ -282,6 +282,8 @@
 					band += res[i].brand + ",";
 					bandId += res[i].brandId + ",";
 				}
+				band=band.slice(0,-1);
+				bandId=bandId.slice(0,-1);
 				W("#car_brand").value = band;
 				W("#car_brand").dataset.brand = bandId;
 			}

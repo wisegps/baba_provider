@@ -25,68 +25,6 @@
 
 		<script src="../wslib/api/Wapi.js" defer="defer"></script>
 	</head>
-
-	<body>
-		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
-			<h1 class="mui-title">新增客户</h1>
-		</header>
-		<div class="mui-content">
-			<center>
-				<form style="font-size: 16px;padding: 0 1.2em;">
-					<div class="mui-input-row">
-						<label>车牌号</label>
-						<div class="input">
-							<div class="s_div">
-								<span class="s"></span>
-								<span id="short_province" class="s_text">粤</span>
-							</div>
-							<input type="text" id="car_number" placeholder="888888" required="required">
-						</div>
-
-					</div>
-					<div class="mui-input-row">
-						<label>车架号</label>
-						<input type="text" id="vehicle_number" placeholder="请输入车架号" required="required">
-					</div>
-
-					<div class="mui-input-row" id="car_picker">
-						<label>车型</label>
-						<input type="text" placeholder="请选择车型" class="value c" name="carType" id="car_type" value="" readonly="true" />
-
-					</div>
-
-					<div class="mui-input-row">
-						<label>行驶里程</label>
-						<input type="number" placeholder="请输入行驶里程" class="value c" name="mileage" id="mileage" value="" required="required" />
-					</div>
-
-					<div class="mui-input-row">
-						<label>客户名称</label>
-						<input type="text" placeholder="请输入客户名称" class="value c" name="cust_name" id="cust_name" value="" required="required" />
-					</div>
-
-					<div class="mui-input-row">
-						<label>手机号</label>
-						<input type="tel" placeholder="请输入客户手机号" class="value c" name="phone" id="mobile" value="" required="required" />
-					</div>
-
-					<div class="mui-input-row" id="arrive">
-						<label>确认到店</label>
-						<div class="mui-switch mui-switch-mini">
-							<div class="mui-switch-handle"></div>
-						</div>
-					</div>
-
-					<div>
-						<button id="save" type="button" class="mui-btn mui-btn-block w">保存</button>
-					</div>
-
-				</form>
-
-			</center>
-		</div>
-	</body>
 	<style type="text/css">
 		body {
 			background: white;
@@ -179,12 +117,73 @@
 			font-size: 16px;
 		}
 	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<h1 class="mui-title">新增客户</h1>
+		</header>
+		<div class="mui-content">
+			<center>
+				<form style="font-size: 16px;padding: 0 1.2em;">
+					<div class="mui-input-row">
+						<label>车牌号</label>
+						<div class="input">
+							<div class="s_div">
+								<span class="s"></span>
+								<span id="short_province" class="s_text">粤</span>
+							</div>
+							<input type="text" id="car_number" placeholder="888888" required="required">
+						</div>
+
+					</div>
+					<div class="mui-input-row">
+						<label>车架号</label>
+						<input type="text" id="vehicle_number" placeholder="请输入车架号" required="required">
+					</div>
+
+					<div class="mui-input-row" id="car_picker">
+						<label>车型</label>
+						<input type="text" placeholder="请选择车型" class="value c" name="carType" id="car_type" value="" readonly="true" />
+
+					</div>
+
+					<div class="mui-input-row">
+						<label>行驶里程</label>
+						<input type="number" placeholder="请输入行驶里程" class="value c" name="mileage" id="mileage" value="" required="required" />
+					</div>
+
+					<div class="mui-input-row">
+						<label>客户名称</label>
+						<input type="text" placeholder="请输入客户名称" class="value c" name="cust_name" id="cust_name" value="" required="required" />
+					</div>
+
+					<div class="mui-input-row">
+						<label>手机号</label>
+						<input type="tel" placeholder="请输入客户手机号" class="value c" name="phone" id="mobile" value="" required="required" />
+					</div>
+
+					<div class="mui-input-row" id="arrive">
+						<label>确认到店</label>
+						<div class="mui-switch mui-switch-mini">
+							<div class="mui-switch-handle"></div>
+						</div>
+					</div>
+
+					<div>
+						<button id="save" type="button" class="mui-btn mui-btn-block w">保存</button>
+					</div>
+
+				</form>
+
+			</center>
+		</div>
+	</body>
 	<script type="text/javascript">
 		//完善资料
 		//监听 html加载完成事件 
 		var updateCustId = ""; //待更新的客户id
 		var updateObjId = "";
-		var toPage = "customer_leave.html";
+		var toPage = "car_manage.html";
 		window.addEventListener("DOMContentLoaded", function() {
 			var mSession = _g;
 			if (mSession.intent != "edit") {
@@ -196,6 +195,7 @@
 			//修改标题
 			W("title").innerText = "完善资料";
 			W(".mui-title").innerText = "完善资料";
+			W("#mobile").parentElement.style.display="none";
 			//获取本地数据存储路径
 			var dataPath = mSession.params;
 			var obj = W.ls(dataPath);
@@ -224,6 +224,18 @@
 			W("#car_type").value = carName;
 			W("#arrive").hidden = true;
 		});
+		if(_g.obj_name){
+			var num,s;
+			if(/^[\u4e00-\u9fa5]+/i.test(_g.obj_name)){
+				s=_g.obj_name.slice(0,1);
+				num=_g.obj_name.slice(1);
+				W("#short_province").innerText=s;
+			}else{
+				num=_g.obj_name;
+			}
+			W("#car_number").value=num;
+		}
+			
 		W("#save").addEvent("click", add); //点击保存
 		/**
 		 * undifine 空值处理
@@ -261,6 +273,7 @@
 				ui_checkInBtn.showBox.call(c);
 				commit_customer.mode = "2"; // 创建模式 1:仅仅创建用户 2:同时创建用户,车辆,到店记录
 				commit_customer.if_arrive = "1"; //是否到店,/1 则需要传入到店类型和备注,/0 则不需要
+				toPage = "customer_leave.html";//如果是确认到店，则保存后跳转到“到店离店”
 			} else {
 				commit_customer.mode = "1";
 				commit_customer.if_arrive = "0";
@@ -313,8 +326,10 @@
 				var ele = eles[i];
 				if (!ele.checkValidity()) {
 					var text = W.parents(ele, ".mui-input-row").querySelector("label").innerText;
-					W.toast(text + "不能为空");
-					return;
+					if(text!="手机号"||_g.intent!="edit"){
+						W.toast(text + "不能为空");
+						return;
+					}
 				}
 			}
 			var seller_id = W.getSetting("user").cust_id;
@@ -349,20 +364,24 @@
 			commit_customer.mileage = mileage;
 			if (_g.intent == "edit") {
 				//完善资料接口
-				commit_customer.cust_id = updateCustId;
-				Wapi.user.update(callback, commit_customer);
+				callback._canLeave=0;
+				commit_customer._cust_id = updateCustId;
+				
+				delete commit_customer.mobile;
 				delete commit_customer.business_content;
 				delete commit_customer.business_type;
 				delete commit_customer.constructor;
 				delete commit_customer.cust_type;
 				delete commit_customer.if_arrive;
 				delete commit_customer.mode;
-				delete commit_customer.mobile;
 				delete commit_customer.seller_id;
+				
+				Wapi.user.update(callback, commit_customer);
 				commit_customer._obj_id = updateObjId;
-				Wapi.vehicle.update(function(res) {}, commit_customer);
+				Wapi.vehicle.update(callback, commit_customer);
 			} else {
 				//新增客户接口
+				callback._canLeave=1;
 				Wapi.user.create(callback, commit_customer);
 			}
 		}
@@ -372,8 +391,11 @@
 		 */
 		function callback(res) {
 			if (res.status_code == 0) {
-				history.pushState(null, "home.html", "home.html");
-				location = toPage;
+				callback._canLeave++;
+				if(callback._canLeave>1){
+					history.pushState(null, "home.html", "home.html");
+					location = toPage;
+				}
 			} else {
 				W.errorCode(res);
 			}
