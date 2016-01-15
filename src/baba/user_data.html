@@ -1,0 +1,381 @@
+<!--
+	作者：小刘
+	时间：2015-12-30
+	描述：用户资料
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>我的资料</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		<script src="../../wslib/api/Wapi.js"></script>
+	</head>
+	<style>
+		body {
+			background-color: #f0f0f0;
+			font-size: 13px;
+		}
+		.mui-content{line-height: 2.4em;}
+		.mui-pull-left,.mui-pull-right{
+		    color: #000;
+		    font-size: 14px;
+		    padding: 0.8em 10px;			
+		}
+		.nop{padding: 0;}
+		.shop {
+			width: 100%;
+			background: white;
+			margin-bottom: 10px;
+			margin-top: 10px;
+			padding: 10px;
+			
+		}
+		.shop_logo{
+			vertical-align: sub;
+		}
+		.div_account {
+			width: 100%;
+			background: white;
+			margin-bottom: 10px;
+			margin-top: 10px;
+		}
+		
+		.div_others {
+			width: 100%;
+			background: white;
+			margin-bottom: 10px;
+			margin-top: 10px;
+		}
+		
+		.shop_infos {
+			width: 60%;
+			display: inline-block;
+			vertical-align: bottom;
+		}
+		
+		.shop_info {
+		    width: 100%;
+			display: block;
+			padding:0 10px;
+			line-height: 1.5em;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space:nowrap; 
+		}
+		.shop_logo img{
+		    width: 100px;
+		    height: 62px;			
+		}
+		#img_logo {
+			width: 60px;
+			height: 60px;
+			vertical-align: bottom;
+		}
+		
+		#cust_name {
+			font-size: 15px;
+			color: black;
+		}
+		
+		.setting {
+			width: 100%;
+			padding:7px 10px;
+		}
+		
+		label {
+			color: #999999;
+		}
+		
+		hr {
+			color: #eeeeee;
+			opacity: 0.1;
+			background: #000000;
+			margin-left: 10px;
+			margin: 0;
+		}
+		.fr{float: right;}
+		#picture{font-size: 16px;}
+		input[type=text]{margin: 0;height:21px;padding: 0;text-indent: 10px;font-size: 12px;}
+		.hide{display: none;background-color: white;}
+		.mui-input-row:last-child{background-color: white;}
+		#submit{width: 100%;margin-top: 2.8em;}
+		#submit p{width: 85%;background-color:#50B7DE ;color:white;margin: 0 8%;text-align: center;border-radius: .3em;padding:.4em 0;}
+		.mui-radio input[type=radio]:before{font-size:20px;}
+		.nodice{background-color:#f0f0f0 ;width: 100%;height: 10px;}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav nop">
+			<a class="mui-pull-right">编辑</a>
+			<a class="mui-pull-left">取消</a>
+			<h1 class="mui-title">我的资料</h1>
+		</header>
+		<div class="mui-content">
+			<div class="shop">
+				<span class="shop_logo"><a href="#picture"><img id="img_logo" src="" onerror="javascript:this.src=&quot;../../img/shop.jpg&quot;"/></a></span>
+				<span class="shop_infos"> 
+					<label class="shop_info hide_data" id="cust_name"></label>
+					<label class="shop_info hide_data" id="address"></label>
+					<label class="shop_info hide_data" id="phone"></label>
+					<input type="text" name="cust_name" class="hide shop_info" maxlength="20" placeholder="修改姓名"/>
+					<input type="text" name="address" class="hide shop_info" placeholder="修改描述" />
+					<input type="text" name="phone" maxlength="11" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" class="hide shop_info" placeholder="修改电话" />
+				</span>
+			</div>
+			<div class="div_account">
+				<div class="setting">
+					<label class="label">我的账号</label>
+					<label class="value" style="float: right;">13212313</label>
+				</div>
+				<div class="setting">
+					<label class="label">性别</label>
+					<span class="hide_data sex fr">男</span>
+				</div>
+				<div  class="hide mui-input-row mui-radio">
+					<label>男</label>
+					<input type="radio" name="man" value="男" checked="checked"/>
+				</div>
+				<div  class="hide mui-input-row mui-radio">
+					<label>女</label>
+					<input type="radio" name="man"  value="女"/>											
+				</div>
+				<div class="nodice"></div>
+				<div class="setting" id="baba">
+					<label class="label">关于叭叭</label>
+					<span class="mui-icon mui-icon-arrowright fr" style="color: #ccc;"></span>
+				</div>
+		</div>
+			<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+						<!--<a href="#file" style="z-index: 1;">选择照片</a>-->
+						<label for="inputf" style="color:inherit ;">		
+								选择文件
+								<input type="file" capture="camera" id="inputf" name="inputf" style="display: none;"accept="image/*" onchange="fileUpload(this)"/>
+						</label>
+					</li>
+				</ul>
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+						<a href="#picture">取消</a>
+					</li>
+				</ul>
+			</div>	
+			<div id="submit" class="hide"><p>保存</p></div>
+		</div>
+		<div class="child_view" id="about" style="display: none;position: fixed;">
+			<header class="mui-bar mui-bar-nav">
+				<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+				<h1 class="mui-title">关于叭叭</h1>
+			</header>
+		    <div class="" style="text-align: center;padding-top: 50px;">
+		      <img src="../../img/icon_new.png" style="width:40%;margin-top: 2em;">
+		      <div style="position: fixed;width: 100%;top: 50%;color: #4EA153;font-weight: 700;font-size: 15px;">叭叭车主版</div>
+		      <div style="  position: fixed;width: 100%;bottom: 0;line-height: 3em;">
+		        <a href="http://www.bibibaba.cn" style="color: #4EA153;" target="_blank">http://www.bibibaba.cn</a>
+		        <h6 style="color: #aaa;margin-bottom: 20px;">Copyright@2014 Bibibaba Inc.</h6>
+		      </div>
+		    </div>
+	  </div>
+	</body>
+	<script>
+	window.addEventListener("W.loginSuccess",function(){
+		W(".mui-pull-right").addEvent('click',showInput);
+		W(".mui-pull-left").addEvent('click',hideInput);
+		W("#baba").addEvent('click',show);
+		W('.mui-icon-left-nav').addEvent('click',hide);
+		W("#submit").addEvent('click',setuserdata);
+		W("#img_logo").src=_user.logo;
+		setuser();	
+	});
+/**
+ * 设置用户资料  
+ */
+	function setuser(){
+		var account=W.getSetting("account");
+		var user =_user;
+		if(user.tel)
+			W("#phone").innerHTML = user.tel;
+		else
+			W("#phone").innerHTML ="联系电话未填写";
+		
+		if(user.remark)
+			W("#address").innerHTML = user.remark;
+		else
+			W("#address").innerHTML ="简介未填写";
+		
+		if(user.cust_name)
+			W("#cust_name").innerHTML = user.cust_name;
+		else
+			W("#cust_name").innerHTML ="用户名未填写";
+		
+		if(account)
+			W(".value").innerHTML = account;
+		else
+			W(".value").innerHTML ="";
+		if(user.sex)
+			W(".sex").innerHTML =user.sex;
+		else
+			W(".sex").innerHTML ="男";
+	}
+/**
+ * 保存提交数据
+ */
+	function setuserdata(){
+		var uName,profile,phone,sex,selectvalue=null;
+		uName = W("[name=cust_name]").value;
+		profile = W("[name=address]").value;
+		phone = W("[name=phone]").value;
+		sex = W("[type=radio]",true);
+		if(uName!=null && uName!=""){
+            for(var i=0;i<sex.length;i++){
+                if(sex[i].checked==true) {
+                     selectvalue=sex[i].value;
+                     break;
+                }
+            }			
+            
+			var data ={
+					cust_id:_user.cust_id,
+					access_token:_user.access_token,				
+					cust_name:uName,
+					remark:profile,
+					tel:phone			
+				}
+			Wapi.user.update(function (res){
+				if(res.status_code==0){
+					_user.cust_name=uName;
+					_user.remark=profile;
+					_user.tel=phone;	
+					_user.sex=selectvalue;
+					W.setSetting("user",_user);
+					hideInput();				//设置成功隐藏input
+					setuser();					//设置成功后替换当前的用户资料；
+				}
+			},data);
+		}else{
+			W.toast('用户名未填写');
+		}
+	}
+/**
+ * 点击编辑 显示输入框  修改资料
+ */
+	function showInput(){
+		W("[name=cust_name]").value=_user.cust_name;
+		W("[name=address]").value=_user.remark;
+		W("[name=phone]").value=_user.tel;
+		var hide_data=W(".hide_data",true);
+		for(var i=0;i<hide_data.length;i++){
+			hide_data[i].style.display='none';
+		}
+		var hide=W(".hide",true);
+		for(var i=0;i<hide.length;i++){
+			hide[i].style.display='block';
+		}
+		W("#submit").style.display='block';
+		W("#submit").style.backgroundColor='#f0f0f0';
+	}
+/**
+ * 取消编辑
+ */
+	function hideInput(){
+		var hide_data=W(".hide_data",true);
+		for(var i=0;i<hide_data.length;i++){
+			hide_data[i].style.display='block';
+		}
+		var hide=W(".hide",true);
+		for(var i=0;i<hide.length;i++){
+			hide[i].style.display='none';
+		}
+		W("#submit").style.display='none';		
+	}
+/**
+ * 照片上传
+ * @param {Object} h
+ */
+	function fileUpload(h){
+/**
+ * 选择图片前 把遮罩隐藏
+ */
+		W("#picture").style.display='none';
+		W("#picture").className='mui-popover mui-popover-action mui-popover-bottom';
+		document.body.removeChild(W(".mui-backdrop"));
+		
+		if(!h.files.length){
+			W.toast("未选择文件");
+			return;
+		}
+		var type;
+	    type=h.value.slice(-3).toLocaleLowerCase();
+		var file =h.files[0];
+	    if((type!="jpg"&&type!="png")){
+	        h.value="";
+	        h.files=null;
+	        W.alert("抱歉，仅支持的jpg或png图片");
+	        return;
+	    }
+		var fr= new FileReader();
+		fr.onload = function (e){
+			W("#img_logo").src=this.result;
+		}
+		fr.readAsDataURL(file);
+/**
+ * 图片上传成功后弹出提示成功
+ */
+		fileUpload.code=1;//利用方法的全局调用 直接给方法添加属性 可以避免命名污染  
+		W.loading("正在上传文件，请稍等");
+		W.fileApi.upload(function (res){
+			W.loading();
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			fileUpload.code=2;
+			var data ={
+				cust_id:_user.cust_id,
+				access_token:_user.access_token,	
+				logo:res.image_file_url
+			}
+			Wapi.user.update(function (res){
+				if(res.status_code==0){
+					_user.logo=res.image_file_url;//更新服务器的user
+					W.setSetting("user",_user);
+				}
+			},data);
+		},file);
+
+	}
+	
+	window.addEventListener('popstate',function(){
+		hide();
+	});
+/**
+ * 显示与隐藏关于页面
+ */	
+	function show(){
+		showNav();
+		W(".child_view").style.display='block';
+		history.pushState(null,"user_data.html","user_data.html");
+	}
+	function hide(){
+		showNav(true);
+		W(".child_view").style.display='none';				
+	}
+	
+	function showNav(show){
+		if(top==window)
+			return;
+		if(show)
+			plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="block";');
+		else
+			plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="none";');
+	}
+	</script>
+</html>

@@ -438,13 +438,14 @@ W.ajax=function(url,options) {
 	jsonConcat(json,options);
 	jsonConcat(headers,options.headers);
 	
+	json.type=json.type.toUpperCase();
     var data="";
     if(json.data){
 	    for (items in json.data){
 			data+="&"+items+"="+json.data[items];
 		}
 		if(json.type=="GET")
-			json.url+="?"+data;
+			json.url+="?"+data.slice(1);
     }
 	
 	var xmlhttp=new XMLHttpRequest();
@@ -852,6 +853,11 @@ W.toast=function(str){
 		if(obj._show){
 			obj.waiting.push(str);
 		}else{
+			if(W("input:focus")){
+				obj.style.top="20%";
+			}else{
+				obj.style.top="70%";
+			}
 			obj.innerText=str;
 			obj.show();
 			setTimeout("W.toastBox.hide()",5000);
@@ -873,6 +879,11 @@ W.toast=function(str){
 			}
 		};
 		obj._show=true;
+		if(W("input:focus")){
+			obj.style.top="20%";
+		}else{
+			obj.style.top="70%";
+		}
 		document.body.appendChild(obj);
 		W.toastBox=obj;
 		setTimeout("W.toastBox.hide()",5000);
@@ -1139,7 +1150,7 @@ W.encoded=function(str){
 }
 
 W.logout=function(){
-	W.setCookie("auth_code","",1);
+	W.setCookie("access_token","");
 	W.setSetting("user",null);
 	W.setSetting("pwd",null);
 	W._login=false;
@@ -1243,9 +1254,9 @@ if(!WiStorm.isWeb){
  */
 W._getSeting();
 var _user=W.getSetting("user");
-if(_user){
+if(_user&&W.getCookie("access_token")){
 	W._login=true;
-	_user.access_token=W.getSetting("access_token");
+	_user.access_token=W.getCookie("access_token");
 }else 
 	W._login=false;
 
@@ -1513,7 +1524,7 @@ W.login=function(){
 				if (json.status_code == 1) {//未绑定
 					if(_g.intent!="bind"){
 						W.alert("未绑定帐号，请先绑定",function(){
-							top.location=WiStorm.root+"index.html"+location.search;
+							top.location=WiStorm.root+"src/temp_user.html?intent=logout";
 						});
 					}
 					return;
@@ -1524,7 +1535,7 @@ W.login=function(){
 			} else {
 				//登录成功
 				W.setSetting("openId",_g.open_id);
-				W.setSetting("access_token", json.access_token);
+				W.setCookie("access_token", json.access_token,1);
 				W.userApi.getUser(function(res) {//获取用户数据
 					if (res.status_code) {
 						W.alert(res.err_msg+"；获取用户信息失败；error_code:"+res.status_code);

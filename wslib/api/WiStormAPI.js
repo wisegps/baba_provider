@@ -123,13 +123,14 @@ WiStormAPI.prototype.ajax=function(url,options) {
 	this.jsonConcat(json,options);
 	this.jsonConcat(headers,options.headers);
 	
+	json.type=json.type.toUpperCase();
     var data="";
     if(json.data){
 	    for (items in json.data){
 			data+="&"+items+"="+json.data[items];
 		}
 		if(json.type=="GET")
-			json.url+="?"+data;
+			json.url+="?"+data.slice(1);
     }
 	
 	var xmlhttp=new XMLHttpRequest();

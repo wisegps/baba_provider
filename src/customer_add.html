@@ -254,7 +254,11 @@
 		ui_carSeries.finish = function(res) {
 			//选择完车型，返回车的json
 			ui_carSeries.box.hide();
-			var carName = res.series + " " + res.type;
+			var carName;
+			if(res.series!=res.type)
+				carName=res.series+" "+res.type;
+			else
+				carName=res.type;
 			W("#car_type").value = carName;
 			commit_customer.car_brand_id = res.brandId; //品牌ID
 			commit_customer.car_brand = res.brand;

@@ -137,11 +137,15 @@ var device = new Schema({
     refuel_second_quantiy:Number, //第二次加油量
     total_traffic: Number,        //每月总的流量
     remain_traffic: Number,       //剩余流量
-    params: {},
+    params: {
+    	air_speed,//速度
+    	air_mode,//运行模式
+    	switch,//开关状态
+    },
     active_gps_data: {
         //        device_id:String,
-        //        lon:Number,
-        //        lat:Number,
+        //        lon:Number,//经纬度
+        //        lat:Number,//经纬度
         //        speed:Number,
         //        direct:Number,
         //        gps_flag:Number,
@@ -162,13 +166,15 @@ var device = new Schema({
         //        rev_lon:Number,
         //        rev_lat:Number,
         //        b_lon:Number,
-        //        b_lat:Number
+        //        b_lat:Number,
+        //        air:Number
     },
     is_online: Boolean,      //是否在线
     signal_level: Number,    //信号强度
     device_flag: Number,     //0: 静止  1：运行  2：设防  3：报警
     stealth_mode: Number,    //是否隐身 1：隐身  0：不隐身
     active_obd_err: [],      //最新obd故障码['P2011', 'P2000']
+    active_obd_data: {},               //最新obd标准数据：电瓶电压，节气门开度，发动机转速，水温，三元催化器温度，剩余油量，环境温度，大气压力，进气压力，进气温度，燃油压力，发动机负载，长期燃油修正，点火提交角
     //{
     //   dpdy: 5,      //电瓶电压 V
     //   jqmkd: 10,    //节气门开度 %
@@ -185,7 +191,6 @@ var device = new Schema({
     //   cqryxz: 100,  //长期燃油修正
     //   dhtqj: 30     //点火角提前 °
     //}
-    active_obd_data: {},               //最新obd标准数据：电瓶电压，节气门开度，发动机转速，水温，三元催化器温度，剩余油量，环境温度，大气压力，进气压力，进气温度，燃油压力，发动机负载，长期燃油修正，点火提交角
     last_drive_score: Number,          //最新驾驶得分 满分：100
     //{
     //    lt_dpdy: Number,                  //长期电瓶电压检测值 10-15V  取最近10天日行程超过2公里的数据

@@ -1,0 +1,804 @@
+<!--
+	作者：小吴
+	时间：2016-01-04
+	描述：空气净化设置，指数
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>我的主页</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		<script src="../../wslib/api/Wapi.js"></script>
+		<script src="../../wslib/toolkit/WCharts.js"></script>
+		<script src="../../wslib/ui/DateTime.js"></script>
+	</head>
+	<style>
+		@font-face{
+			font-family: fantasy;
+			src: url('img/impact.ttf')
+		}
+		.control{
+			display: table;
+			margin: auto;
+			text-align: center;
+		}
+		.control>div{
+			display: table-cell;
+			padding: .5em 1em;
+			width: 25%;
+		}
+		.control img{
+			width: 3em;    
+			border-radius: 50%;
+    		box-shadow: 1px 2px 10px rgba(0,0,0,.3);
+    	}
+    	.control img:active{
+    		box-shadow: 1px 2px 5px rgba(0,0,0,.5);
+    	}
+		#logo{
+		    text-align: center;
+		    height: 0;
+		    padding: 0;
+		    border: none;
+		}
+		#logo_img{
+			width: 80px;
+		    height: 80px;
+		    border-radius: 50%;
+		    box-shadow: 0 0 0 3px #fff;
+		    position: relative;
+		    top: -40px;
+		}
+
+		#set_card{background: #efefef;position: fixed;padding-top:44px}
+		.mui-table-view-cell{padding: 1em;}
+		.mui-table-view-cell>*{vertical-align:middle}
+		.mui-table-view-cell>img{width: 1.5em;margin-right: .3em;}
+		#time{
+			width: 6em;
+			height: auto;
+		    padding: 0 .5em;
+		    border: none;
+		    margin: 0;
+		    color: #268FF9;
+		    vertical-align: bottom;
+		}
+		.time{
+		    display: table;
+		    width: 100%;
+		}
+		.time>label{
+			display: table-cell;
+			position: relative;
+		}
+		#time_land{color: #268FF9;}
+		#timing_btn{
+			width: 6em;
+			margin-bottom: .5em;
+			display: none;
+		}
+		
+		
+		.new_air{
+			background: #fff;
+			margin-bottom: 40px;
+			text-align: center;
+		}
+		.new_air>div:not(.control){
+			border-bottom: 1px solid #ccc;
+		}
+		.mui-slider .mui-slider-group .mui-slider-item .title>img{
+			width: 30px;
+		    vertical-align: middle;
+		    margin-left: .5em;
+		}
+		.air_content>div{
+			display: inline-block;
+			width: 50%;
+			text-align: center;
+			height: 40vw;
+		}
+		.air_img{
+			background-size: 100%;
+		}
+		.air_text{
+			vertical-align: top;
+			white-space: nowrap;
+			position: relative;
+		}
+		.air_text h3{
+			font-weight: 100;
+			display: inline;
+			font-size: 20px;
+			margin-right: .5em;
+		}
+		.small{
+			font-size: .75em;
+			color: #999;
+		}
+		.avg_air{
+			height: 1em;
+		    color: #2DBDEA;
+		    font-size: 3.5em;
+		    font-family: fantasy;
+		    font-weight: 100;
+		}
+		
+		
+		
+		
+.loader {
+	position: relative;
+	top: 5vw;
+    width: 30vw;
+    height: 30vw;
+    border-radius: 50%;
+    perspective: 800px;
+    color: #5bc0de;
+    margin: auto;
+    transition: color .5s;
+	-webkit-transition: color .5s;
+}
+.inner {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+.inner.one {
+    left: 0%;
+    top: 0%;
+    animation: rotate-one 10s linear infinite;
+    -webkit-animation: rotate-one 10s linear infinite;
+    border-bottom: 6px solid;
+}
+.inner.two {
+    right: 0%;
+    top: 0%;
+    animation: rotate-two 10s linear infinite;
+    -webkit-animation: rotate-two 10s linear infinite;
+    border-right: 6px solid;
+}
+.inner.three {
+    right: 0%;
+    bottom: 0%;
+    animation: rotate-three 10s linear infinite;
+    -webkit-animation: rotate-three 10s linear infinite;
+    border-top: 6px solid;
+}
+
+.speed0>.inner{
+	color: #aaa;
+    animation-play-state:paused;
+	-webkit-animation-play-state:paused;
+}
+.speed1>.inner{
+	animation-duration:6s;
+    -webkit-animation-duration:6s
+}
+.speed2>.inner{
+	animation-duration:1.5s;
+    -webkit-animation-duration:1.5s
+}
+.speed3>.inner{
+	animation-duration:.8s;
+    -webkit-animation-duration:.8s
+}
+@keyframes rotate-one {
+    0% {transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg);}
+    100% {transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg);}
+}
+@keyframes rotate-two {
+    0% {transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg);}
+    100% {transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg);}
+}
+@keyframes rotate-three {
+    0% {transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg);}
+    100% {transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg);}
+}
+
+
+@-webkit-keyframes rotate-one {
+    0% {-webkit-transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg);}
+    100% {-webkit-transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg);}
+}
+@-webkit-keyframes rotate-two {
+    0% {-webkit-transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg);}
+    100% {-webkit-transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg);}
+}
+@-webkit-keyframes rotate-three {
+    0% {-webkit-transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg);}
+    100% {-webkit-transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg);}
+}
+
+
+#air_history{
+	height: 200px;
+}
+.air_title{
+	padding: .8em .5em;
+	line-height: 1em;
+}
+.air_title>span{
+	width: 1em;
+	height: 1em;
+	display: inline-block;
+	border-radius: 2px;
+	vertical-align:bottom;
+}
+	</style>
+	<body>
+		
+		<div class="mui-content">
+			<div class="new_air">
+				<div class="air_title">
+					空气质量
+					<span style="background: #5cb85c;"></span>
+					<span style="background: #5bc0de;"></span>
+					<span style="background: #f0ad4e;"></span>
+					<span style="background: #d9534f;"></span>
+				</div>
+				<div id="slider" class="mui-slider" >
+					<div id="air_list" class="mui-slider-group">
+					</div>
+				</div>
+				
+				<div class="control">
+					<div id="switch">
+		              	<img src="img/1_r5_c1.png">
+		            </div>
+		            <div id="speed_but">
+		              	<img src="img/1_r5_c13.png">
+		            </div>
+		            <div id="setting">
+		              	<img src="img/1_r5_c11.png">
+		            </div>
+				</div>
+			</div>
+			<div id="logo">
+				<img id="logo_img" />
+			</div>
+			<div style="padding-top: 40px;background: #fff;">
+				<div id="air_history">
+					<div class="null_tip">
+						<h1>NULL</h1>
+						<p><label class="tip_text">该设备无历史记录</label></p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="set_card" class="child_view hide">
+			<div class="mui-bar mui-bar-nav onshadow">
+				<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+				<h1 class="mui-title">设置</h1>
+			</div>
+			<div>
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+						<span>智能模式</span>
+						<div class="mui-switch mui-active" id="mode_auto" data-val="1">
+							<div class="mui-switch-handle"></div>
+						</div>
+					</li>
+					<li class="mui-table-view-cell">
+						<span>定时开启净化</span>
+						<div class="mui-switch" id="mode_timing" data-val="2">
+							<div class="mui-switch-handle"></div>
+						</div>
+					</li>
+					<div id="timing">
+						<li class="mui-table-view-cell" id="time_li">
+							<img src="img/2_r5_c1.png"/>
+							<span>每日定时开启</span>
+							<script id="time" value="08:30">echo(new TimeSelector())</script>
+							<span class="mui-icon mui-icon-arrowright" style="float: right;"></span>
+						</li>
+						<li class="mui-table-view-cell">
+							<img src="img/2_r7_c1.png"/>
+							<span>净化时长:</span>
+							<span id="time_land">30</span>
+							<span>分钟</span>
+						</li>
+						<div class="mui-input-range" style="padding: 0 1.5em;text-align: right;">
+				            <div class="time">
+								<label style="left: -1em;text-align: left;" data-val = "30">30分钟</label>
+								<label style="text-align: center;"data-val = "60">60分钟</label>
+								<label style="text-align: right;left: .5em;"data-val = "90">90分钟</label>
+								<label style="text-align: right;left: 1em;"data-val = "120">120分钟</label>
+							</div>
+							<input type="range" id="time_range" min="30" max="120" value="30">
+							<button type="button" class="mui-btn mui-btn-primary" id="timing_btn">保存</button>
+				        </div>
+					</div>
+
+				</ul>
+			</div>
+		</div>
+	</body>
+	<script for="获取数据">
+		var device_list;//用户的设备数组
+		var device_i=0;//当前正在显示的设备在device_list中的索引
+		var get_device_data,get_device_op={
+			fields:'device_id,serial,cust_id,cust_name,device_type,sim,status,active_time,params,active_gps_data.lon,active_gps_data.lat,active_gps_data.air,active_obd_data.dpdy'
+		}
+		var dom={
+			list:W("#air_list"),
+			'switch':W("#switch"),
+			mode:W("#mode"),
+			setting:W("#setting"),
+			speed_but:W("#speed_but"),
+			set:W("#set_card"),
+			time:W("#time"),
+			range:W("#time_range"),
+			time_land:W("#time_land"),
+			mode_auto:W("#mode_auto"),
+			mode_timing:W("#mode_timing"),
+			timing:W("#timing"),
+			timing_btn:W("#timing_btn")
+		}
+		window.addEventListener("W.loginSuccess",function(){
+			//获取设备
+			get_device_data={
+				cust_id:_user.cust_id,
+				access_token:_user.access_token
+			}
+			getDevices();
+			addEvent();//给相关元素添加事件监听
+			W("#logo_img").src=_user.logo;
+		});
+		window.addEventListener("popstate",function(){
+			dom.set.hide();
+		});
+		
+		
+		//获取并展示用户设备
+		function getDevices(){
+			Wapi.user.getDeviceList(function(res){
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				if(!res.data.length){
+					return;//如果没有设备则不执行下面
+				}
+				res.data.reverse();//颠倒顺序
+				
+				if(getDevices.first){
+					var list = document.createDocumentFragment();
+					for(var i=0;i<res.data.length;i++){
+						list.appendChild(new newAir(res.data[i]));
+					}
+					device_list=res.data;
+					getDevices.first=false;
+					dom.list.innerHTML="";
+					dom.list.appendChild(list);
+					mui('#slider').slider();
+					getWeather();//获取定位和室外空气
+					getAirHistory();//获取空气日曲线
+				}else{
+					for(var i=0;i<res.data.length;i++){
+						if(i>=device_list.length)
+							dom.list.appendChild(new air(res.data[i]));
+						else
+							dom.list.childNodes[i].setData(res.data[i]);
+						device_list[i]=res.data[i];
+					}
+				}
+				setDeviceStatus(getDevices.first);
+				setTimeout(getDevices,5000);
+			},get_device_data,get_device_op);
+		}
+		getDevices.first=true;
+		
+		function getWeather(){
+			//获取定位和室外空气
+			var data=device_list[device_i];//当前显示设备的数据
+			var lat=data.active_gps_data.lat;
+			var lon=data.active_gps_data.lon;
+			var url="http://api.map.baidu.com/geocoder/v2/?ak=DjMyWnXm12o3esdcWR8gIQLm&output=json&pois=1&callback=renderOption&location="+lat+","+lon;
+			var temS=document.createElement("script");
+			temS.src=url;
+			W("head").appendChild(temS);
+		}
+		
+		//获取到地址
+		function renderOption(res){
+			if(res.status){
+				W.alert("获取位置信息出错；错误码："+res.status);
+				return;
+			}
+			var city=res.result.addressComponent.city;
+			var city_data={
+				"city":city.slice(0,-1)
+			}
+			Wapi.base.getWeather(function(res){
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				var thisView=dom.list.childNodes[device_i];
+				thisView.querySelector("[name='outdoor']").innerText=res.quality;
+			},city_data);
+		}
+		
+		
+		function addEvent(){
+			dom.switch.addEvent("click",onOff);//开关
+			dom.setting.addEvent("click",showSetting);//打开设置页
+			dom.speed_but.addEvent("click",setSpeed);//设置速度
+			dom.set.show=function(){//设置页打开方法
+				this.classList.add("fromRight");
+				this.classList.remove("hide");
+				this.classList.remove("toRight");
+			}
+			dom.set.hide=function(){//隐藏页的方法
+				this.classList.remove("fromRight");
+				this.classList.add("toRight");
+			};
+			
+			W("#time_li").addEvent("click",function(){//选择定时时间的行
+				var evt = document.createEvent("MouseEvents");
+				evt.initMouseEvent("tap", false,false);
+				dom.time.dispatchEvent(evt);
+				
+				var evt1 = document.createEvent("MouseEvents");
+				evt1.initMouseEvent("click", false,false);
+				dom.time.dispatchEvent(evt1);
+			});
+			dom.range.addEvent("change",function(){//滑块
+				var val=dom.range.value;
+				val=Math.round(val/30)*30;
+				dom.time_land.innerText=dom.range.value=val;
+				dom.timing_btn.style.display="inline-block";
+			});
+			dom.time.addEvent("click",function(){
+				dom.timing_btn.style.display="inline-block";
+			});
+			
+			var temD=W(".time>label",true);//选择定时时长
+			for(var i=0;i<temD.length;i++){
+				temD[i].addEvent("click",getTime);
+			}
+			
+			dom.mode_auto.addEvent("click",settingMode);
+			dom.mode_timing.addEvent("click",settingMode);
+			dom.timing_btn.addEvent("click",saveTiming);
+			
+			W('.mui-slider').addEvent('slide', function(event) {
+				device_i=event.detail.slideNumber;//滑动切换车辆
+				setDeviceStatus(true);//更改设置状态（参数为true，说明需要把设置页的定时时间和时长也做更改）
+				getWeather();//获取定位和室外空气
+				getAirHistory();//获取空气日曲线
+			});
+		}
+		
+		function settingMode(){//设置页里的模式更改
+			var val=this.getAttribute("data-val");
+			if(!this.classList.contains("mui-active")){
+				val=0;
+			}
+			setDevice("air_mode",val);
+		}
+		
+		function getTime(){//滑块数值显示
+			var val=this.getAttribute("data-val");
+			dom.time_land.innerText=dom.range.value=val;
+		}
+		
+		function saveTiming(){//保存定时信息
+			var time=dom.time.value;
+			var duration=dom.range.value;
+			var data=device_list[device_i];//当前显示设备的数据
+			if(!data){
+				W.toast("当前无设备数据");
+				return;
+			}
+			var d={
+				access_token:_user.access_token,
+				device_id:data.device_id,
+				cmd_type:0x4044,
+				params:{
+					air_time:time,
+					air_duration:duration
+				}
+			}
+			this.style.display="none";
+			Wapi.device.createCommand(function(res){
+				if (res && res.status_code) {
+					dom.timing_btn.style.display="inline-block";
+					W.errorCode(res);
+					return;
+				}
+				W.toast("已保存");
+			},d);
+		}
+		
+		
+		//设置当前设备的按钮状态
+		function setDeviceStatus(first){
+			if(device_i<0){
+				return;
+			}
+			var data=device_list[device_i];//当前显示设备的数据
+			var air_view=dom.list.childNodes[device_i];//当前显示设备的卡片
+			if(!air_view.canChange){
+				return;
+			}
+			
+			var simg=dom.switch.querySelector("img");
+			if(data.params.switch){//开关
+				simg.src="img/1_r3_c1.png";
+			}else{
+				simg.src="img/1_r5_c1.png";
+			}
+			
+			if(data.params.air_mode==1){
+				dom.mode_timing.classList.remove("mui-active");
+				dom.mode_auto.classList.add("mui-active");
+				dom.timing.classList.add("glass");
+			}else if(data.params.air_mode==2){
+				dom.mode_auto.classList.remove("mui-active");
+				dom.mode_timing.classList.add("mui-active");
+				dom.timing.classList.remove("glass");
+			}else{
+				dom.mode_auto.classList.remove("mui-active");
+				dom.mode_timing.classList.remove("mui-active");
+				dom.timing.classList.add("glass");
+			}
+			
+			var tem0=dom.mode_auto.querySelector("div");
+			var tem1=dom.mode_timing.querySelector("div");
+			tem0.style.transform='';
+			tem0.style.webkitTransform='';
+			tem1.style.transform='';
+			tem1.style.webkitTransform='';
+			
+			if(first){
+				dom.time.value=data.params.air_time||dom.time.value;
+				dom.time_land.innerText=dom.range.value=data.params.air_duration||dom.time_land.innerText;
+			}
+		}
+		
+		//发送对应指令操作开关，模式，速度,传入要调节的字段名str,要设置的值val,不传为加1
+		function setDevice(str,val){
+			var define={
+				'switch':{
+					type:0x4043,//指令类型
+					m:2,//指令档位
+					os:0//档位偏移
+				},
+				'air_speed':{
+					type:0x4045,
+					m:3,
+					os:1
+				},
+				'air_mode':{
+					type:0x4044,
+					m:3,
+					os:0
+				}
+			};//
+			var a=define[str];
+			if(!a||!device_list||device_list.length<1)return;
+			
+			var data=device_list[device_i];//当前显示设备的数据
+			if(!data){
+				W.toast("当前无设备数据");
+				return;
+			}else if(str=="switch"&&data.active_obd_data.dpdy<11){
+				W.toast("电瓶电压小于11V，无法开关");
+				return;
+			}
+			var nowVal=data.params[str];//当前的值，指令发送失败回滚时使用
+			var air_view=dom.list.childNodes[device_i];//当前显示设备的卡片
+			var d={
+				access_token:_user.access_token,
+				device_id:data.device_id,
+				cmd_type:a.type,
+				params:{}
+			}
+			if(typeof val=='undefined'){
+				val=(data.params[str]-a.os+1)%a.m+a.os;
+			}
+			d.params[str]=val;
+			var nowVal=data.params[str];
+			data.params[str]=d.params[str];
+			air_view.canChange=true;
+			air_view.setData(data);
+			setDeviceStatus();//设置开关，模式，速度
+			air_view.canChange=false;
+			clearTimeout(air_view.timeOut);
+			air_view.timeOut=setTimeout(function(){
+				air_view.canChange=true;
+			},5000);
+			if(str=="air_mode"&&d.params.air_mode==2){
+				data.params.air_time=d.params.air_time=dom.time.value;//定时模式需要把定时时间和时长传过去
+				data.params.air_duration=d.params.air_duration=dom.range.value;
+			}
+			console.log(val);
+			Wapi.device.createCommand(function(res){
+				if (res && res.status_code) {
+					W.errorCode(res);
+					data.params[str]=nowVal;
+					setDeviceStatus();//设置开关，模式，速度
+					air_view.setData(data);
+					return;
+				}
+			},d);
+		}
+		
+		function onOff(){
+			//开关当前设备
+			setDevice("switch");
+		}
+		function setMode(){
+			//设置模式
+			setDevice("air_mode");
+		}
+		function setSpeed(){
+			//调节速度
+			setDevice("air_speed");
+		}
+		function showSetting(){
+			//展示设置页
+			history.pushState(null,"air_home.html","air_home.html");
+			dom.set.show();
+		}
+	</script>
+	<script for="空气组件定义">
+		function newAir(data){
+			var obj=new WiStormUI("div");//创建一个div组件
+			obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+			
+			obj.className="mui-slider-item";//设置div的class属性
+			obj.id="id_"+data.device_id;
+			
+			obj.canChange=true;//表示可以被自动刷新更改
+			obj.setData(data);//设置obj的内容,setData()在下面cv.prototype中定义
+			return obj;//最后记得要返回组件
+		}
+		newAir.prototype.setData=function(data){
+			if(!this.canChange){
+				return;
+			}
+			var speed=data.params.air_speed||1,closed=" speed0";
+			if(data.params.switch){
+				closed="";
+			}
+					
+			var air_desc="优",color="#5cb85c";
+			var a=data.active_gps_data.air||0;
+			if(a<=1300){
+			    air_desc="优";
+			    color="#5cb85c"
+		    }else if(a<=1500){
+			    air_desc="良";
+			    color="#5bc0de"
+			}else if(a<=2000){
+			    air_desc="中";
+			    color="#f0ad4e"
+			}else{
+			    air_desc="差";
+			    color="#d9534f"
+			}
+			if(this.innerHTML){
+				this.querySelector("[name='air_desc']").innerText=air_desc;
+				this.querySelector(".avg_air").innerText=a;
+				var lo=this.querySelector(".loader");
+				
+				lo.style.color=color;
+				if(this.data._speed!=speed||(!lo.classList.contains("speed0")&&closed)){//如果速度改变了，重新构造一个旋转组件
+					var newLo=document.createElement("div");
+					newLo.className="loader speed"+speed+closed;
+					newLo.style.color=color;
+					newLo.innerHTML='<div class="inner one"></div><div class="inner two"></div><div class="inner three"></div>';
+					lo.parentElement.replaceChild(newLo,lo);
+				}else if(!closed){
+					lo.classList.remove("speed0");
+				}
+			}else{
+				this.innerHTML='<div class="title"><span>'+data.obj_name+'</span><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png"></div><div class="air_content"><div class="air_text"><div><h3><span name="air_desc">'+air_desc+'</span><span class="small">(车内)</span></h3><h3><span name="outdoor">良</span><span class="small">(车外)</span></h3></div><h1 class="avg_air center">'+a+'</h1></div><div class="air_img"><div class="loader speed'+speed+closed+'" style="color:'+color+'"><div class="inner one"></div><div class="inner two"></div><div class="inner three"></div></div></div></div>';
+			}
+			data._speed=speed;
+			this.data=data;
+		}
+	</script>
+	<script>
+		//折线图样式
+		var option = {
+		    title : {
+		        x:'center',
+		        textStyle:{
+		        	fontFamily:"微软雅黑",
+		        	fontWeight:"normal",
+		        	fontSize:16
+		        }
+		    },
+		    tooltip : {
+		        trigger: 'item'
+		    },
+		    grid:{
+		    	x:35,
+		    	y:40,
+		    	x2:35,
+		    	y2:40,
+		    	borderWidth:0
+		    },
+		    yAxis : [
+		        {
+		            type : 'value',
+		            splitLine:{
+		            	show:true,
+		            	lineStyle:{
+		            		color:"#eee"
+		            	}
+		            }
+		        }
+		    ],
+		    xAxis:[{
+	            type : 'category',
+	            boundaryGap : false,
+	            splitLine:{
+	            	show:false
+	            },
+	        }],
+		    series:[{
+	            type:'line',
+	            smooth:true,
+	            symbol:'none',
+	            itemStyle: {normal: {areaStyle: {type: 'default',color:"rgba(27,158,208,0.4)"},lineStyle:{width:0}}},
+	        }]
+		};
+		
+		function getAirHistory(){
+			var car=device_list[device_i];//当前显示设备的数据
+			var end=new Date();
+			var start=new Date();
+			start.setDate(start.getDate()-7);
+			var startTime=start.WtoString().slice(0,10);
+			var endTime=end.WtoString().slice(0,10);
+			var data={
+				access_token:_user.access_token,
+				serial: car.serial,
+				rcv_day:startTime+"@"+endTime
+			};
+			var op={
+				fields:'rcv_day,avg_air',
+			}
+			Wapi.device.getDayTripList(function(res){
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				var data=res.data;
+				if(!data.length){
+					W(".null_tip").style.display="block";
+					return;
+				}else{
+					W(".null_tip").style.display="none";
+				}
+				var x=[];
+				var airList=[],temD="";
+				for(var i=0;i<data.length;i++){
+					temD=data[i].rcv_day.slice(5,10);
+					airList.push(data[x].total_distance);
+					x.push(temD);
+				}
+				option.title.text="里程(km)";
+		        option.xAxis[0].data=x;
+				option.series[0].data=airList;
+				var myChart = echarts.init(W('#air_history'));
+				myChart.setOption(option); 
+			},data,op)
+		}
+	</script>
+</html>

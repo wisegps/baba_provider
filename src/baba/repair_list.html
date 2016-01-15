@@ -1,7 +1,7 @@
 <!--
-	作者：cyy
-	时间：2015-11-11
-	描述：客户到店/离店
+	作者：小吴
+	时间：2015-12-30
+	描述：维修记录
 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -11,30 +11,25 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
 
-		<title>客户到店/离店</title>
-		<!--必须最先引入WiStorm.js文件-->
-		<script src="../wslib/WiStorm.js"></script>
+		<title>维修记录</title>
+		<script src="../../wslib/WiStorm.js"></script>
 		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
-		<!--使用link()引入css文件，无需写路径，直接写文件名即可,尽量少引入css，样式如果少（小于10k为少），
-		可以直接写在style元素里，放到body元素后面-->
 		<script>
 			link("W.css")
 		</script>
+		<script src="../../wslib/api/Wapi.js"></script>
+
 		<script>
 			link("ui.css")
 		</script>
-
-		<!--其他js文件需在css文件后面引入，如果是在加载完页面之后才会用到的，使用defer属性异步加载;或者直接放到body后面；
-			同样尽量少引入js文件；
-			现在接口可能需要你们自己封装，参考wslib/api/WUserApi.js里的封装方式
-			-->
-		<script src="../wslib/api/Wapi.js" defer="defer"></script>
 		<!--默认的同步加载js（用于加载有严格加载顺序的外部js文件）-->
-		<script src="../wslib/ui/WiStormUI.js"></script>
-		<script src="../wslib/ui/DateTime.js"></script>
-		<script src="ui/ui.js"></script>
-		<script src="js/string_factory.js"></script>
+		<script src="../../wslib/ui/WiStormUI.js"></script>
+		<script src="../../wslib/ui/DateTime.js"></script>
+		<script src="../ui/ui.js"></script>
+		<script src="../js/string_factory.js"></script>
+
 	</head>
 	<style>
 		body {
@@ -88,98 +83,43 @@
 			font-size: small;
 		}
 		
-		.tab_inout {
-			display: table;
+		.title_img {
+			width: 2em !important;
+			vertical-align: middle;
+		}
+		
+		.mui-slider {
 			background: white;
-			width: 100%;
-			margin-bottom: 12px;
-			margin-top: 12px;
-			padding: 13px;
-		}
-		
-		.tab_item {
-			display: table-cell;
+			margin-top: 1px;
 			text-align: center;
+			padding: 10px;
 		}
 		
-		.tab_item>label {
-			padding: 7px;
-			border-bottom: 1.5px #50b7de solid;
-			font-size: medium;
-		}
+		.title_brand {}
 	</style>
+
 	<body>
-		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left" href="home.html"></a>
-			<a class="mui-icon w_icon icon_add mui-pull-right btn_customer_add"></a>
-			<h1 class="mui-title">客户到店/离店</h1>
+		<header class="mui-bar mui-bar-nav noshadow">
+			<h1 class="mui-title">维修记录</h1>
 		</header>
 		<div class="mui-content">
-			<center>
-				<div class="preview">
-					<div class="t_row">
-						<div class="t_cell">
-							<label class="t_value" id="arrive_today">0</label>
-							<br/>
-							<label class="t_label">
-								今日到店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="leave_today">0</label>
-							<br/>
-							<label class="t_label">
-								今日离店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="review_today">0</label>
-							<br/>
-							<label class="t_label">
-								今日评价
-							</label>
-						</div>
 
-					</div>
-					<div class="t_row">
-						<div class="t_cell">
-							<label class="t_value" id="arrive_month">0</label>
-							<br/>
-							<label class="t_label">
-								当月到店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="leave_month">0</label>
-							<br/>
-							<label class="t_label">
-								当月离店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="review_month">0</label>
-							<br/>
-							<label class="t_label">
-								当月评价
-							</label>
-						</div>
-					</div>
+			<div class="mui-slider">
+				<div class="mui-slider-group" id="car_group">
+
 				</div>
-
-			</center>
-			<div class="tab_inout">
-				<div style="display: table-row;">
-					<div class="tab_item" data-value="1" onclick="change(this)">
-						<label id="label_in" class="total_number">在店(0)</label>
-					</div>
-
-					<div class="tab_item" data-value="2|3" onclick="change(this)">
-						<label id="label_out" class="total_number" style="border-color: white">离店(0)</label>
-					</div>
-				</div>
-
 			</div>
-			<div class="condition" hidden="true">
+
+			<div class="mui-slider-item car" id="car_tmp" hidden="true">
+				<div class="title_brand">
+					<img class="title_img" src="http://img.wisegps.cn/logo/m_8_100.png" onerror='javascript:this.src="../img/icon_car_moren.png"'>
+					<label name="car_brand">粤B614D1</label>
+					<label class="repair_count">(0)</label>
+				</div>
+				<h4 name="car_name">小狮子</h4>
+			</div>
+
+			<div class="condition">
 				<div class="duration_div">
 					<center>
 
@@ -210,9 +150,11 @@
 			<div id="car_list"></div>
 
 			<div id="car_list_left"></div>
-			<div class="null_tip" id = "null_tip" >
+			<div class="null_tip" id="null_tip">
 				<h1>NULL</h1>
-				<p ><label class="tip_text"></label></p>
+				<p>
+					<label class="tip_text"></label>
+				</p>
 			</div>
 
 		</div>
@@ -244,9 +186,7 @@
 				</tr>
 				<tr>
 					<td name="comment"><span class="name">评价:</span>
-						<span class="value" id="evaluate_level">
-								<span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-star-filled"></span><span class="mui-icon mui-icon-starhalf"></span>
-						</span>
+						<span class="value"></span>
 					</td>
 				</tr>
 			</table>
@@ -289,22 +229,18 @@
 				<button type="button" class="mui-btn mui-btn-primary" name="immediate_leave">直接离店</button>
 			</footer>
 		</div>
-
 	</body>
 	<script>
-		W(".btn_customer_add").addEventListener("click", function() {
-			location = "customer_add.html";
-			return;
-		});
 		var StateCode = {
 			arrived: "1",
 			left: "2|3"
 		};
-		var CarState = StateCode.arrived; //全局变量，离店，到店标识
 		
-		var showTipType = "5";//提示类型
+		var slider_index = 0;
+		var CarState = StateCode.left; //全局变量，离店，到店标识
+		var showTipType = 0; //提示类型
 		var param = {
-			parent_cust_id: _user.cust_id,
+			cust_id: _user.cust_id,
 			max_id: 0,
 			access_token: _user.access_token
 		};
@@ -316,22 +252,84 @@
 		var dom_left = {
 			max_id: 0
 		};
-		window.addEventListener("DOMContentLoaded", function() {
+		window.addEventListener("W.loginSuccess", function() {
 			//页面加载完
-			getShopData(); //获取并展示店铺当天、当月数据getBusinessData
-			getBusinessData(CarState);
+			
 			W("#begin_time").addEvent("change", function() {
 				select(4);
 			});
 			W("#end_time").addEvent("change", function() {
 				select(4);
 			});
-			W(".w_icon.icon_add").addEvent();
+			var data = {
+					cust_id: _user.cust_id,
+					access_token: _user.access_token
+				}
+				//调用接口，获取用户车辆,并绘制到页面上
+			W.userApi.getVehicleList(makeCarList, data);
 		});
-		/**
-		 * 到店离店切换
-		 * @param {Object} obj
-		 */
+
+		function makeCarList(res) {
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			var cars = res.data;
+			var list = document.createDocumentFragment();
+			for (var i = cars.length - 1; i >= 0; i--) {
+				list.appendChild(new car(cars[i]));
+			}
+			W("#car_group").appendChild(list);
+			//获得slider插件对象
+			var gallery = mui('.mui-slider');
+			gallery.slider({
+				interval: 0 //自动轮播周期，若为0则不自动播放，默认为0；
+			});
+			document.querySelector('.mui-slider').addEventListener('slide', function(event) {
+				//注意slideNumber是从0开始的；
+				
+				var index = event.detail.slideNumber;
+				slider_index = index;
+				var group = event.target.firstElementChild;
+				var data = group.childNodes[index + 1].data;
+				param.obj_id = data.obj_id;
+				select(showTipType);
+				
+				
+			});
+			
+			
+			//车辆轮滑列表 第一次显示，
+			if (cars.length > 0) {
+				param.obj_id = cars[cars.length-1].obj_id;
+				select(showTipType);
+				
+				//getBusinessData(CarState);
+			}
+		}
+
+		function car(data) {
+			var car = new WiStormUI("div"); //创建一个div组件
+			car.merge(this);
+			car.className = "mui-slider-item car";
+			car.setData(data);
+			return car;
+		}
+		//给组件添加对象方法
+		car.prototype.getData = function() {
+			return this.data;
+		}
+		car.prototype.setData = function(data) {
+				this.innerHTML = W("#car_tmp").innerHTML;
+				initText(this, "car_brand", data.obj_name);
+				initText(this, "car_name", data.nick_name);
+				this.getElementsByTagName('img')[0].src="http://img.wisegps.cn/logo/m_"+data.car_brand_id+"_100.png";
+				this.data = data;
+			}
+			/**
+			 * 到店离店切换
+			 * @param {Object} obj
+			 */
 		function change(obj) {
 			W("#null_tip").style.display = "none";
 			var v = obj.getAttribute("data-value");
@@ -390,8 +388,8 @@
 			initText(this, "business_type", $BizType(data.business_type));
 			initText(this, "arrive_time", $T(data.arrive_time));
 			initText(this, "leave_time", $T(data.leave_time));
-			initLeaveEvent(this, data.business_id, data.obj_id, data.business_type, data.mileage);
 			this.querySelector("table").addEvent("click", cv.toDetail).obj_id = data.obj_id;
+		
 			//this.querySelector(".edit").addEvent("click",cv.editData); //给其中的按钮添加点击事件监听，使用cv.editData来处理点击事件
 			this.data = data; //直接把数据缓存进入组件（按需求，如果数据是需要重复用的就这样缓存）
 		}
@@ -421,55 +419,6 @@
 			}
 		}
 		/**
-		 * 设置点击离开事件
-		 * @param {Object} ctx
-		 * @param {Object} business_id
-		 */
-		function initLeaveEvent(ctx, business_id, obj_id, business_type, mileage) {
-			var finish_leave = ctx.querySelector("[name= finish_leave]");
-			var immediate_leave = ctx.querySelector("[name= immediate_leave]");
-			//完工离开
-			if (finish_leave != null) {
-				var data_leave = {
-					_business_id: business_id,
-					access_token: _user.access_token,
-					obj_id: obj_id,
-					mileage: mileage
-				};
-				finish_leave.data_leave = data_leave;
-				finish_leave.data_leave.status = "2";
-				finish_leave.addEvent("click", leave);
-			}
-			//直接离开
-			if (immediate_leave != null) {
-				var data_leave = {
-					_business_id: business_id,
-					access_token: _user.access_token,
-					obj_id: obj_id,
-					mileage: mileage
-				};
-				immediate_leave.data_leave = data_leave;
-				immediate_leave.data_leave.status = "3";
-				immediate_leave.addEvent("click", leave);
-			}
-		}
-		/**
-		 * 离店
-		 */
-		function leave() {
-			var data = this.data_leave;
-			data.leave_time = getFullCurrentTime();
-			Wapi.vehicle.updateBusiness(function(res) {
-				if (res && res.status_code) {
-					W.errorCode(res);
-					return;
-				}
-				dom_arrived.max_id = 0;
-				getShopData(); //获取并展示店铺当天、当月数据getBusinessData
-				getBusinessData(CarState);
-			}, data);
-		}
-		/**
 		 * 
 		 * 设置评价等级
 		 * @param {Object} level
@@ -497,7 +446,6 @@
 				if (!dom_left.car_list) {
 					dom_left.car_list = W("#car_list_left");
 				}
-				
 				refresh(dom_left, res);
 			} else {
 				if (!dom_arrived.car_list) {
@@ -511,6 +459,8 @@
 		function refresh(dom, res) {
 			var resData = res.data;
 			var target = dom.car_list;
+			
+			showCount(res.total)
 			//重置清空数据
 			if (dom.max_id == 0) {
 				while (target.hasChildNodes()) //当div下还存在子节点时 循环继续
@@ -531,18 +481,15 @@
 					dom.max_id = data.business_id;
 				}
 			}
-			
 			/**
 			 * 数据不为空，隐藏提示信息
 			 */
 			if (target.data.length > 0) {
 				W("#null_tip").style.display = "none";
-			}else{
+			} else {
 				W("#null_tip").style.display = "block";
 				showTip();
 			}
-			
-			
 			if (res.total > target.data.length) {
 				var autoLoad;
 				if (target.autoLoad) {
@@ -559,6 +506,17 @@
 				delete target.autoLoad;
 			}
 			target.appendChild(list); //把整个列表添加到页面
+			
+			
+		}
+		
+		
+		function showCount(total){
+			var eles = document.getElementsByClassName("repair_count");
+			
+			var ele = eles[slider_index];
+			ele.innerText = "(" + total + ")";
+			
 		}
 		/**
 		 * 
@@ -568,12 +526,9 @@
 		function getBusinessData(status, begin_time, end_time) {
 			param.status = status; //状态 1:在店 2:离店;
 			param.query_type = status; //状态 1:在店 2:离店;
-			
-			
-			if(status==1){
+			if (status == 1) {
 				showTipType = 5;
 			}
-			
 			//			param.begin_time = begin_time;
 			//			param.end_time = end_time;
 			if (begin_time != undefined) {
@@ -586,7 +541,7 @@
 			}
 			Wapi.vehicle.getBusinessList(function(res) {
 				var carList = res.data;
-				setTotalText(res.total);
+				//setTotalText(res.total);
 				showMore(res);
 			}, param);
 		}
@@ -601,58 +556,9 @@
 			}
 			WVehicleApi.prototype.getBusinessList(function(res) {
 				var carList = res.data;
-				setTotalText(res.total);
+				//setTotalText(res.total);
 				showMore(res);
 			}, param);
-		}
-		/**
-		 * 设置在店离店总数（total）
-		 * @param {Object} total
-		 */
-		function setTotalText(total) {
-			if (CarState == StateCode.arrived) {
-				W("#label_in").innerText = "在店(" + total + ")";
-			} else {
-				W("#label_out").innerText = "离店(" + total + ")";
-			}
-		}
-		/**
-		 * 调用api获取店面当天/当月信息并显示
-		 */
-		function getShopData() {
-			var begin_time = new Date();
-			var end_time = begin_time.WtoString();
-			begin_time.setHours(0, 0, 0, 0);
-			var data = {
-				begin_time: begin_time.WtoString(),
-				end_time: end_time,
-				access_token: _user.access_token,
-				parent_cust_id: _user.cust_id
-			}
-			W.userApi.getBusinessTotal(function(res) {
-				W("#arrive_today").innerText = res.arrive_count;
-				//今天离店人数
-				var leaveNumber = res.leave_count;
-				W("#leave_today").innerText = leaveNumber;
-				W("#label_out").innerText = "离店(" + leaveNumber + ")";
-				W("#review_today").innerText = res.evaluate_count;
-			}, data);
-			//月到店离店
-			var begin_time = new Date();
-			var end_time = begin_time.WtoString();
-			begin_time.setDate(1);
-			begin_time.setHours(0, 0, 0, 0);
-			var dataMonth = {
-				begin_time: begin_time.WtoString(),
-				access_token: _user.access_token,
-				end_time: end_time,
-				parent_cust_id: _user.cust_id
-			}
-			W.userApi.getBusinessTotal(function(res) {
-				W("#arrive_month").innerText = res.arrive_count;
-				W("#leave_month").innerText = res.leave_count;
-				W("#review_month").innerText = res.evaluate_count;
-			}, dataMonth);
 		}
 		/**
 		 * 点击时间段标签(今天0，1周1，1个月2，自选3，日期选择4)
@@ -699,11 +605,10 @@
 					break;
 			}
 			if (index != 4) {
-				W("#end_time").value = getFullCurrentTime();
+				W("#end_time").value = getFullCurrentTime().slice(0,10);
 			}
 			var begin = W("#begin_time").value + " 00:00:00";
-			var end = W("#end_time").value;
-			
+			var end = W("#end_time").value+" 23:59:59";
 			showTipType = index;
 			getBusinessData(StateCode.left, begin, end);
 		}
@@ -712,14 +617,14 @@
 		 */
 		function showTip() {
 			W("#null_tip").style.display = "block";
-			var t0 = "您好，当天还没有离店车辆";
-			var t1 = "您好，本周还没有离店车辆";
-			var t2 = "您好，本月还没有离店车辆";
-			var t3 = "您好，该时段还没有离店车辆";
-			var t4 = "您好，该时段还没有离店车辆";
-			var t5 = "您好，您目前还没有在店车辆，客户都去哪儿了";
-			var tips = new Array(t0, t1, t2, t3, t4,t5);
-			W(".tip_text").innerText= tips[showTipType];
+			var t0 = "您好，当天还没有维修记录";
+			var t1 = "您好，本周还没有维修记录";
+			var t2 = "您好，本月还没有维修记录";
+			var t3 = "您好，该时段还没有维修记录";
+			var t4 = "您好，该时段还没有维修记录";
+			var t5 = "您好，您目前还没有维修记录";
+			var tips = new Array(t0, t1, t2, t3, t4, t5);
+			W(".tip_text").innerText = tips[showTipType];
 		}
 	</script>
 

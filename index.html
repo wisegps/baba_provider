@@ -12,7 +12,7 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 
-		<title>叭叭商户版</title>
+		<title>叭叭</title>
 		<script src="wslib/WiStorm.js"></script>
 		<script>link("W.css")</script>
 		<script src="wslib/api/Wapi.js"></script>
@@ -76,6 +76,7 @@
 			var pwd = W.getSetting("pwd");
 			var account=W.getSetting("account");
 			var openId = _g.open_id;
+			var cust_type=2;//用户类型，[0：无车]，[1：车主]，[2：服务商]
 			if(openId)
 				W.setCookie("__login_redirect_uri__","");
 			function success(json){
@@ -96,11 +97,11 @@
 						W.setSetting("pwd",pwd);
 						W.setSetting("account",account);
 					}
-					W.setSetting("access_token", json.access_token);
+					W.setCookie("access_token", json.access_token,1);
 					W.userApi.getUser(function(res) {
 						W.loading();
 						if (res.status_code) {
-							W.alert(res.msg+"获取用户信息失败");
+							W.alert("错误码："+res.status_code+"；获取用户信息失败");
 							W.loading();
 							return;
 						} else {
@@ -142,7 +143,7 @@
 								W("#login_but").innerText = "绑定叭叭账号";
 								
 								success=function(data){
-									W.userApi.update(bind,{"login_id":openId,"cust_id":data.cust_id,"access_token":W.getSetting("access_token")});
+									W.userApi.update(bind,{"login_id":openId,"cust_id":data.cust_id,"access_token":W.getCookie("access_token")});
 								}
 								return;
 							}else{
@@ -255,14 +256,32 @@
 	</body>
 	<script for="login">
 		W.dom.login_f=W("#login_form");
+		var rf=W.dom.register_f=W("#register_form");
+		W.dom.showBut=W("[data-show]",1);
+		var _temId="";
+		for(var i=W.dom.showBut.length-1;i>=0;i--){
+			W.dom.showBut[i].addEvent("click",show);
+			_temId=W.dom.showBut[i].getAttribute("data-show");
+			W.dom[_temId]=W("#"+_temId);
+		}
+		delete _temId;
 		
+		if(_g.type=="user"){
+			rf.querySelector(".w_icon.icon_store_management").className="w_icon icon_merchant";
+			rf.querySelector("[name='cust_name']").placeholder="用户名";
+			W.setCookie("__login_redirect_uri__","src/baba/air_home.html",-30);
+			cust_type=1;
+		}
 		//如果意图是忘记密码，则弹出忘记密码view
 		if(_g.intent=="forget"){
 			W("#forget").classList.remove("hide");
 			W("#forget").querySelector(".W_back").addEvent("click",function(){
 				plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="block";');
 			})
+		}else if(_g.intent=="register"){
+			show.call(W("[data-show='register']"));
 		}
+		
 		//如果非微信环境并且没有意图，则自动登录
 		if(!WiStorm.agent.weixin&&account&&pwd&&!_g.intent){
 			W.dom.login_f.querySelector("[name='account']").value=account;
@@ -301,15 +320,6 @@
 			this.parentElement.classList.remove("active");
 		}
 		
-		W.dom.showBut=W("[data-show]",1);
-		var _temId="";
-		for(var i=W.dom.showBut.length-1;i>=0;i--){
-			W.dom.showBut[i].addEvent("click",show);
-			_temId=W.dom.showBut[i].getAttribute("data-show");
-			W.dom[_temId]=W("#"+_temId);
-		}
-		delete _temId;
-		
 		//登录
 		W("#login_but").addEvent("click",login);
 		//监听地址变化，切换view
@@ -338,7 +348,6 @@
 		}
 	</script>
 	<script for="register">
-		var rf=W.dom.register_f=W("#register_form");
 		//检测手机是否已注册
 		function checkMobile(){
 			var v=W.trim(this.value);
@@ -549,28 +558,41 @@
 					return;
 			}
 			W.loading("注册中...请稍候");
-			var data={
+			var reg_data={
 				mobile:W.dom.mi.value,
 				valid_code:W.dom.ci.value,
 				password:W.dom.rp.value,
 				valid_type:1
 			}
+			pwd = reg_data.password;
+			account=reg_data.mobile;
 			W.userApi.register(function(json){
 				if(json.status_code){
 					W.loading();
 					W.errorCode(json);
 					return;
 				}else{
-					var data={
-						cust_name:W.dom.ni.value
-					}
-					if(openId){
-						data.qq_login_id=openId;
-						data.logo=_g.headimgurl;
-					}
-					W.userApi.update(registerSuccess,data);//更新用户名等资料
+					W.userApi.login(function(res){//先调用登录接口获取到access_token才能更新其他信息
+						if(json.status_code){
+							W.loading();
+							W.errorCode(json);
+							return;
+						}
+						var data={
+							access_token: res.access_token,
+							_cust_id:res.cust_id,
+							cust_name:W.dom.ni.value,
+							'cust_type':cust_type,
+							seller_id:0
+						}
+						if(openId){
+							data.login_id=openId;
+							data.logo=_g.headimgurl;
+						}
+						W.userApi.update(registerSuccess,data);//更新用户名等资料
+					},{account: account,password: pwd});
 				}
-			},data);
+			},reg_data);
 		}
 		
 		W.dom.rb=rf.querySelector("button").addEvent("click",register);

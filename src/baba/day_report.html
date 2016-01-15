@@ -1,0 +1,134 @@
+<!--
+	作者：小刘
+	时间：2017-12-30
+	描述：每日行车报告
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>每日行车报告</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+		<script src="../../wslib/api/Wapi.js"></script>
+		<script src="../ui/ui.js"></script>
+	</head>
+	<style>
+		body{	
+			background-color: #f0f0f0;
+			font-size: 13px;
+			text-align: center;
+		}
+		.tab{display: table;width: 100%;}
+		.tab_gro{display: table-row;background-color: white;}
+		.tab_gro div{display: table-cell;padding: 10px 0;border-bottom: 1px solid #ccc;}
+		.tab_gro div img{vertical-align: text-bottom;}
+		.n_borbot div{border-top: 1px solid #ccc;}
+		.mileage{color: #66C6E9;}
+		.consumption {color: #FF7102;}
+		.date{color: #999;}
+		.air{color: #96D44B;}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav noshadow">
+			<h1 class="mui-title">每日行车报告</h1>
+		</header>
+		<div class="mui-content">
+			<div class="tab">
+				<div class="tab_gro n_borbot">
+					<div>日期</div>
+					<div><img src="img/ico_drive_distance.png" width="15" height="16" adivgn="absbottom" />里程</div>
+					<div><img src="img/ico_drive_gas_total.png" width="15" height="16" align="absbottom" />油耗</div>
+					<div><img src="img/ico_drive_gas_avg.png" width="15" height="16" align="absbottom" />平均油耗</div>
+					<div><img src="img/ico_drive_green.png" width="15" height="16" align="absbottom" />空气指数</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+	var dom={},MIN_ID;
+	window.addEventListener("W.loginSuccess",function(){
+		mileageCar();
+	});
+	/**
+	 * 行车报告组件
+	 */
+		function bg(data){
+			var obj = new WiStormUI('div');
+			obj.merge(this);
+			obj.className='tab_gro';
+			obj.setData(data);
+			return obj;
+		}
+		bg.prototype.setData=function (data){
+			var air;
+			if(!data.avg_air)
+				air='无数据';
+			else
+				air= data.avg_air;
+			this.innerHTML='<div class="date">'+data.rcv_day.slice(5,10)+'</div><div class="mileage">'+data.total_distance.toFixed(1)+'km</div><div class="consumption">'+data.total_fuel.toFixed(1)+'L</div><div class="average">'+data.avg_fuel.toFixed(1)+'L/100km</div><div class="air">'+air+'</div>';
+			this.data=data;
+		}
+		function mileageCar(){
+			var data={
+				serial:_g.serial,
+				access_token:_user.access_token,	
+				min_id:MIN_ID
+			}
+			if(!MIN_ID)
+				delete data.min_id;
+			var op={
+				fields:'day_trip_id,rcv_day,total_distance,total_fuel,avg_fuel,avg_air',
+				sorts:'-day_trip_id',
+				page:'day_trip_id',
+				limit:'20'
+			}
+			Wapi.device.getDayTripList(show,data,op);
+		}
+/**
+ * 行车报告的主要
+ */
+		function show(res){
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+		 	MIN_ID =res.data[res.data.length-1].day_trip_id;
+			if(!dom.tab)
+				dom.tab=W(".tab");
+			if(!dom.tab.data)
+				dom.tab.data= new Array();
+			var list = document.createDocumentFragment();
+			for (var i=0;i<res.data.length;i++) {
+				list.appendChild(new bg(res.data[i]))
+				dom.tab.data.push(res.data[i]);
+			}
+	
+			if(res.total>dom.tab.data.length){
+					var autoLoad;						//把加载的存起来		
+					if(dom.tab.autoLoad){
+						autoLoad=dom.tab.autoLoad;
+					}else if(WiStorm.agent.ios)
+						autoLoad=new ui_autoLoad(W(".mui-content"),mileageCar);
+					else
+						autoLoad=new ui_autoLoad(document,mileageCar);
+						
+					W(".mui-content").appendChild(autoLoad);
+					dom.tab.autoLoad=autoLoad;
+				}else if(dom.tab.autoLoad){
+					//删除自动加载组件,释放内存
+					dom.tab.autoLoad.remove();
+					delete dom.tab.autoLoad;
+				}
+				dom.tab.appendChild(list);	
+		}
+
+	</script>
+</html>

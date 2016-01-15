@@ -526,7 +526,7 @@
 				seller_id:_user.cust_id,
 				obj_id:_g.obj_id,
 				access_token:_user.access_token,
-				arrive_time:_startTime+"@"+_endTime
+				arrive_time:_startTime+" 00:00:00@"+_endTime+" 23:59:59"
 			};
 			if(dom.list&&dom.list.max_id)
 				param.max_id=dom.list.max_id;
@@ -587,9 +587,8 @@
 			}
 			var p={
 				access_token:_user.access_token,
-				//device_id:_car.device_id,
-				serial: "56621647610",
-				rcv_time:_startTime+"@"+_endTime
+				serial: _car.serial,
+				rcv_time:_startTime+" 00:00:00@"+_endTime+" 23:59:59"
 			};
 			Wapi.device.getDeviceObdDataList(function(res){//获取水温和电瓶电压
 				if (res && res.status_code) {

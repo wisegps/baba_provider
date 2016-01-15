@@ -1,0 +1,621 @@
+<!--
+	作者：小吴
+	时间：2015-12-30
+	描述：车主版叭叭，车主用于管理车辆
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>我的车</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+		<script src="../../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../../wslib/toolkit/WxSdk.js" defer="defer"></script>
+		<script src="../ui/ui.js" defer="defer"></script>
+	</head>
+	<style>
+	#car_list{background: #fff;overflow: hidden;}
+	.car{
+	    white-space: nowrap;
+	    border-bottom: 1px solid #ccc;
+	    transform:translate3d(0,0,0);
+	    -webkit-transform:translate3d(0,0,0);
+	    transition: transform .5s;
+	    -webkit-transition: -webkit-transform .5s;
+	}
+	.car.show_option{
+		transform:translate3d(-12.5em,0,0);
+		-webkit-transform:translate3d(-12.5em,0,0);
+	}
+	.car>div{
+		display: inline-block;
+		padding: .5em;
+		width: 100%;
+		position: relative;
+	}
+	.logo{
+		display: inline-block;
+		width: 60px;
+	}
+	.logo>img{
+		width: 50px;
+		vertical-align: middle;
+	}
+	.details{
+		display: inline-block;
+		vertical-align: middle;
+		font-size: 16px;
+	}
+	.car_name{font-size: .9em;}
+	.car>.operation{
+	    display: inline-table;
+	    width: 4em;
+	    padding: 0;
+	    height: 67px;
+	    vertical-align: middle;
+	    text-align: center;
+	}
+	.option{
+		display: table-cell;
+		vertical-align: middle;
+	    width: 4em;
+	    padding: 0 1em;
+	    border-right: 1px solid;
+	    background: #4DB8EF;
+	    color: #fff;
+	    white-space: normal;
+	}
+	.option:last-child{
+		background: #F56D77;
+	    border-right: none;
+	}
+	#add_car{background: #efefef;position: fixed;padding-top:44px}
+	#add_btn{
+		text-align: center;
+	    background: #fff;
+	    border-top: 1px solid #ccc;
+	    padding: .5em;
+	    line-height: 1em;
+	}
+	.form{padding: .5em;line-height: 2.5em;font-size: 16px;}
+	.row{
+		border-bottom: 1px solid #ccc;
+    	display: table;
+    	width: 100%;
+	}
+	.row:last-child{border:none}
+	.row>*{
+		line-height: 1em;
+	    display: table-cell;
+	    vertical-align: middle;
+	    text-align: center;
+	}
+	.row>label {
+	    width: 5em;
+	    text-align: right;
+	}
+	.infobox{
+	    padding: 0 .5em;
+    	margin-bottom: 10px;
+    	background: #fff;
+    	border-radius: 4px;
+    	box-shadow: 1px 1px 2px rgba(0,0,0,.15);
+	}
+	.infobox>.row>input{
+		margin: 0;
+	    border: none;
+	    font-size: 16px;
+	    line-height: 1em;
+	    vertical-align: middle;
+	    padding-left: 0;
+	    text-align: left;
+	}
+	#province{width: auto;}
+	#car_picker{height: 40px;text-align: left;width:auto;}
+	.car .mui-btn-primary{
+		background: #50B7DF;
+	    border: none;
+	    position: absolute;
+	    right: .5em;
+	    bottom: .2em;
+	}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<h1 class="mui-title">我的车</h1>
+		</header>
+		<div class="mui-content">
+			<div id="car_list">
+				<div class="null_tip">
+					<h1>NULL</h1>
+					<p>您好，您目前还没有添加车辆。</p>
+				</div>
+			</div>
+			
+			<div id="add_btn">
+				<img src="img/icon_add.png" style="width: 2.5em;">
+				<div>添加爱车</div>
+			</div>
+		</div>
+		<div id="add_car" class="child_view hide">
+			<div class="mui-bar mui-bar-nav onshadow">
+				<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+				<h1 class="mui-title">添加车辆</h1>
+			</div>
+			<div class="form">
+				<form id="car_form">
+					<div class="infobox">
+						<div class="row">
+							<label>车辆昵称：</label>
+							<input type="text" placeholder="必填" name="nick_name">
+						</div>
+						<div class="row">
+							<label>车牌号：</label>
+							<label id="province">粤</label><span style="font-size: 12px;">&#9660</span>
+							<input type="text" placeholder="必填" name="obj_name">
+						</div>
+						<div class="row">
+							<label>车型：</label>
+							<label type="text" id="car_picker" name="car_series">必选</label>
+							<span class="w_icon icon_next" style="width: 1em;font-size: 40px;"></span>
+						</div>
+						<div class="row">
+							<label>里程：</label>
+							<input type="text" placeholder="必填" name="mileage">
+						</div>
+					</div>
+					
+					<div class="infobox">
+						<div class="row">
+							<label>车架号：</label>
+							<input type="text" placeholder="选填" name="frame_no">
+						</div>
+						<div class="row">
+							<label>发动机号：</label>
+							<input type="text" placeholder="选填" name="engine_no">
+						</div>
+					</div>
+				</form>
+				<button id="save" type="button" class="mui-btn mui-btn-block w">保存</button>
+			</div>
+		</div>
+	</body>
+	<script for="car类的定义">
+	function car(data){
+		var obj=new WiStormUI("div");//创建一个div组件
+		obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+		
+		obj.className="car";//设置div的class属性
+		obj.id="id_"+data.obj_id;
+		
+		obj.setData(data);//设置obj的内容,setData()在下面cv.prototype中定义
+		obj.addEvent("touchstart",car.touchS);
+		obj.addEvent("touchmove",car.touchM);
+		obj.addEvent("touchend",car.touchE);//监听触摸事件以分辨手势
+		obj.querySelector(".car_details").addEvent("click",edit);
+		
+		return obj;//最后记得要返回组件
+	}
+	car.prototype.setData=function(data){
+		var car_name;
+		if(data.car_type==data.car_series)
+			car_name=data.car_type;
+		else
+			car_name=data.car_series+' '+data.car_type;
+		this.innerHTML='<div class="car_details"><div class="logo"><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png"></div><div class="details"><div class="type">'+car_name+'</div><div class="car_name">'+data.nick_name+'</div></div></div><div class="operation"></div>';
+		var logo=this.querySelector(".logo>img");
+		logo.addEvent("error",car.noLogo);//处理没有获取到车辆logo错误
+		var active=this.querySelector(".operation");
+		var b0=document.createElement("div");//创建删除按钮
+		b0.className="option";
+		b0.innerText="删除";
+		if(data.device_id){//如果已经绑定设备，则创建解除绑定和修改终端按钮
+			var b1=b0.cloneNode(true);
+			b1.innerText="解除绑定";
+			var b2=b0.cloneNode(true);
+			b2.innerText="修改终端";
+			b1.addEvent("click",car.relieve);		
+			b2.addEvent("click",car.update);
+			active.appendChild(b1);
+			active.appendChild(b2);
+			active.style.width="12.5em";
+		}else{
+			var b=document.createElement("button");//创建删除按钮
+			b.type="button";
+			b.className="mui-btn mui-btn-primary";
+			b.innerText="绑定终端";
+			b.addEvent("click",car.update);
+			this.querySelector(".car_details").appendChild(b);
+		}
+		b0.addEvent("click",car.delete);
+		active.appendChild(b0);//添加按钮
+		
+		this.data=data;
+	}
+	
+	car.prototype.showOption=function(){//显示操作按钮
+		var w=this.querySelector(".operation").offsetWidth;
+		this.style.transform='translate3d(-'+w+'px,0,0)';
+		this.style.webkitTransform='translate3d(-'+w+'px,0,0)';
+	}
+	car.prototype.hideOption=function(){//隐藏操作按钮
+		this.style.transform='';
+		this.style.webkitTransform='';
+	}
+	
+	car.prototype.delete=function(){//删除车辆
+		W.loading(true);
+		var that=this;
+		var data={
+			access_token:_user.access_token,
+			obj_id:this.data.obj_id
+		}
+		Wapi.vehicle.delete(function(res){
+			W.loading();
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			W.toast("删除成功");
+			that.parentElement.removeChild(that);
+		},data);
+	}
+	
+	car.noLogo=function(){//处理没有获取到车辆logo错误的方法
+		this.src="../../img/icon_car_moren.png";
+	}
+	car.delete=function(){
+		//点击删除车辆
+		var thisCar=W.parents(this,2);
+		W.confirm("确认删除该车辆吗？",function(b){
+			if(b)
+				thisCar.delete();
+		});
+	}
+	car.update=function(){
+		//点击修改终端
+		if(this.tagName){//判断是否是元素
+			var thisCar=W.parents(this,2);
+			thisCar.hideOption();
+			W.focus(thisCar);//设置为伪焦点,扫描返回后找到伪焦点元素处理
+			event.stopPropagation(); //阻止冒泡
+			event.preventDefault();
+		}
+		//调用二维码扫描
+		if(W.native){
+			W.native.scanner.start(receive);
+		}else{
+			if(car.update.addEvent)
+				return;
+			W.toast("请稍等，正在准备扫描");
+			window.addEventListener("nativeSdkReady",car.update);
+			car.update.addEvent=true;
+		}
+	}
+	car.relieve=function(){
+		//点击解除绑定
+		var thisCar=W.parents(this,2);
+		var carData=thisCar.data;
+		W.confirm("确认解除该车辆的设备绑定吗？",function(b){
+			if(!b)return;
+			thisCar.hideOption();
+			W.loading(true);
+			var data={
+				_obj_id:carData.obj_id,
+				access_token:_user.access_token,
+				device_id:0
+			}
+			Wapi.vehicle.update(function(res){
+				if (res && res.status_code) {
+					W.loading();
+					W.errorCode(res);
+					return;
+				}
+				//修改设备绑定信息
+				var data={
+					access_token:_user.access_token,
+					_device_id:carData.device_id,
+					cust_id: 0,//归属用户，默认0，公司仓库，如果用户购买并支付，则变成用户id
+				    cust_name:'',
+				    mobile:"",
+				    email:"",
+				}
+				Wapi.device.update(function(res){//修改车辆绑定信息
+					W.loading();
+					if (res && res.status_code) {
+						W.errorCode(res);
+						W.alert("修改设备失败，请重试解除");
+						return;
+					}
+					W.toast("解除绑定成功");//设备信息也更改了才算解除绑定成功
+					carData.device_id=0;
+					thisCar.setData(carData);
+				},data);
+			},data);
+		});
+	}
+	car.touchS=function(){
+		//监听触摸开始事件
+		this.touchStart=event.touches[0].pageX;
+		this.touchY=event.touches[0].pageY;
+	}
+	car.touchE=function(){
+		var e=event.changedTouches[0].pageX-this.touchStart;
+		if(e<-30){
+			this.showOption();
+		}else if(e>30){
+			this.hideOption();
+		}
+	}
+	car.touchM=function(){
+		var y=Math.abs(event.changedTouches[0].pageY-this.touchY);
+		var x=Math.abs(event.changedTouches[0].pageX-this.touchStart);
+		if(x>y)
+			event.preventDefault();
+	}//触摸移动事件应付微信神经病的
+		
+	//二维码扫描返回，获取所扫描的设备信息
+	function receive(res){
+		W.loading("绑定中……");
+		var param={
+			serial:res,
+			access_token:_user.access_token
+		}
+		Wapi.device.getOne(receiveBack,param);
+	}
+	//获取所扫描的设备信息返回,开始绑定设备
+	function receiveBack(res){
+		if (res.status_code) {
+			W.loading();
+			W.errorCode(res);
+			return;
+		}
+		if(res.cust_id){
+			W.toast("该设备已经绑定了车辆，请先解除绑定。");
+			W.loading();
+			return;
+		}
+		var target=W.getFocus();
+		var carData=target.data;
+		var device_id=carData.device_id=res.device_id;
+		var data={
+			_obj_id:carData.obj_id,
+			access_token:_user.access_token,
+			device_id:device_id
+		}
+		Wapi.vehicle.update(function(res){//修改车辆绑定信息
+			if (res && res.status_code) {
+				W.loading();
+				W.errorCode(res);
+				return;
+			}
+			
+			target.setData(carData);
+			//修改设备绑定信息
+			var data={
+				access_token:_user.access_token,
+				_device_id:device_id,
+				cust_id: _user.cust_id,//归属用户，默认0，公司仓库，如果用户购买并支付，则变成用户id
+			    cust_name:_user.cust_name,
+			    mobile:_user.mobile||"",
+			    email:_user.email||"",
+			}
+			Wapi.device.update(function(res){
+				W.loading();
+				if (res && res.status_code) {
+					W.errorCode(res);
+					W.alert("修改设备失败，请重试绑定");
+					return;
+				}
+				W.toast("绑定新设备成功");
+			},data);
+		},data);
+	}
+	</script>
+	
+	<script for="加载数据">
+		var dom={
+			add:W("#add_car"),
+			list:W("#car_list"),
+			nick_name:W("[name='nick_name']"),
+			obj_name:W("[name='obj_name']"),
+			series:W("[name='car_series']"),
+			mileage:W("[name='mileage']"),
+			frame:W("[name='frame_no']"),
+			engine:W("[name='engine_no']"),
+			save:W("#save")
+		};
+		
+		window.addEventListener("W.loginSuccess",function(){
+			getUserCar();//加载用户车辆
+			
+			W("#province").addEvent("click",ui_areaBox);//点击选择省份
+			dom.series.addEvent("click",ui_carSeries);//点击选择车型
+			ui_carSeries.preLoad();//预加载选择车型
+		})
+				
+		function addEvent(){
+			//添加事件监听
+			W("#add_btn").addEvent("click",showAddCar);
+			dom.save.addEvent("click",saveCar);//保存车辆信息按钮
+			
+			W(".row>.icon_next").addEvent("click",function(){//选择车型的右箭头，点击触发选择车型
+				var evt = document.createEvent("MouseEvents");
+				evt.initMouseEvent("tap", false,false);
+				dom.series.dispatchEvent(evt);
+				
+				var evt1 = document.createEvent("MouseEvents");
+				evt1.initMouseEvent("click", false,false);
+				dom.series.dispatchEvent(evt1);
+			});
+			dom.add.show=function(){
+				this.classList.add("fromRight");
+				this.classList.remove("hide");
+				this.classList.remove("toRight");
+			}
+			dom.add.hide=function(){
+				this.classList.remove("fromRight");
+				this.classList.add("toRight");
+			};
+		}
+
+		function getUserCar(){
+			//加载用户车辆
+			var data={
+				cust_id:_user.cust_id,
+				access_token:_user.access_token
+			}
+
+			//调用接口，获取用户车辆,并绘制到页面上
+			Wapi.user.getVehicleList(function(res){
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				var cars=res.data;
+				if(cars&&cars.length){//隐藏空列表提示
+					W(".null_tip").style.display="none";
+				}else{
+					return;
+				}
+				
+				var list = document.createDocumentFragment();
+				for(var i=cars.length-1;i>=0;i--){
+					list.appendChild(new car(cars[i]));
+				}
+				dom.list.appendChild(list);
+			},data);
+		}
+	</script>
+	
+	<script for="添加/修改车辆">
+		function showAddCar(){
+			if(this.id=="add_btn"){
+				delete dom.save.intent;
+				W("#car_form").reset();
+				dom.series.innerText="必选";
+				W("#province").innerText="粤";
+			}
+				
+			history.pushState(null,"my_car.html","my_car.html");
+			dom.add.show();
+		}
+		
+		window.addEventListener("popstate",function(){
+			dom.add.hide();
+		});
+		
+		
+		function edit(){
+			var c=this.parentElement;
+			var data=c.data;
+			
+			dom.nick_name.value=data.nick_name;
+			dom.mileage.value=data.mileage;
+			dom.frame.value=data.frame_no||"";
+			dom.engine.value=data.engine_no||"";
+			
+			//处理车牌号
+			dom.obj_name.value=data.obj_name.slice(1);
+			W("#province").innerText=data.obj_name.charAt(0);
+			
+			//处理车型json，选择车型组件没做好，应该直接按数据库字段命名的，下个项目修复
+			var car_json={
+				brandId:data.car_brand_id,
+				brand:data.car_brand,
+				seriesId:data.car_series_id,
+				series:data.car_series,
+				typeId:data.car_type_id,
+				type:data.car_type
+			}
+			dom.series.value=car_json;
+			dom.series.innerText=data.car_series+" "+data.car_type;
+			
+			dom.add.querySelector(".mui-title").innerText="修改车辆";
+			dom.save.intent="edit";
+			dom.save.data=data;
+			showAddCar();
+		}
+		
+		//保存车辆信息
+		function saveCar(){
+			W.loading(true);
+			var data={
+				cust_id:_user.cust_id,
+				cust_name:_user.cust_name,
+				access_token:_user.access_token,
+				nick_name:dom.nick_name.value,
+				obj_name:dom.obj_name.value,
+				mileage:dom.mileage.value,
+				frame_no:dom.frame.value||"",
+				engine_no:dom.engine.value||""
+			}
+			if(dom.series.value){
+				var temCar=dom.series.value;
+				data.car_brand_id=temCar.brandId;
+				data.car_brand=temCar.brand;
+				data.car_series_id=temCar.seriesId;
+				data.car_series=temCar.series;
+				data.car_type_id=temCar.typeId;
+				data.car_type=temCar.type;
+			}else{
+				W.toast("车型为必填项");
+				return;
+			}
+			if(!data.nick_name){
+				W.toast("车辆昵称为必填项");
+				return;
+			}
+			if(!data.mileage){
+				W.toast("里程为必填项");
+				return;
+			}
+			if(!data.obj_name){
+				W.toast("车牌号为必填项");
+				return;
+			}else{
+				data.obj_name=W("#province").innerText+data.obj_name;
+			}
+			
+			if(this.intent=="edit"){//如果意图为
+				var carData=this.data;
+				data._obj_id=carData.obj_id;
+				Wapi.vehicle.update(function(res){
+					W.loading();
+					if (res && res.status_code) {
+						W.errorCode(res);
+						return;
+					}
+					var id=data._obj_id;
+					delete data._obj_id;
+					jsonConcat(carData,data);
+					W("#id_"+id).setData(carData);
+					history.back();
+					W.toast("保存成功");
+				},data);
+			}else{//默认新增一辆车
+				Wapi.vehicle.create(function(res){
+					W.loading();
+					if (res && res.status_code) {
+						W.errorCode(res);
+						return;
+					}
+					W(".null_tip").style.display="none";
+					data.obj_id=res.obj_id;
+					dom.list.insertBefore(new car(data),dom.list.childNodes[0]);
+					history.back();
+					W.toast("保存成功");
+				},data);
+			}
+		}
+		addEvent();
+	</script>
+</html>

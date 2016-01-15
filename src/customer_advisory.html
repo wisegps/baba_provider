@@ -107,7 +107,7 @@
 		return obj;
 	}
 	cl.prototype.setData=function (data){
-		var uname=data.friend_name.slice(0,1);
+		var uname=data.friend_name.trim().slice(0,1);
 		var newtime = spliceDate(data.send_time);
 		var a=["#428bca",'#5cb85c','#5bc0de','#f0ad4e','#d9534f'];
 		this.innerHTML = '<div class="icon">'+uname+'</div><div class="new_info"><div><span class="fr" style="color:#ccc;font-size: 12px;">'+newtime+'</span><div style="overflow: hidden;"><span style="color: #676767;">'+data.friend_name+'</span></div></div><div class="show_news"><p style="color:#ccc;margin: 0 3.2em 0 0;overflow: hidden;white-space: nowrap;">'+data.content+'</p></div></div>';
@@ -404,21 +404,24 @@ function getNextnews(){
 					return;
 				}
 				if(res.data.length!=0){
-					dom.newlist.firstChild.style.display='none';
-					var list = document.createDocumentFragment();
-					for(var i=res.data.length-1;i>=0;i--){
-						var f =res.data[i].friend_id;
-						if(!localnews['W'+f]){
-							list.appendChild(new cl(res.data[i]));
-							localnews["W"+f]=localnews["tem_W"+f]||new Array();
-							delete localnews["tem_W"+f];
+						dom.newlist.firstChild.style.display='none';
+						var list = document.createDocumentFragment();
+						for(var i=res.data.length-1;i>=0;i--){
+							var f =res.data[i].friend_id;
+							if(f>4){
+								if(!localnews['W'+f]){
+									list.appendChild(new cl(res.data[i]));
+									localnews["W"+f]=localnews["tem_W"+f]||new Array();
+									delete localnews["tem_W"+f];
+								}
+							}
 						}
-					}
-					dom.newlist.insertBefore(list,dom.newlist.childNodes[0]);
-					if(_g.id){
-						//微信直接点击进入聊天
-						show.call(W("#W"+_g.id));
-					}
+						dom.newlist.insertBefore(list,dom.newlist.childNodes[0]);
+						if(_g.id){
+							//微信直接点击进入聊天
+							show.call(W("#W"+_g.id));
+						}
+					
 				}
 			},data);
 			

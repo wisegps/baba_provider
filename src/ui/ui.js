@@ -183,7 +183,11 @@ ui_carSeries.preLoad=function(param){
 ui_carSeries.finish=function(res){
 	ui_carSeries.box.hide();
 	var tar=W.getFocus();
-	var carName=res.series+" "+res.type;
+	var carName;
+	if(res.series!=res.type)
+		carName=res.series+" "+res.type;
+	else 
+		carName=res.type;
 	tar.innerText=carName;
 	tar.value=res;
 }

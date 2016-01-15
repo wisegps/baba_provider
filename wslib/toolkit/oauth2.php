@@ -52,10 +52,11 @@ function https_request($url){
 
 setcookie("_wx_user_", json_encode($userinfo), time()+86400,"/",$_SERVER['HTTP_HOST']);
 $cookie_url=$_COOKIE["__login_redirect_uri__"];
+$u_data='open_id='.$userinfo["openid"]."&headimgurl=".$userinfo['headimgurl'].'&nickname='.$userinfo["nickname"]."&sex=".$userinfo["sex"].'&province='.$userinfo["province"].'&city='.$userinfo["city"].'&privilege='.$userinfo["privilege"];
 if(strpbrk($cookie_url,"?"))
-	$url=$cookie_url."&open_id=".$userinfo["openid"];
+	$url=$cookie_url."&".$u_data;
 else 
-	$url=$cookie_url."?open_id=".$userinfo["openid"];
+	$url=$cookie_url."?".$u_data;
 header("Location: ".$url);
 exit;
 ?>
