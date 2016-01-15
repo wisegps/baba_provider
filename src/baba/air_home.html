@@ -177,7 +177,6 @@
 }
 
 .speed0>.inner{
-	color: #aaa;
     animation-play-state:paused;
 	-webkit-animation-play-state:paused;
 }
@@ -593,9 +592,6 @@
 			var data=device_list[device_i];//当前显示设备的数据
 			if(!data){
 				W.toast("当前无设备数据");
-				return;
-			}else if(str=="switch"&&data.active_obd_data.dpdy<11){
-				W.toast("电瓶电压小于11V，无法开关");
 				return;
 			}
 			var nowVal=data.params[str];//当前的值，指令发送失败回滚时使用
