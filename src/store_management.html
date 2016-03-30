@@ -12,9 +12,9 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 			
-		<title>店面管理</title>
+		<title>WiCARE商户版</title>
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<script>link("W.css")</script>
 		
 		<script src="../wslib/api/Wapi.js" defer="defer"></script>
@@ -116,7 +116,11 @@ var img_URL;
 	}else{
 		img_URL = new Array();
 	}
-	window.onload = function(){
+		window.addEventListener("load",windowLoad);
+		function windowLoad(){
+			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[7]=="0")){
+				location="home.html";
+			}
 			W("#submit").addEvent("click",storeM);
 			if(user.address!=undefined)
 				W("#address").value = user.address;
@@ -137,9 +141,7 @@ var img_URL;
 			W("#noActive").addEvent('click',hidePicture);
 			W(".mui-pull-left").addEvent("click",function(){top.location="home.html";});
 	}
-	
-	
-	
+			
 	//在界面上插入一张图片
 	function insertImg(url,index){
 		var img=document.createElement("img");
@@ -165,8 +167,7 @@ var img_URL;
 		storeM(true);
 	}
 	function showPicture(){
-		W("#picture").classList.add('mui-active');
-		
+		W("#picture").classList.add('mui-active');		
 		W("#picture").style.display='block';
 		var tem=W(".mui-backdrop");
 		if(tem)
@@ -201,10 +202,10 @@ var img_URL;
 		var type;
 	    type=h.value.slice(-3).toLocaleLowerCase();
 		var file =h.files[0];
-	    if((type!="jpg"&&type!="png")){
+	    if((type!="jpg"&&type!="png"&&type!="jpeg")){
 	        h.value="";
 	        h.files=null;
-	        W.alert("抱歉，仅支持的jpg或png图片");
+	        W.alert("抱歉，仅支持的jpg或png或者jpeg图片");
 	        return;
 	    }
 		var fr= new FileReader();
@@ -232,7 +233,7 @@ var img_URL;
 
 /**
  * 提交店面管理的数据
- */ 
+ */  
 	function storeM(b){
 		if(!fileUpload.code|| fileUpload.code==2){
 		var mName=W("#mName").value;	   	//商户名称
@@ -241,7 +242,7 @@ var img_URL;
 		var profile=W("#profile").value; //店铺简介
 			if(mName!=null && mName!=""){
 				var data={
-					cust_id:user.cust_id,
+					cust_id:user.seller_id,
 					access_token:_user.access_token,				
 					cust_name:mName,
 					remark:profile,
@@ -278,5 +279,6 @@ var img_URL;
 			W.toast("您的图片还未上传成功.");			
 		}
 	}
+	
 	</script>
 </html>

@@ -110,6 +110,8 @@
 		#submit p{width: 85%;background-color:#50B7DE ;color:white;margin: 0 8%;text-align: center;border-radius: .3em;padding:.4em 0;}
 		.mui-radio input[type=radio]:before{font-size:20px;}
 		.nodice{background-color:#f0f0f0 ;width: 100%;height: 10px;}
+		#baba{padding: 7px 10px 2px 10px;}
+		.mui-pull-left{display: none;}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav nop">
@@ -126,7 +128,7 @@
 					<label class="shop_info hide_data" id="phone"></label>
 					<input type="text" name="cust_name" class="hide shop_info" maxlength="20" placeholder="修改姓名"/>
 					<input type="text" name="address" class="hide shop_info" placeholder="修改描述" />
-					<input type="text" name="phone" maxlength="11" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" class="hide shop_info" placeholder="修改电话" />
+					<input type="text" name="phone" maxlength="11" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" class="hide shop_info" placeholder="修改额外电话" />
 				</span>
 			</div>
 			<div class="div_account">
@@ -148,7 +150,7 @@
 				</div>
 				<div class="nodice"></div>
 				<div class="setting" id="baba">
-					<label class="label">关于叭叭</label>
+					<label class="label" style="line-height: 24px;vertical-align: super;">关于叭叭</label>
 					<span class="mui-icon mui-icon-arrowright fr" style="color: #ccc;"></span>
 				</div>
 		</div>
@@ -172,7 +174,7 @@
 		</div>
 		<div class="child_view" id="about" style="display: none;position: fixed;">
 			<header class="mui-bar mui-bar-nav">
-				<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+				<a class="mui-icon mui-icon-left-nav mui-pull-left" style="display: block;"></a>
 				<h1 class="mui-title">关于叭叭</h1>
 			</header>
 		    <div class="" style="text-align: center;padding-top: 50px;">
@@ -199,12 +201,12 @@
  * 设置用户资料  
  */
 	function setuser(){
-		var account=W.getSetting("account");
 		var user =_user;
+		var account=user.mobile;
 		if(user.tel)
 			W("#phone").innerHTML = user.tel;
 		else
-			W("#phone").innerHTML ="联系电话未填写";
+			W("#phone").innerHTML ="额外的联系电话未填写";
 		
 		if(user.remark)
 			W("#address").innerHTML = user.remark;
@@ -258,6 +260,7 @@
 					W.setSetting("user",_user);
 					hideInput();				//设置成功隐藏input
 					setuser();					//设置成功后替换当前的用户资料；
+					W('.mui-pull-left').style.display='none';
 				}
 			},data);
 		}else{
@@ -268,9 +271,12 @@
  * 点击编辑 显示输入框  修改资料
  */
 	function showInput(){
+		W('.mui-pull-left').style.display='block';
 		W("[name=cust_name]").value=_user.cust_name;
-		W("[name=address]").value=_user.remark;
-		W("[name=phone]").value=_user.tel;
+		if(_user.remark)
+			W("[name=address]").value=_user.remark;
+		if(_user.tel)	
+			W("[name=phone]").value=_user.tel;
 		var hide_data=W(".hide_data",true);
 		for(var i=0;i<hide_data.length;i++){
 			hide_data[i].style.display='none';
@@ -295,6 +301,7 @@
 			hide[i].style.display='none';
 		}
 		W("#submit").style.display='none';		
+		W('.mui-pull-left').style.display='none';
 	}
 /**
  * 照片上传

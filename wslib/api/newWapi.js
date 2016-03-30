@@ -5,6 +5,7 @@ var Wapi={};Wapi.encrypt={};Wapi.encrypt.hexcase=0;Wapi.encrypt.b64pad="";Wapi.e
  */
 function WiStormAPI(){
 	this.url="http://o.bibibaba.cn/router/rest";
+	this.safetyUrl="http://h5.bibibaba.cn/baba/wx/wslib/api/safetyWapi.php";
 	this.appKey=WiStorm.config.app_key;
 	this.appSecret=WiStorm.config.app_secret;
 	this.encrypt=Wapi.encrypt;
@@ -35,7 +36,7 @@ WiStormAPI.prototype.getApi=function(data,callback,op){
 		timeout:10000,//超时时间设置为10秒；
 		success:callback,
 		error:function(xhr,type,errorThrown){//异常处理；
-			console.log(type);
+			throw ("apiError:"+type);
 		}
 	}
 	this.ajax(url,ajaxSetting);
@@ -59,7 +60,7 @@ WiStormAPI.prototype.postApi=function(getData,callback,data){
 		timeout:10000,//超时时间设置为10秒；
 		success:callback(res),
 		error:function(xhr,type,errorThrown){//异常处理；
-			console.log(type);
+			throw ("apiError:"+type);
 		}
 	}
 	this.ajax(url,ajaxSetting);
@@ -68,7 +69,7 @@ WiStormAPI.prototype.postApi=function(getData,callback,data){
 WiStormAPI.prototype.makeUrl=function(json){
 	var sign="";
 	var URL="";
-	
+	var reg=new RegExp("(^\\s*)|(\\s*$)", "g");
 	//按key名进行排序
 	var keyArr=[];
 	for(key in json){
@@ -80,7 +81,14 @@ WiStormAPI.prototype.makeUrl=function(json){
 	var signText="",key,getData="",val;
 	for(var i=0;i<keyArr.length;i++){
 		key=keyArr[i];
-		val=encodeURI(json[key]);
+		val=json[key];
+		if(val===null||val===undefined)
+			val="";
+		else if(typeof val=="object"){
+			val=JSON.stringify(val);			
+		}else
+			val=val.toString();
+		val=encodeURI(val.replace(reg,""));
 		signText+=key+val;
 		getData+="&"+key+"="+val;
 	}
@@ -124,13 +132,14 @@ WiStormAPI.prototype.ajax=function(url,options) {
 	this.jsonConcat(json,options);
 	this.jsonConcat(headers,options.headers);
 	
+	json.type=json.type.toUpperCase();
     var data="";
     if(json.data){
 	    for (items in json.data){
 			data+="&"+items+"="+json.data[items];
 		}
 		if(json.type=="GET")
-			json.url+="?"+data;
+			json.url+="?"+data.slice(1);
     }
 	
 	var xmlhttp=new XMLHttpRequest();
@@ -139,6 +148,7 @@ WiStormAPI.prototype.ajax=function(url,options) {
 			xmlhttp.onreadystatechange=Wapi._noop;
 			xmlhttp.abort();
 			json.error(xmlhttp,'timeout',json);
+			json.success({"status_code":-2,"err_msg":"获取信息超时"});
 		}, json.timeout);
 	}
 	xmlhttp.onreadystatechange=function(){
@@ -148,7 +158,7 @@ WiStormAPI.prototype.ajax=function(url,options) {
 			var result, error = false;
 			if ((xmlhttp.status >= 200 && xmlhttp.status < 300) || xmlhttp.status === 304 ||xmlhttp.status === 0){
 				var dataType=json.dataType;
-				var resultText = xmlhttp.responseText;
+				var resultText = xmlhttp.responseText||'{"status_code":-1,"err_msg":"无返回信息"}';
 				try {
 					if (dataType === 'xml') {
 						result = xmlhttp.responseXML;
@@ -180,7 +190,7 @@ WiStormAPI.prototype.ajax=function(url,options) {
     return xmlhttp;
 };
 
-WiStormAPI.prototype.add=function(){
+WiStormAPI.prototype.add=function(callback,data,op){
 	var OP={
 		fields:'status_code'
 	};
@@ -189,7 +199,7 @@ WiStormAPI.prototype.add=function(){
 	
 	this.getApi(data,callback,OP);
 }
-WiStormAPI.prototype.delete=function(){
+WiStormAPI.prototype.delete=function(callback,data,op){
 	var OP={
 		fields:'status_code'
 	};
@@ -198,20 +208,30 @@ WiStormAPI.prototype.delete=function(){
 	
 	this.getApi(data,callback,OP);
 }
-WiStormAPI.prototype.updata=function(){
+WiStormAPI.prototype.update=function(callback,data,op){
 	var OP={
 		fields:'status_code'
 	};
 	this.jsonConcat(OP,op);
-	OP.method=this.apiName+".updata"; //接口名称
+	OP.method=this.apiName+".update"; //接口名称
 	
 	this.getApi(data,callback,OP);
 }
-WiStormAPI.prototype.get=function(){
+WiStormAPI.prototype.get=function(callback,data,op){
+	var OP={};
+	this.jsonConcat(OP,this._get_op);
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+".get"; //接口名称
 	
+	this.getApi(data,callback,OP);
 }
-WiStormAPI.prototype.list=function(){
+WiStormAPI.prototype.list=function(callback,data,op){
+	var OP={};	
+	this.jsonConcat(OP,this._list_op);
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+"s.list"; //接口名称
 	
+	this.getApi(data,callback,OP);
 }
 
 Wapi._=new WiStormAPI();
@@ -223,40 +243,27 @@ Wapi._noop=function(){};
  */
 function WUserApi(){
 	this.tableName="user";
-	this.apiName+=this.tableName;
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'cust_id,cust_name,cust_type,saler_id,car_brand,car_series,seller_id,logo,remark,create_time,update_time,photo,address,tel,mobile'//默认返回的字段
+	}
+	this._list_op={
+		fields:'cust_id,cust_name,cust_type,car_brand,car_series,seller_id,logo,remark,create_time,update_time,photo,address,tel,mobile',
+		sorts:"cust_id",
+		page:"cust_id",
+		limit:"20"
+	}
 }
 WUserApi.prototype=new WiStormAPI();//继承父类WiStormAPI
 
 WUserApi.prototype.login=function(callback,data,op){
 	var OP={};
 	this.jsonConcat(OP,op);				    //把用户传入的配置覆盖默认配置
-	OP.method="wicare.user.login"; 		//接口名称
+	OP.method=this.apiName+".login"; 		//接口名称
 	
 	data.password=this.encrypt.hex_md5(data.password);//md5加密
 	this.getApi(data,callback,OP);			         //使用“GET”请求，异步获取数据
 }
-
-/**
- * 第三方登录
- * 参数：
- *      login_id: 第三方登陆返回的标识ID
- * 	返回：
- *      cust_id: 用户id
- *      cust_name: 用户名称
- *      access_token: 全局令牌
- *      valid_time: 有效时间
- * @param {Object} callback
- * @param {Object} loginId
- * @param {Object} op
- */
-WUserApi.prototype.sso_login=function(callback,loginId,op){
-	var data={
-		login_id:loginId
-	};
-	this.jsonConcat(data,op);				    //把用户传入的配置覆盖默认配置
-	data.method="wicare.user.sso_login"; 		//接口名称
-   	this.getApi(data,callback);
-};
 
 /**
  * 注册
@@ -274,7 +281,7 @@ WUserApi.prototype.register=function(callback,data,op){
 		fields:'cust_id'			//默认返回的字段
 	};
 	this.jsonConcat(OP,op);
-	OP.method="wicare.user.register"; 				//接口名称
+	OP.method=this.apiName+".register"; 				//接口名称
 	data.password=this.encrypt.hex_md5(data.password);
 	
 	this.getApi(data,callback,OP);
@@ -293,7 +300,7 @@ WUserApi.prototype.checkExists=function(callback,data,op){
 		fields:'exist'			//默认返回的字段
 	};
 	this.jsonConcat(OP,op);
-	OP.method="wicare.user.exists";//接口名称
+	OP.method=this.apiName+".exists";//接口名称
 	this.getApi(data,callback,OP);
 }
 
@@ -314,63 +321,12 @@ WUserApi.prototype.resetPassword=function(callback,data,op){
 		fields:'status_code'			//默认返回的字段
 	};
 	this.jsonConcat(OP,op);
-	OP.method="wicare.user.password.reset";//接口名称
+	OP.method=this.apiName+".password.reset";//接口名称
 	data.password=this.encrypt.hex_md5(data.password);
 	
 	this.getApi(data,callback,OP);
 }
 
-/**
- * 创建一个客户
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WUserApi.prototype.create=function(callback,data,op){
-	var OP={
-		fields:'cust_id'			//默认返回的字段
-	};
-	this.jsonConcat(OP,op);
-	OP.method="wicare.user.create"; //接口名称
-	
-	this.getApi(data,callback,OP);	//调用新接口
-}
-
-
-/**
- * 获取用户信息（需要令牌token）
- * data包含cust_id,access_token
- * @param {Object} callback
- * @param {Object} data,需要令牌,access_token
- * @param {Object} op
- */
-WUserApi.prototype.getUser=function(callback,data,op){
-	var OP={
-		fields:'cust_id,cust_name,cust_type,car_brand,car_series,parent_cust_id,logo,remark,create_time,update_time,photo,address,tel,mobile'//默认返回的字段
-	};
-	this.jsonConcat(OP,op);
-	OP.method="wicare.user.get"; //接口名称
-	
-	this.getApi(data,callback,OP);		//调用新接口
-}
-
-/**
- * 更新用户数据
- * @param {Function} callback
- * @param {json} data,必须指定cust_id
- * @param {OP} op
- */
-WUserApi.prototype.update=function(callback,data,op){
-	var OP={
-		fields:'cust_id'			//默认返回的字段
-	};
-	this.jsonConcat(OP,op);
-	data._cust_id=data.cust_id;
-	delete data.cust_id;
-	OP.method="wicare.user.update"; //接口名称
-	
-	this.getApi(data,callback,OP);	//调用新接口
-}
 
 /**
  * 获取用户授权令牌access_token
@@ -386,57 +342,109 @@ WUserApi.prototype.getToken=function(callback,data,op){
 		fields:'access_token'			//默认返回的字段
 	};
 	this.jsonConcat(OP,op);
-	OP.method="wicare.user.access_token"; //接口名称
+	OP.method=this.apiName+".access_token"; //接口名称
 	data.password=this.encrypt.hex_md5(data.password);
 	this.getApi(data,callback,OP);
 }
 
-
 /**
- * 获取商户下的客户(需要令牌token)
+ * 绑定第三方登录帐号id
  * data包含：
- *     seller_id: 商户ID;
- *     max_id: 本页最大ID, 获取下页内容时使用
- *     access_token:令牌
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
+ *     account:登录手机或邮箱
+ *     passsword:密码
+ * @param {Function} callback
+ * @param {json} data，账户密码
+ * @param {OP} op
  */
-WUserApi.prototype.getVehicleList=function(callback,data,op){
+WUserApi.prototype.bind=function(callback,data,op){
 	var OP={
-		fields:'cust_name,obj_id,cust_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,maintain_last_mileage,mileage,arrive_count,evaluate_count,last_arrive_time,business_status,evaluate_level',	//默认返回的字段
-		sorts:"obj_id",
-		page:"obj_id",
-		limit:"20"
+		fields:'status_code'
 	};
-	
-	this.jsonConcat(OP,op);				    //把用户传入的配置覆盖默认配置
-	OP.method="wicare.vehicles.list"; 				//接口名称
-	
-	if(data.parent_cust_id){
-		data.seller_id=data.parent_cust_id;
-		delete data.parent_cust_id;
-	}
+	this.jsonConcat(OP,op);				//把用户传入的配置覆盖默认配置
+	OP.method=this.apiName+".bind"; 		//接口名称
 	
 	this.getApi(data,callback,OP);
 }
 
 /**
- * 搜索车辆(需要令牌token)
- * data包含：
- *     seller_id: 商户ID;
- *     obj_name: 搜索的车牌号
- *     max_id: 本页最大ID, 获取下页内容时使用
- *     access_token:令牌
- * @param {Object} callback
+ * 创建一条崩溃/错误记录
  * @param {Object} data
+ * @param {Object} callback
  * @param {Object} op
  */
-WUserApi.prototype.searchCustomerVehicle=function(callback,data,op){
-	if(data.obj_name)
-		data.obj_name="^"+data.obj_name;
-	Wapi.user.getVehicleList(callback,data,op);
+WUserApi.prototype.createCrash=function(data,callback,op){
+	var OP={
+		fields:'status_code,exception_id'
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+'.crash.create';
+	
+	this.getApi(data,callback,OP);
 }
+
+/**
+ * 分销商各层级注册
+ * @param {Object} data 必须parent_open_id，parent_mobile,mobile,password,valid_code,valid_type
+ * @param {Object} callback
+ * @param {Object} op
+ */
+WUserApi.prototype.distributorRegister=function(callback,data){
+	data.method=this.apiName+'.distributor.register';
+	var ajaxSetting={
+		'data':data,
+		dataType:'json',//服务器返回json格式数据
+		type:'get',//HTTP请求类型
+		timeout:10000,//超时时间设置为10秒；
+		success:callback,
+		error:function(xhr,type,errorThrown){//异常处理；
+			throw ("apiError:"+type);
+		}
+	}
+	this.ajax(this.safetyUrl,ajaxSetting);
+}
+
+/**
+ * 验证邀请手机和openid是否有效
+ * @param {Object} data 需要parent_open_id，parent_mobile
+ * @param {Object} callback
+ * @param {Object} op
+ */
+WUserApi.prototype.distributorCheck=function(callback,data){
+	data.method=this.apiName+'.distributor.checkParent';
+	var ajaxSetting={
+		'data':data,
+		dataType:'json',//服务器返回json格式数据
+		type:'get',//HTTP请求类型
+		timeout:10000,//超时时间设置为10秒；
+		success:callback,
+		error:function(xhr,type,errorThrown){//异常处理；
+			throw ("apiError:"+type);
+		}
+	}
+	this.ajax(this.safetyUrl,ajaxSetting);
+}
+
+
+
+
+/**
+ * 业务表api类
+ * @constructor
+ */
+function WBusinessApi(){
+	this.tableName="business";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type',//默认返回的字段
+	}
+	this._list_op={
+		fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type',//默认返回的字段
+		sorts:"business_id",
+		page:"business_id",
+		limit:"20"
+	}
+}
+WBusinessApi.prototype=new WiStormAPI();//继承父类WiStormAPI
 
 /**
  * 到店离店统计,需要令牌
@@ -448,136 +456,54 @@ WUserApi.prototype.searchCustomerVehicle=function(callback,data,op){
  * @param {Object} data
  * @param {Object} op
  */
-WUserApi.prototype.getBusinessTotal=function(callback,data,op){
+WBusinessApi.prototype.getBusinessTotal=function(callback,data,op){
 	var OP={
 		fields:'arrive_total,leave_total,evaluate_total'//默认返回的字段
 	};
 	this.jsonConcat(OP,op);
-	OP.method='wicare.business.total';//接口名称
-	if(data.parent_cust_id){
-		data.seller_id=data.parent_cust_id;
-		delete data.parent_cust_id;
-	}
-	
+	OP.method=this.apiName+'.total';//接口名称
 	this.getApi(data,callback,OP);		//调用新接口
 }
 
 /**
- * 获取设备列表,令牌
- * 参数:
- *   seller_id: 商户ID;
- *   max_id: 本页最大ID, 获取下页内容时使用
- *   fields: 返回字段;
+ * seller_id: 商户ID;
+ * status: 状态 1:在店 2:离店;
+ * query_type: 离店查询方式 1: 到店时间 2: 离店时间 3: 评价时间
+ * begin_time: 开始时间;
+ * end_time: 结束时间;
+ * max_id: 本页最大ID, 获取下页内容时使用
  * @param {Object} callback
  * @param {Object} data
  * @param {Object} op
  */
-WUserApi.prototype.getDeviceList=function(callback,data,op){
-	var OP={
-		fields:'device_id,serial,cust_id,cust_name,device_type,sim,status,active_time',
-		sorts: 'device_id',
-	    page: 'device_id',
-    	limit: "20"
-	};
+WBusinessApi.prototype.list=function(callback,data,op){
+	var OP={};
+	this.jsonConcat(OP,this._list_op);
 	this.jsonConcat(OP,op);
-	OP.method='wicare.devices.list';
+	OP.method=this.apiName+'.list';//接口名称
 	
-	if(data.parent_cust_id){
-		data.seller_id=data.parent_cust_id;
-		delete data.parent_cust_id;
-	}
-	this.getApi(data,callback,OP);
+	this.getApi(data,callback,OP);		//调用新接口
 }
 
+
 /**
- *获取商户的异常车况列表
- *	参数:
- *	    seller_id: 商户Id
- *	    exp_type: 异常类型, 不传为全部 1:保养到期 2:长期未到店 3:故障
- *	    max_id: 本地最大Id
- *	    fields: 返回字段
- *	返回：
- *	      由fields设定的字段
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
+ * 异常车况表api类
+ * @constructor
  */
-WUserApi.prototype.getExceptionList=function(callback,data,op){
-	var OP={
+function WExceptionsApi(){
+	this.tableName="exception";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'exception_id,msg_template,obj_id,cust_id,obj_name,cust_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,maintain_last_mileage,mileage,last_arrive,exp_type,exp_reason,pushed,push_time,create_time,update_time'
+	};
+	this._list_op={
 		fields:'exception_id,msg_template,obj_id,cust_id,obj_name,cust_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,maintain_last_mileage,mileage,last_arrive,exp_type,exp_reason,pushed,push_time,create_time,update_time',
 		sorts: 'exception_id',
 	    page: 'exception_id',
     	limit: "20"
 	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.exceptions.list';
-	
-	if(data.parent_cust_id){
-		data.seller_id=data.parent_cust_id;
-		delete data.parent_cust_id;
-	}
-	
-	this.getApi(data,callback,OP);
 }
-
-/**
- * 删除异常车况
- * 参数:
- *     exc_id: 异常Id
- * 返回：
- *   status_code: 状态码
- */
-WUserApi.prototype.deleteException = function (callback,exc_id){
-	var OP={
-		fields:'status_code',
-		exception_id:exc_id,
-		method:'wicare.exception.delete'
-	};
-	this.getApi(OP,callback);
-};
-
-/**
- * 更新异常车况
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WUserApi.prototype.updateException=function(callback,data,op){
-	var OP={
-		fields:'status_code'
-	};
-	this.jsonConcat(OP,op);
-	OP.method="wicare.exception.update"; //接口名称
-	
-	if(data.exception_id){
-		data._exception_id=data.exception_id;
-		delete data.exception_id;
-	}
-	
-	this.getApi(data,callback,OP);	//调用新接口
-}
-
-/**
- * 创建一条异常记录
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WUserApi.prototype.createException=function(callback,data,op){
-	var OP={
-		fields:'status_code,exception_id'			//默认返回的字段
-	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.exception.create';//接口名称
-	
-	this.getApi(data,callback,OP);		//调用新接口
-}
-
-
-
-
-
-
+WExceptionsApi.prototype=new WiStormAPI();//继承父类WiStormAPI
 
 
 
@@ -585,155 +511,61 @@ WUserApi.prototype.createException=function(callback,data,op){
 /**
  * 提醒设置表
  */
-
-/**
- * 新增一个提醒设置
- * 参数：参考数据库字段
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WUserApi.prototype.createSchema=function(callback,data,op){
-	var OP={
-		fields:'option_id'			//默认返回提醒id
+function WExcOptionApi(){
+	this.tableName="exception_option";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'option_id,option_type,option_name,cust_id,mileage,duration,object,object_type,object_name,msg_template,create_time,update_time'
 	};
-	this.jsonConcat(OP,op);
-	OP.method="wicare.exception_option.create"; //接口名称
-	
-	this.getApi(data,callback,OP);	//调用新接口
-}
-
-/**
- * 删除一个提醒设置
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WUserApi.prototype.deleteSchema=function(callback,data,op){
-	var OP={
-		fields:'status_code'
-	};
-	this.jsonConcat(OP,op);
-	OP.method="wicare.exception_option.delete"; //接口名称
-	
-	this.getApi(data,callback,OP);
-}
-
-/**
- * 更改一个提醒设置
- * 参数：
- * 	_option_id:提醒设置的id
- * 	其余为需要更改的字段（除去option_id，create_time，update_time）
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WUserApi.prototype.updataSchema=function(callback,data,op){
-	var OP={
-		fields:'status_code'
-	};
-	this.jsonConcat(OP,op);
-	OP.method="wicare.exception_option.update"; //接口名称
-	
-	this.getApi(data,callback,OP);	//调用新接口
-}
-
-/**
- * 获取一条提醒设置
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WUserApi.prototype.getSchema=function(callback,data,op){
-	
-}
-
-/**
- * 获取提醒列表
- * 参数：
- * 	seller_id:商户id
- * 	max_id:本页最大option_id（可选）
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WUserApi.prototype.getSchemaList=function(callback,data,op){
-	var OP={
+	this._list_op={
 		fields:'option_id,option_type,option_name,cust_id,mileage,duration,object,object_type,object_name,msg_template,create_time,update_time',
 		sorts: 'option_id',
 	    page: 'option_id',
     	limit: "20"
 	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.exception_options.list';
-	
-	this.getApi(data,callback,OP);
 }
-
+WExcOptionApi.prototype=new WiStormAPI();//继承父类WiStormAPI
 
 
 
 
 /**
- * 发送聊天信息(推送)
- * 参数:
- *     user_id: Number,               //用户id
- *     cust_name: String,             //发送名称
- *     friend_id: Number,             //好友id
- *     type: Number,                  //私信类型 0:文本  1:图片  2:语音  3:文件 4:位置
- *     url: String,                   //如果图片，或者语音，则需设置该地址
- *     content: String,               //文本内容
- *     voice_len: Number,             //语音长度
- *     lon: Number,                   //发送位置经度
- *     lat: Number,                   //发送位置纬度
- *     address: String,               //发送位置地址
- * 返回：
- *     status_code: 状态码
- * @param {Object} callback
- * @param {Object} data
+ * 聊天信息
  */
-WUserApi.prototype.sendChat=function(callback,data){
-	data.method='wicare.chat.create';
-	this.getApi(data,callback);
-}
-
-/**
- * 获取聊天记录
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WUserApi.prototype.getChatList=function(callback,data,op){
-	var OP={
+function WChatApi(){
+	this.tableName="chat";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'chat_id,user_id,friend_id,type,url,content,voice_len,lon,lat,address,create_time,read_time,sender_id,receiver_id'
+	};
+	this._list_op={
 		fields:'chat_id,user_id,friend_id,type,url,content,voice_len,lon,lat,address,create_time,read_time,sender_id,receiver_id',
 		sorts: 'chat_id',
 	    page: 'chat_id',
     	limit: "20"
 	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.chats.list';
-	
-	this.getApi(data,callback,OP);
 }
+WChatApi.prototype=new WiStormAPI();//继承父类WiStormAPI
+
+
 
 /**
- * 聊天用户列表
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
+ * 关系表（聊天）
  */
-WUserApi.prototype.getRelationList=function(callback,data,op){
-	var OP={
+function WRelationApi(){
+	this.tableName="relation";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'relat_id,user_id,friend_id,friend_type,friend_name,sex,logo,content,send_time,create_time,unread_count,status'
+	};
+	this._list_op={
 		fields:'relat_id,user_id,friend_id,friend_type,friend_name,sex,logo,content,send_time,create_time,unread_count,status',
 		sorts: '-create_time',
 	    page: 'create_time',
     	limit: "20"
 	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.relations.list';
-	
-	this.getApi(data,callback,OP);
 }
+WRelationApi.prototype=new WiStormAPI();//继承父类WiStormAPI
 
 
 
@@ -744,10 +576,105 @@ WUserApi.prototype.getRelationList=function(callback,data,op){
  * 基础接口api类
  * @constructor
  */
-function WBaseApi(){}
+function WBaseApi(){
+	this.tableName="base";
+	this.apiName+="."+this.tableName;
+}
 WBaseApi.prototype=new WiStormAPI();
 
 
+/**
+ * 获取天气
+ * @param {Object} callback
+ * @param {Object} data
+ * @param {Object} op
+ */
+WBaseApi.prototype.getWeather=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+'.weather.get';
+	
+	//this.getApi(data,callback,OP);
+	W.getJSON("http://api.bibibaba.cn/base/weather2",data,callback);
+}
+
+/**
+ * 获取城市空气指数
+ * @param {Object} callback
+ * @param {Object} data
+ * @param {Object} op
+ */
+WBaseApi.prototype.getAQI=function(callback,data,op){
+	var OP={};
+	this.jsonConcat(OP,op)
+	OP.method=this.apiName+'.aqi.get';//接口名称
+	
+	this.getApi(data,callback,OP);
+}
+
+
+/**
+ * 获取品牌列表
+ * @param {Function} callback
+ * @param {json} op，接口配置，可选
+ */
+WBaseApi.prototype.getBrands=function(callback,op){
+	var OP={};
+	this.jsonConcat(OP,op)
+	OP.method=this.apiName+'.car_brands.list';//接口名称
+	
+	this.getApi(OP,callback);		//调用新接口
+}
+
+/**
+ * 获取车系列表
+ * @param {Function} callback
+ * @param {String} id，品牌id
+ * @param {options} op，接口配置，可选
+ */
+WBaseApi.prototype.getSeriess=function(callback,id,op){
+	var OP={
+		pid:id
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+'.car_series.list';//接口名称
+	
+	this.getApi(OP,callback);		//调用新接口（这里因为新接口还没有做好，所以先注释，使用下面的旧接口）
+}
+
+/**
+ * 获取车款列表
+ * @param {Function} callback
+ * @param {String} id，车系id
+ * @param {options} op，接口配置，可选
+ */
+WBaseApi.prototype.getTypes=function(callback,id,op){
+	var OP={
+		pid:id
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+'.car_types.list';//接口名称
+	
+	this.getApi(OP,callback);		//调用新接口
+}
+
+//经纬度转地址
+WBaseApi.prototype.geocoder=function(callback,data){
+	data.method=this.apiName+'.geocoder';
+	var ajaxSetting={
+		'data':data,
+		dataType:'json',//服务器返回json格式数据
+		type:'get',//HTTP请求类型
+		timeout:10000,//超时时间设置为10秒；
+		success:callback,
+		error:function(xhr,type,errorThrown){//异常处理；
+			throw ("apiError:"+type);
+		}
+	}
+	this.ajax(this.safetyUrl,ajaxSetting);
+}
 
 
 
@@ -756,7 +683,10 @@ WBaseApi.prototype=new WiStormAPI();
  * 通讯接口api类
  * @constructor
  */
-function WCommApi(){}
+function WCommApi(){
+	this.tableName="comm";
+	this.apiName+="."+this.tableName;
+}
 WCommApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
 
 /**
@@ -770,7 +700,7 @@ WCommApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
  */
 WCommApi.prototype.sendSMS=function(callback,mobile,type){
 	var Data={
-		method:"wicare.comm.sms.send",
+		method:this.apiName+".sms.send",
 		mobile:mobile,
 		type:type
 	};
@@ -778,6 +708,7 @@ WCommApi.prototype.sendSMS=function(callback,mobile,type){
 	this.getApi(Data,callback);	
 }
 
+//验证验证码
 WCommApi.prototype.validCode=function(callback,data,op){
 	var OP={
 		fields:'valid'			//默认返回的字段
@@ -785,6 +716,55 @@ WCommApi.prototype.validCode=function(callback,data,op){
 	this.jsonConcat(OP,op);
 	OP.method="wicare.user.valid_code";//接口名称
 	this.getApi(data,callback,OP);
+}
+
+/*
+ * 推送微信
+ * data包含：
+ * from:消息来源（字符串）
+ * content：内容
+ * open_id：接收者open_id
+ * link：链接
+ * remark:说明
+ */
+WCommApi.prototype.sendWeixin=function(callback,data){
+	var url="http://h5.bibibaba.cn/send_weixin.php";
+	var now = new Date();
+    var op = {
+        "first": {
+            "value": data.content,
+            "color": "#173177"
+        },
+        "keynote1": {
+            "value": data.from,
+            "color": "#173177"
+        },
+        "keynote2": {
+            "value": now.WtoString(),
+            "color": "#173177"
+        },
+        "remark": {
+            "value": data.remark,
+            "color": "#173177"
+        }
+    };
+    var OP={
+		template_id:"FB1J1WM7tYMFPe0dScOBRc0MmGaOA_2VnBaNE1hnzH4",
+		data:encodeURIComponent(JSON.stringify(op)),
+		open_id:data.open_id,
+		url:encodeURIComponent(data.link)
+	}
+	var ajaxSetting={
+		dataType:"json",//服务器返回json格式数据
+		data:OP,
+		type:'get',//HTTP请求类型
+		timeout:10000,//超时时间设置为10秒；
+		success:callback,
+		error:function(xhr,type,errorThrown){//异常处理；
+			throw ("apiError:"+type);
+		}
+	}
+	this.ajax(url,ajaxSetting);
 }
 
 
@@ -811,53 +791,26 @@ WDeveloperApi.prototype=new WiStormAPI();
  * 终端接口api类
  * @constructor
  */
-function WDeviceApi(){}
+function WDeviceApi(){
+	this.tableName="device";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'device_id,serial,cust_id,cust_name,device_type,sim,status,active_time'//默认返回的字段
+	}
+	this._list_op={
+		fields:'device_id,serial,cust_id,cust_name,device_type,sim,status,active_time',
+		sorts:"device_id",
+		page:"device_id",
+		limit:"20"
+	}
+}
 WDeviceApi.prototype=new WiStormAPI();
 
-/**
- * 更新设备信息(需要令牌access_token)
- * 参数:
- * 	   必须device_id
- *    device表里面的除了create_time, update_time之外的所有字段
- * 返回：
- *    status_code: 状态码
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WDeviceApi.prototype.update=function(callback,data,op){
-	var OP={
-		fields:'status_code'			//默认返回的字段
-	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.device.update';//接口名称
-	
-	if(data.device_id){
-		data._device_id=data.device_id;
-		delete data.device_id;
-	}
-	
-	this.getApi(data,callback,OP);		//调用新接口
-}
 
-///**
-// * 获取某一设备，搜索字段直接传入
-// * @param {Object} callback
-// * @param {Object} data
-// * @param {Object} op
-// */
-//WDeviceApi.prototype.getOne=function(callback,data,op){
-//	var OP={
-//		fields:'device_id,serial,cust_id,cust_name,device_type,sim,status,active_time'
-//	};
-//	this.jsonConcat(OP,op);
-//	OP.method='wicare.device.get';
-//	
-//	this.getApi(data,callback,OP);
-//}
+
 
 /**
- * 获取电压曲线及水温曲线
+ * 获取电压曲线及水温曲线(也可以是其他数据的历史数据)
  * @param {Object} callback
  * @param {Object} data
  * @param {Object} op
@@ -897,6 +850,84 @@ WDeviceApi.prototype.getDayTripList=function(callback,data,op){
 }
 
 
+/**
+ * 获取gps字段信息
+ * @param {Object} callback
+ * @param {Object} data
+ * @param {Object} op
+ */
+WDeviceApi.prototype.getDeviceGpsDataList=function(callback,data,op){
+	var OP={
+		fields:'rcv_time,lon,lat',	//默认返回的字段
+		sorts:"rcv_time",
+		page:"rcv_time",
+		limit:"1000"
+	};
+	
+	this.jsonConcat(OP,op);				    //把用户传入的配置覆盖默认配置
+	OP.method="wicare.gps_datas.list"; 				//接口名称
+	
+	this.getApi(data,callback,OP);
+}
+
+/**
+ * 获取空气历史
+ * @param {Object} callback
+ * @param {Object} data
+ * @param {Object} op
+ */
+WDeviceApi.prototype.getDeviceAirDataList=function(callback,data,op){
+	var OP={
+		fields:'rcv_time,air',	//默认返回的字段
+		sorts:"rcv_time",
+		page:"rcv_time",
+		limit:"1000"
+	};
+	
+	this.jsonConcat(OP,op);				    //把用户传入的配置覆盖默认配置
+	OP.method="wicare.air_datas.list"; 				//接口名称
+	
+	if(!data.air){
+		data.air=">0";
+	}
+	this.getApi(data,callback,OP);
+}
+
+/**
+ * 发送设备指令
+ * @param {Object} callback
+ * @param {Object} data
+ * @param {Object} op
+ */
+WDeviceApi.prototype.sendCommand=function(callback,data,op){
+	var OP={
+		fields:'status_code'	//默认返回的字段
+	};
+	
+	this.jsonConcat(OP,op);				    //把用户传入的配置覆盖默认配置
+	data.params=JSON.stringify(data.params);
+	OP.method="wicare.command.create"; 				//接口名称
+	
+	this.getApi(data,callback,OP);
+}
+
+/**
+ * 更新日行程汇总数据表
+ * @param {Object} callback
+ * @param {Object} data
+ * @param {Object} op
+ */
+WDeviceApi.prototype.incDayTrip = function (callback,data,op) {
+	var OP={
+		fields:'status_code'	//默认返回的字段
+	};
+	
+	this.jsonConcat(OP,op);				    //把用户传入的配置覆盖默认配置
+	OP.method="wicare.day_trip.inc"; 				//接口名称
+	this.getApi(data,callback,OP);
+};
+
+
 
 
 
@@ -907,7 +938,10 @@ WDeviceApi.prototype.getDayTripList=function(callback,data,op){
  * 文件接口api类
  * @constructor
  */
-function WFileApi(){}
+function WFileApi(){
+	this.tableName="file";
+	this.apiName+="."+this.tableName;
+}
 WFileApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
 
 /**
@@ -919,7 +953,6 @@ WFileApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
  */
 WFileApi.prototype.upload=function(callback,file,updateProgress,op){
 	var OP={
-		auth_code:WiStorm.config.test_code,
 		format: 'json',   //返回数据格式
 	    v: '1.0',         //接口版本
 	    sign_method: 'md5',//签名方式
@@ -962,18 +995,49 @@ WFileApi.prototype.upload=function(callback,file,updateProgress,op){
 	oReq.send(oData);
 }
 
-WFileApi.prototype.getFile=function(){
-	var OP={
-		fields:'待定'			//默认返回的字段
-	};
-	this.jsonConcat(OP,op);
-	OP.method="wicare.file.get"; 				//接口名称
+/**
+ * 
+ * @param {Function} callback,上传成功之后调用
+ * @param {String} dataUrl，要上传的文件base64编码
+ * @param {Function} updateProgress，上传进度发生改变时调用，传入一个0-1之间的小数
+ * @param {json} op，接口配置
+ */
+WFileApi.prototype.base64=function(callback,data,updateProgress,op){
+	var method=this.apiName+'.base64'; 
+	data.dataUrl=data.dataUrl.replace(/data:.*;base64,/,'');
+	var url=this.safetyUrl+'?method='+method;
+	var oData = new FormData();
+	oData.append("image",data.dataUrl);
+	oData.append("imageName",data.name);
+	oData.append("suffix",data.suffix);
+
+	var oReq = new XMLHttpRequest();
+	oReq.open("POST",url,true);
 	
-	//this.getApi(OP,callback);		//调用新接口（这里因为新接口还没有做好，所以先注释，使用下面的旧接口）
-	this.post(WiStorm.config.safety_url,data,callback,"json");
+	if(updateProgress){
+		oReq.upload.addEventListener("progress",function(event){
+			if(event.lengthComputable){
+			    var percentComplete = event.loaded / event.total;
+			    updateProgress(percentComplete);
+			}
+		});
+	}
+	oReq.onload = function(oEvent) {
+		if (oReq.status == 200) {
+			var json;
+			try{
+				json=JSON.parse(oReq.responseText);
+			}catch(e){
+				//TODO handle the exception
+				json=oReq.responseText;
+			}
+			callback(json);
+		} else {
+		  	callback("Error " + oReq.status + " occurred uploading your file.<br \/>");
+		}
+	};
+	oReq.send(oData);
 }
-
-
 
 
 
@@ -982,7 +1046,19 @@ WFileApi.prototype.getFile=function(){
  * 订单接口api类
  * @constructor
  */
-function WOrderApi(){}
+function WOrderApi(){
+	this.tableName="order";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'order_id,cust_id,seller_id,saler_id,order_type,status,product_name,unit_price,quantity,remark,create_time'//默认返回的字段
+	}
+	this._list_op={
+		fields:'order_id,cust_id,seller_id,saler_id,order_type,status,product_name,unit_price,quantity,remark,create_time',
+		sorts:"order_id",
+		page:"order_id",
+		limit:"20"
+	}
+}
 WOrderApi.prototype=new WiStormAPI();
 
 
@@ -994,7 +1070,10 @@ WOrderApi.prototype=new WiStormAPI();
  * 支付接口api类
  * @constructor
  */
-function WPayApi(){}
+function WPayApi(){
+	this.tableName="pay";
+	this.apiName+="."+this.tableName;
+}
 WPayApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
 
 /**
@@ -1012,16 +1091,17 @@ WPayApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
  *	total_price: 总价;
  */
 WPayApi.prototype.pay=function(callback,data){
-	data.method='wicare.pay.weixin';
+	data.method=this.apiName+'.weixin';
 	this.getApi(data,function(res){
 		if(res.status_code){
 			//后台下单不成功
 			callback(res);
 		}else{
 			//下单成功跳转确认订单页面
-			localStorage.setItem("_weixin_pay_args",res.pay_args);
+			localStorage.setItem("_temp_order_id",res.order_id);
+			localStorage.setItem("_weixin_pay_args",JSON.stringify(res.pay_args));
 			localStorage.setItem("_weixin_pay_callback",callback.name)
-			top.location="activation.html?title="+data.product_name+"&detail="+data.remark+"&price="+data.total_price;
+			top.location="http://h5.bibibaba.cn/baba/wx/src/activation.html?title="+data.product_name+"&detail="+data.remark+"&price="+data.total_price;
 		}
 	});
 }
@@ -1043,166 +1123,307 @@ window.addEventListener("load",function(){
  * 车辆接口api类
  * @constructor
  */
-function WVehicleApi(){}
+function WVehicleApi(){
+	this.tableName="vehicle";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'nick_name,cust_name,obj_id,cust_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,maintain_last_mileage,mileage,arrive_count,evaluate_count,last_arrive_time,business_status,evaluate_level'
+	}
+	this._list_op={
+		fields:'nick_name,cust_name,obj_id,cust_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,maintain_last_mileage,mileage,arrive_count,evaluate_count,last_arrive_time,business_status,evaluate_level',	//默认返回的字段
+		sorts:"obj_id",
+		page:"obj_id",
+		limit:"20"
+	};
+}
 WVehicleApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
 
-/**
- * 获取品牌列表
- * @param {Function} callback
- * @param {json} op，接口配置，可选
- */
-WVehicleApi.prototype.getBrands=function(callback,op){
-	OP={};
-	this.jsonConcat(OP,op)
-	OP.method='wicare.base.car_brands.list';//接口名称
-	
-	this.getApi(OP,callback);		//调用新接口
-}
+
 
 /**
- * 获取车系列表
- * @param {Function} callback
- * @param {String} id，品牌id
- * @param {options} op，接口配置，可选
+ * 字典接口api类
+ * @constructor
  */
-WVehicleApi.prototype.getSeriess=function(callback,id,op){
-	var OP={
-		pid:id
-	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.base.car_series.list';//接口名称
-	
-	this.getApi(OP,callback);		//调用新接口（这里因为新接口还没有做好，所以先注释，使用下面的旧接口）
-}
-
-/**
- * 获取车款列表
- * @param {Function} callback
- * @param {String} id，车系id
- * @param {options} op，接口配置，可选
- */
-WVehicleApi.prototype.getTypes=function(callback,id,op){
-	var OP={
-		pid:id
-	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.base.car_types.list';//接口名称
-	
-	this.getApi(OP,callback);		//调用新接口（这里因为新接口还没有做好，所以先注释，使用下面的旧接口）
-}
-
-/**
- * 更新车辆信息,需要token
- * data包含obj_id，access_token
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WVehicleApi.prototype.update=function(callback,data,op){
-	var OP={
-		fields:'obj_id'			//默认返回的字段
-	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.vehicle.update';//接口名称
-	
-	if(data.obj_id){
-		data._obj_id=data.obj_id;
-		delete data.obj_id;
+function WDictApi(){
+	this.tableName="dict";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'dict_value'
 	}
-	
-	this.getApi(data,callback,OP);		//调用新接口
+	this._list_op={
+		fields:'dict_value',	//默认返回的字段
+		sorts:"dict_value",
+		page:"dict_value",
+		limit:"20"
+	};
 }
+WDictApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
 
 /**
- * 获取某一车辆信息，搜索字段直接传入
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
+ * 工具接口
+ * @constructor
  */
-WVehicleApi.prototype.getOne=function(callback,data,op){
+function WUtilApi(){
+	this.tableName="util";
+	this.apiName+="."+this.tableName;
+}
+WUtilApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+//获取二维码接口
+WUtilApi.prototype.getPicValidCode=function(callback,data,op){
 	var OP={
-		fields:'cust_name,obj_id,cust_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,maintain_last_mileage,mileage,arrive_count,last_arrive_time,business_status'
+		fields:'status_code'	//默认返回的字段
 	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.vehicle.get';
 	
+	this.jsonConcat(OP,op);	//把用户传入的配置覆盖默认配置
+	OP.method=this.apiName+".pic_valid_code.get";//接口名称
+	this.getApi(data,function(res){
+		if(!res.status_code){
+			res.valid_code_img=res.valid_code_img.match(/data:image(.*?)(?=")/)[0];
+		}
+		callback(res);
+	},OP);
+}
+
+
+/**
+ * 微信好友关系表api类
+ * @constructor
+ */
+function WFriendApi(){
+	this.tableName="weixin_friend";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'open_id,name,friend_open_id,friend_name,click_count'
+	}
+	this._list_op={
+		fields:'open_id,name,friend_open_id,friend_name,click_count',	//默认返回的字段
+		sorts:"click_count",
+		page:"click_count",
+		limit:"100"
+	};
+}
+WFriendApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+/**
+ * 操作日志表api类
+ * @constructor
+ */
+function WLogApi(){
+	this.tableName="op_log";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'cust_id,open_id,type,content,create_time'
+	}
+	this._list_op={
+		fields:'cust_id,open_id,type,content,create_time',	//默认返回的字段
+		sorts:"create_time",
+		page:"create_time",
+		limit:"100"
+	};
+}
+WLogApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+/**
+ * 账单表
+ * @constructor
+ */
+function WBillApi(){
+	this.tableName="bill";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'cust_id,open_id,source,type,m_type,sum,partner_trade_no,payment_no,payment_time'
+	}
+	this._list_op={
+		fields:'cust_id,open_id,source,type,m_type,sum,partner_trade_no,payment_no,payment_time',	//默认返回的字段
+		sorts:"create_time",
+		page:"create_time",
+		limit:"100"
+	};
+}
+WBillApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+
+
+/**
+ * 位置表(目前只有一个充电桩位置接口)
+ * @constructor
+ */
+function WLocationApi(){
+	this.tableName="location";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'name,address,tel,lon,lat,distance'
+	}
+	this._list_op={
+		fields:'name,address,tel,lon,lat,distance',	//默认返回的字段
+		sorts:"-create_time",
+		page:"create_time",
+		limit:"20"
+	};
+}
+WLocationApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+/**
+ * 产品表
+ * @constructor
+ */
+function WProductApi(){
+	this.tableName="product";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'product_id,product_type,status,product_name,photo,sku_info,unit_price,stock,remark,url'
+	}
+	this._list_op={
+		fields:'product_id,product_type,status,product_name,photo,sku_info,unit_price,stock,remark,url',
+		sorts:"product_id",
+		page:"product_id",
+		limit:"20"
+	};
+}
+WProductApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+/**
+ * 奖品表
+ * @constructor
+ */
+function WLotteryApi(){
+	this.tableName="lottery";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'lottery_id,name,type,sum,time_start,time_end,msg'
+	}
+	this._list_op={
+		fields:'lottery_id,name,type,sum,time_start,time_end,msg',	//默认返回的字段
+		sorts:"lottery_id",
+		page:"lottery_id",
+		limit:"20"
+	};
+}
+WLotteryApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+//抽奖
+WLotteryApi.prototype.draw=function(callback,data,op){
+	var OP={
+		fields:'status_code'	//默认返回的字段
+	};
+	
+	this.jsonConcat(OP,op);				    //把用户传入的配置覆盖默认配置
+	OP.method=this.apiName+".draw"; 				//接口名称
+	this.getApi(data,callback,OP);
+}
+
+//领奖
+WLocationApi.prototype.receive=function(callback,data,op){
+	var OP={
+		fields:'status_code'	//默认返回的字段
+	};
+	
+	this.jsonConcat(OP,op);				    //把用户传入的配置覆盖默认配置
+	OP.method=this.apiName+".receive"; 				//接口名称
 	this.getApi(data,callback,OP);
 }
 
 
-
-
 /**
- * 创建业务信息
- * @param {Function} callback
- * @param {json} data
- * @param {options} op
+ * 游戏表
  */
-WVehicleApi.prototype.createBusiness=function(callback,data,op){
-	var OP={
-		fields:'status_code,business_id'			//默认返回的字段
-	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.business.create';//接口名称
-	
-	this.getApi(data,callback,OP);		//调用新接口
-}
-
-/**
- * 更新一条业务信息
- * @param {Function} callback
- * @param {json} data
- * @param {options} op
- */
-WVehicleApi.prototype.updateBusiness=function(callback,data,op){
-	var OP={
-		fields:'status_code'			//默认返回的字段
-	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.business.update';//接口名称
-
-	this.getApi(data,callback,OP);		//调用新接口
-}
-/**
- * seller_id: 商户ID;
- * status: 状态 1:在店 2:离店;
- * query_type: 离店查询方式 1: 到店时间 2: 离店时间 3: 评价时间
- * begin_time: 开始时间;
- * end_time: 结束时间;
- * max_id: 本页最大ID, 获取下页内容时使用
- * @param {Object} callback
- * @param {Object} data
- * @param {Object} op
- */
-WVehicleApi.prototype.getBusinessList=function(callback,data,op){
-	var OP={
-		fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type',//默认返回的字段
-		sorts:"business_id",
-		page:"business_id",
+function WGameApi(){
+	this.tableName="game";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'game_id,open_id,type,material_url,create_time'
+	}
+	this._list_op={
+		fields:'game_id,open_id,type,material_url,create_time',	//默认返回的字段
+		sorts:"create_time",
+		page:"create_time",
 		limit:"20"
 	};
-	this.jsonConcat(OP,op);
-	OP.method='wicare.business.list';//接口名称
-	
-	if(data.parent_cust_id){
-		data.seller_id=data.parent_cust_id;
-		delete data.parent_cust_id;
+}
+WGameApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+/**
+ * 游戏操作表
+ */
+function WGamelogApi(){
+	this.tableName="game_log";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'log_id,game_id,open_id,completion,create_time,update_time'
 	}
-	
-	this.getApi(data,callback,OP);		//调用新接口
+	this._list_op={
+		fields:'log_id,game_id,open_id,completion,create_time,update_time',	//默认返回的字段
+		sorts:"lottery_id",
+		page:"lottery_id",
+		limit:"20"
+	};
+}
+WGamelogApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+/**
+ * 广告表
+ */
+function WAdApi(){
+	this.tableName="ad";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'ad_id,city,image,content,url'
+	}
+	this._list_op={
+		fields:'ad_id,city,image,content,url',	//默认返回的字段
+		sorts:"ad_id",
+		page:"ad_id",
+		limit:"20"
+	};
+}
+WAdApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+
+Wapi.vehicle=new WVehicleApi();//车辆
+Wapi.pay=new WPayApi();//支付
+Wapi.order=new WOrderApi();//订单
+Wapi.file=new WFileApi();//文件
+Wapi.device=new WDeviceApi();//设备
+Wapi.developer=new WDeveloperApi();//开发者
+Wapi.user=new WUserApi();//用户
+Wapi.base=new WBaseApi();//基本
+Wapi.comm=new WCommApi();//通信
+Wapi.business=new WBusinessApi();//业务
+Wapi.exc_opt=new WExcOptionApi();//提醒设置
+Wapi.exceptions=new WExceptionsApi();//异常车况
+Wapi.chat=new WChatApi();//聊天
+Wapi.relation=new WRelationApi();//关系表
+Wapi.dict=new WDictApi();//字典表
+Wapi.util=new WUtilApi();//工具接口类
+Wapi.friend=new WFriendApi();//微信好友表
+Wapi.log=new WLogApi();//操作日志表
+Wapi.bill=new WBillApi();//账单表
+Wapi.location=new WLocationApi();//位置表
+Wapi.product=new WProductApi();//产品表
+Wapi.lottery=new WLotteryApi();//奖品表
+Wapi.game=new WGameApi();//游戏表
+Wapi.gamelog=new WGamelogApi();//游戏操作表
+Wapi.ad=new WAdApi();//游戏操作表
+
+
+//处理记录在本地的错误日志
+var __errorLog=localStorage.getItem("errorList");
+var __errorList;
+if(__errorLog){
+	try{
+		__errorList=JSON.parse(__errorLog);
+	}catch(e){
+		//TODO handle the exception
+		__errorList=[];
+	}
+	for(var __i=0;__i<__errorList.length;__i++){
+		Wapi.user.createCrash(__errorList[__i],function(res){});
+	}
+	localStorage.removeItem("errorList");
 }
 
 
-
-
-
-
-W.vehicleApi=Wapi.vehicle=new WVehicleApi();//车辆
-W.payApi=Wapi.pay=new WPayApi();//支付
-W.orderApi=Wapi.order=new WOrderApi();//订单
-W.fileApi=Wapi.file=new WFileApi();//文件
-W.deviceApi=Wapi.device=new WDeviceApi();//设备
-W.developerApi=Wapi.developer=new WDeveloperApi();//开发者
-W.userApi=Wapi.user=new WUserApi();//用户
-W.baseApi=Wapi.base=new WBaseApi();//基本
-W.commApi=Wapi.comm=new WCommApi();//通信
+var evt = document.createEvent("HTMLEvents");
+evt.initEvent("W.apiready", false, false);
+window.dispatchEvent(evt);

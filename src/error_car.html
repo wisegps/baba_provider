@@ -12,9 +12,9 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 
-		<title>异常车况</title>
+		<title>WiCARE商户版</title>
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<!--按皮肤引入css-->
 		<script>link("W.css")</script>
 		<script>link("ui.css")</script>
@@ -87,14 +87,14 @@
 		    stringTime =  Date.parse(new Date(stringTime))//将日期转换成时间戳
 		    stringTime = stringTime/1000;
 			timestamp = timestamp/1000;
-			ltime = timestamp-stringTime;			
+			var ltime = timestamp-stringTime;			
 			
 			if(ltime<1){
 				create_time=Math.floor(ltime/(1000 * 60* 60))+"小时前";
 			}else{
 				create_time="发生时间："+data.create_time.slice(5,7)+"/"+data.create_time.slice(8,10);;
 			}
-				
+			var slast_maintain;	
 			if(data.last_arrive){
 				var md = data.last_arrive.slice(5,10);
 				var hm = data.last_arrive.slice(11,16);
@@ -148,7 +148,7 @@
 			var nodes = this.parentNode.parentNode;
 			var ndata = nodes.data;
 			var data ={
-				user_id:_user.cust_id,
+				user_id:_user.seller_id,
 				access_token:_user.access_token,	
 				cust_name:ndata.cust_name,
 				friend_id:ndata.cust_id,
@@ -185,12 +185,16 @@
 		
 		
 		var dom={},MAX_ID=0,param={
-			parent_cust_id:_user.cust_id,
+			seller_id:_user.seller_id,
 			exp_type:0,
 			access_token:_user.access_token
 		}
 		//exception_id
-		window.onload=function(){
+		window.addEventListener("load",windowLoad);
+		function windowLoad(){
+			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[2]=="0")){
+				location="home.html";
+			}
 			var item=W(".tab_item",true);                           //返回所有tab_item类的元素
 			for(var i=0;i<item.length;i++){
 				item[i].addEvent("click",changeItem);				

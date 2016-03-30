@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<title>WiCARE-游戏</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script>link("W.css")</script>
+		<script src="../../wslib/api/newWapi.js" defer="defer"></script>
+		<script src="../../wslib/toolkit/WxSdk.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../ui/hongbao.js" defer="defer"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+	</head>
+	<style>
+		#game{
+			width: 90vmin;
+    		margin: auto;
+		}
+		#game_view{
+			font-size: 0;
+			margin: auto;
+			width: 90vmin;
+			height: 90vmin;
+			position: relative;
+			box-shadow: 0px 0px 10px rgba(0,0,0,.5);
+		}
+		#game>span{
+			display: inline-block;
+		    color: #333;
+		    font-size: 24px;
+		    padding: 5px;
+		    margin: 5px 0;
+		}
+		#ratio:after{
+			content: "%";
+		}
+		.card{
+			position: absolute;
+			top: 0;
+			left: 0;
+  			background-repeat: no-repeat;
+		}
+		.can_move{
+			transition: transform .5s;
+			-moz-transition: -moz-transform .5s;
+			-webkit-transition: -webkit-transform .5s;
+			transform: translate3d(0,0,0);
+			-webkit-transform: translate3d(0,0,0);
+			-moz-transform: translate3d(0,0,0);
+		}
+		.card.active{
+			box-shadow: 0 0 15px #d9534f inset;
+		}
+		.control{
+		    width: 100%;
+		    padding: .5em;
+		    text-align: center;
+		}
+		button{
+			color: #fff;
+			margin: 5px;
+		}
+		.mui-btn.mui-btn-block.w{
+			width: 90%;
+			margin: auto;
+			margin-top: 5px;
+			-webkit-transition: none;
+    		transition: none;
+		}
+		.ad img{
+			width: 100%;
+		    text-align: center;
+		}
+		#title,#makeMyGame{width: 40%;display: inline-block;}
+		
+		#make_game{
+		    position: fixed;
+		    background: #fff;
+		    text-align: center;
+		}
+		#rank{
+			display: table;
+			width: 100%;
+			padding: .5em;
+   			text-align: center;
+		}
+		#rank>div{
+			display: table-cell;
+		}
+		.rank {
+			border-radius: 50%;
+		    width: 40px;
+		    display: inline-block;
+		    height: 40px;
+		    background-size: 100% 100%;
+		    position: relative;
+    		overflow: hidden;
+		}
+		.rank>span{
+			z-index: 1;
+			display: block;
+    		color: #fff;
+    		line-height: 40px;
+    		width: 100%;
+    		position: absolute;
+    		text-shadow: 0 0 3px#000;
+    		font-size: 14px;
+		}
+		.rankb{
+			width: 100%;
+		    height: 100%;
+		    background: rgba(0,0,0,.5);
+		}
+		#dou{
+			float: right;
+		}
+		#dou:before{
+			font-family: Muiicons;
+			content: '\e438';
+			color: #FFCA00;
+			vertical-align:top;
+		}
+		@keyframes like
+		{
+			0%   {transform:scale3d(1,1,1) translate3d(0,0,0);opacity: 1;}
+			100% {transform:scale3d(2,2,1) translate3d(-10px,-10px,0);opacity: 0;}
+		}
+		
+		@-webkit-keyframes like
+		{
+			0%   {-webkit-transform:scale3d(1,1,1) translate3d(0,0,0);opacity: 1;}
+			100% {-webkit-transform:scale3d(2,2,1) translate3d(-10px,-10px,0);opacity: 0;}
+		}
+		
+		#game>.like{
+			position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    color: #d9534f;
+		    text-shadow: 0 0 1px #fff;
+			animation: like 1s;
+			-webkit-animation: like 1s;
+			animation-fill-mode: forwards;
+			-webkit-animation-fill-mode: forwards;
+		}
+	</style>
+	<script>
+		var open_id=_g.openid;
+		if(!open_id){
+			if(!_g.needUser)
+				W.getOpenId();
+			else{
+				W.wxLogin();
+			}	
+		}
+		_g.id=_g.id||0;
+	</script>
+	<body style="overflow: hidden;">
+		<div class="mui-content">
+			<div class="ad" style="width: 100%;">
+				<a href="../buy.html?intent=logout">
+					<img src="../../img/ad.jpg" />
+				</a>
+			</div>
+			<div id="game">
+				<span id="ratio">0</span>
+				<span id="s">0</span>
+				<span id="time">00:00</span>
+				<span id="dou">0</span>
+				<div id="game_view"></div>
+			</div>
+			<div id="rank"></div>
+			<div style="text-align: center;">
+				<button type="button" id="title" class="mui-btn mui-btn-block w">设置分享标题</button>
+				<button type="button" id='makeMyGame' class="mui-btn mui-btn-block w" style="background: #d9534f;">制作我自己的游戏</button>
+			</div>
+		</div>
+		<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<label for="inputf">
+						<div>
+							选择图片
+							<input type="file" capture="camera" id="inputf" name="inputf" style="display: none;"accept="image/*"/>
+						</div>
+					</label>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<a id="noActive">取消</a>
+				</li>
+			</ul>
+		</div>
+		<div id="make_game" class="child_view toRight">
+			<div class="control">
+				<button type="button" data-val="3" style="background: #5cb85c;">幼儿水平</button>
+				<button type="button" data-val="4" style="background: #5bc0de;">来点挑战</button>
+				<button type="button" data-val="5" style="background: #f0ad4e;">摧残意志</button><br>
+				<button type="button" data-val="6" style="background: #d9534f;">丧心病狂</button>
+				<button type="button" data-val="8" style="background: #000;">放弃治疗</button>
+				<button type="button" data-val="10" style="background: #fff;color: #000;">妈的智障</button>
+			</div>
+			<canvas id='myCanvas' width="400" height="200"></canvas>
+			<button type="button" id="upload" class="mui-btn mui-btn-block w">确定</button>
+		</div>
+		<template id="rankone">
+			<div class="rank" style="background-image: url(<%logo%>);">
+				<span><%completion%>%</span>
+				<svg viewBox="0,0,100,100" style="opacity: .5;">
+					<defs>
+						<clipPath id="clipPath">
+							<rect x="<%completion%>" y="0" width="100" height="100"/>
+						</clipPath>
+				  	</defs>
+				  	<circle cx="50" cy="50" r="50" clip-path="url(#clipPath)"></circle>
+				</svg>
+			</div>
+			<div><%name%></div>
+		</template>
+	</body>
+	<script>
+		var dom={
+			body:W('body'),
+			gv:W("#game_view"),
+			main:W(".mui-content"),
+			game:W("#game"),
+			make:W("#makeMyGame"),
+			ratio:W("#ratio"),
+			s:W("#s"),
+			time:W("#time"),
+			c:W(".control"),
+			mg:W("#make_game"),
+			canvas:W("#myCanvas"),
+			file:W("#file"),
+			img:new Image(),
+			ad:W(".ad a"),
+			adimg:W(".ad img"),
+			rankone:W("#rankone"),
+			rank:W("#rank"),
+			dou:W("#dou")
+		}
+		var vmin=dom.body.offsetWidth;
+		if(dom.mg.offsetWidth>dom.mg.offsetHeight)
+			vmin=dom.mg.offsetHeight;
+		else
+			vmin=dom.mg.offsetWidth;
+		
+		var img=_g.img||"pZuYoJ2XlqOYqQ.jpg",
+		img_w,img_h,game_id=_g.game_id;
+		var gw=90*vmin/100;//game_view的高宽,单位是px
+		var x=_g.x||3;//3x3的游戏
+		var wh;//图片格的高度和宽度
+		var l;//格子的数量
+		var c={
+			bsw:gw,
+			bsh:gw,
+			sx:0,//图片起始点的x
+			sy:0,//图片起始点的y
+			w:0
+		};//card的background-size等等各种属性
+		var win={
+			s:0,//总计多少步
+			win:true,//是否胜利
+			l:[],//等级
+			upset:false//是否打乱了
+		};//记录总共使用了多少步
+		var cards;//当前卡片数组
+		var startTime,timeId;
+		var cxt=dom.canvas.getContext("2d");//画布
+		var socket;//socket对象
+		window.addEventListener("load",function(){
+			setShare();
+			var b=W(".control button",true);
+			for(var i=0;i<b.length;i++){
+				b[i].addEvent('click',setX);
+				win.l[b[i].dataset.val]=(b[i].innerText);
+			}
+			W("#title").addEvent('click',setTitle);
+			win.l[2]=b[i-1].innerText;
+			W("#noActive").addEvent('click',hidePicture);
+			dom.make.addEvent('click',showMakeGame);
+			
+			W("#inputf").addEvent('change',loadImg);
+			W("#upload").addEvent('click',fileUpload);
+			dom.img.addEvent('load',imgLoad);
+			dom.canvas.width=dom.canvas.height=gw;
+			
+			login();
+			resetImg();
+			getad();
+			dom.dou.innerHTML=W.ls('total_wi_dou',true)||0;
+		})
+		//更换图片
+		function resetImg(){
+			c={
+				bsw:gw,
+				bsh:gw,
+				sx:0,//图片起始点的x
+				sy:0,//图片起始点的y
+				w:0
+			}
+			dom.img.src=img;
+		}
+		
+		function imgLoad(){
+			img_w=this.width;
+		    img_h=this.height;
+		    resetGame();
+		}
+		
+		function resetGame(){
+			if(img_w>img_h){
+		    	c.bsw=gw*img_w/img_h;
+		    	c.sx=(c.bsw-gw)/2;
+		    	c.w=img_h/x;
+		    }else{
+		    	c.bsh=gw*img_h/img_w;
+		    	c.sy=(c.bsh-gw)/2;
+		    	c.w=img_w/x;
+		    }
+			dom.gv.innerHTML='';
+			wh=gw/x;
+			l=x*x;//格子的数量
+			var tem=document.createDocumentFragment(),cd;
+			cards=[];
+			for (var i=0;i<l;i++) {
+				cd=new card(i);
+				cards.push(cd);
+				tem.appendChild(cd);
+			}
+			dom.gv.appendChild(tem);
+			upset();
+			setShare();
+			W.loading();
+			
+			startTime=new Date().getTime();
+			var saveTime=W.ls(game_id+'startTime',true);
+			if(saveTime)
+				startTime=saveTime;
+			else 
+				W.setLS(game_id+'startTime',startTime);
+			timing();
+		}
+		
+		//计时
+		function timing(){
+			var t=parseInt((new Date().getTime()-startTime)/1000);
+			var m=parseInt(t/60);
+			var s=t%60;
+			var h=0;
+			if(m>60){
+				h=parseInt(m/60);
+				m=m%60;
+			}
+			dom.time.innerHTML=h+':'+m+':'+s;
+			timeId=setTimeout(timing,1000);
+		}
+		function stopTiming(){
+			clearTimeout(timeId);
+		}
+		
+		function setX(){
+			W.loading(true);
+			x=parseInt(this.dataset.val);
+			win.win=true;
+			setTimeout(resetGame,50);
+		}
+		
+		//画布上画出所有卡片
+		function drawImage(){
+			if(img.search(/data:image/)==-1)
+				return;
+			for (var i =0;i<l;i++) {
+				cards[i].draw();
+			}
+		}
+		
+		//打乱顺序
+		function upset(){
+			var j;
+			for(var i=0;i<l;i++){
+				j=getRandom(0,l-1);
+				cards[i].move(j);
+			}
+			loadGame();
+			win.s=W.ls(game_id+'wins',true);
+			var p=W.ls(game_id+'completion',true);
+			if(win.s=='undefined'||!win.s)win.s=0;
+			if(p=='undefined'||!p)p=0;
+			dom.s.innerHTML=win.s.toString();
+			dom.ratio.innerText=p;
+			win.win=false;
+			makeSequence();
+			drawImage();
+		}
+		
+		//根据位置获取在该位置上的元素,如果为空，则返回false
+		function getCardBy(i){
+			for(var j=0;j<cards.length;j++){
+				if(cards[j].i==i)
+					return cards[j];
+			}
+			return false;
+		}
+		
+		//自动走一步
+		function autoMove(){
+			for(var i=0;i<l;i++){
+				if(cards[i]._i!=cards[i].i){
+					cards[i].autoMove();
+					return;
+				}
+			}
+		}
+		
+		
+		//方块组件
+		function card(i){
+			var obj=new WiStormUI("div");//创建一个div组件
+			obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+			
+			obj.className="card can_move";//设置div的class属性
+			obj.id="id_"+i;
+			obj.setData(i);//设置obj的内容,setData()在下面cv.prototype中定义
+			return obj;//最后记得要返回组件
+		}
+		card.prototype.setData=function(i){
+			var ro=parseInt(i/x),co=i%x;//行，列
+			this.ro=ro;
+			this.co=co;//行，列
+			this.x=wh*co;
+			this.y=wh*ro;
+			this.bsw=c.w*co+c.sx;
+			this.bsh=c.w*ro+c.sy;
+			this.w=c.w;
+			this._i=this.i=i;
+
+			this.style.backgroundImage='url("'+img+'")';
+			this.style.backgroundPosition='-'+(wh*co+c.sx)+'px -'+(wh*ro+c.sy)+'px';
+			this.style.backgroundSize=c.bsw+'px '+c.bsh+'px';
+			this.style.width=this.style.height=wh+'px';
+			this.moveTo(co,ro);
+			this.addEvent('touchstart',card.move);
+		}
+		//移动到某个位置
+		card.prototype.moveTo=function(x,y){
+			var px=wh*x,py=wh*y;
+			this.style.transform=this.style.webkitTransform='translate3d('+px+'px,'+py+'px,0)';
+			this.x=px;
+			this.y=py;
+			this.ro=y;
+			this.co=x;//行，列
+		}
+		card.prototype.moveBy=function(i){
+			var py=parseInt(i/x),px=i%x;//行，列
+			this.moveTo(px,py);
+			this.i=i;
+		}
+		//交换位置
+		card.prototype.move=function(r){
+			if(i==this.i)
+				return;
+			var i=this.i;
+			var t=getCardBy(r);
+			t.moveBy(i);
+			this.moveBy(r);
+			win.s++;
+			dom.s.innerHTML=win.s;
+		}
+		
+		card.prototype.draw=function(){
+			cxt.drawImage(dom.img,this.bsw,this.bsh,this.w,this.w,this.x,this.y,wh,wh);
+		}
+		//自动恢复
+		card.prototype.autoMove=function(){
+			this.move(this._i);
+		}
+		
+		card.move=function(){
+			if(card.active){
+				this.move(card.active.i);
+				card.send();
+				card.active.classList.remove('active');
+				card.active=false;
+				W.setLS(game_id+'wins',win.s,true);
+			}else{
+				card.active=this;
+				this.classList.add('active');
+			}
+		}
+		card.send=function(){
+			if(win.win)return;
+			var s=makeCheckSequence();
+			socket.sendMsg({
+				type: 'PIECE_CHANGE',
+				pieces: s
+			},card.sended);
+			W.setLS(game_id,s);
+		}
+		card.sended=function(res){
+			if(res.status!='OK'){
+				W.toast(JSON.stringify(res));
+				W.toast('服务器同步失败');
+			}else{
+				dom.ratio.innerText=res.completion;
+				W.setLS(game_id+'completion',res.completion,true);
+				if(res.completion<100)
+					return;
+				win.win=true;
+				setShare();
+				stopTiming();
+				dom.dou.innerHTML=res.total_wi_dou;
+				dom.game.appendChild(like(res.add_wi_dou));
+				W.toast('赢了！！！可以点击下面的等级按钮挑战不同级别哦！也可以制作自己的游戏分享出去，摧残他们的意志吧少年！');
+				W.setLS(game_id+'completion','',true);
+				W.setLS(game_id+'startTime','',true);
+				W.setLS(game_id,'',true);
+				W.setLS(game_id+'wins','',true);
+				W.setLS('total_wi_dou',res.total_wi_dou,true)
+			}
+		}
+		
+		function like(num){
+			var p=document.createElement("span");
+			p.className="like";
+			p.innerHTML='+'+num+'微豆';
+			setTimeout(function(){
+				p.parentNode.removeChild(p);
+			},1000);
+			return p;
+		}
+		
+		//设置标题
+		function setTitle(){
+			var op={
+				"title":'请设置分享标题',
+				"content":"会在分享卡片内显示",
+				"y":___.ok,
+				"n":___.cancel,
+				"callback":function(res){
+					setShare.title=res;
+					setShare();
+				}
+			}
+			W.prompt(op);
+		}
+		
+		/*****设置分享******/
+		function setShare(){
+			if(img.search(/data:image/)==0)
+				return;
+			var name=_user?_user.cust_name:"";
+			var share_url=location.origin+location.pathname+'?intent=logout&needOpenId=true&id='+open_id+'&name='+name+'&x='+x+'&game_id='+game_id+'&img='+encodeURIComponent(img);
+			history.pushState(null,"",share_url);
+			if(!W.fillFriend.fill){
+				W.fillFriend(_g.id,open_id,_g.name,name);
+				W.fillFriend.fill=true;
+			}
+			if(!W.native){
+				window.addEventListener("nativeSdkReady",setShare);
+				return;
+			}
+			W.debug(open_id);
+			var op={
+			    title: setShare.title||'我的自拍不是那么容易发出来滴~', // 分享标题
+			    desc: 'WiCARE空气净化器', // 分享描述
+			    link: share_url, // 分享链接
+			    imgUrl:img, // 分享图标
+			    success: function(){},
+			    cancel: function(){}
+			}
+			if(win.win&&!setShare.title){
+				op.title='我花了'+win.s+'步完成【'+win.l[x]+'】级别，要不要试试?';
+			}
+			
+			wx.onMenuShareTimeline(op);
+			wx.onMenuShareAppMessage(op);
+		}
+		
+		
+		/*******websocket部分******/
+		function Socket(callback){
+			var server="ws:gs.bibibaba.cn:8081";
+			this.socket=new WebSocket(server);
+			this.socket.onopen=callback||W._noop;
+			this.msgid=0;
+			this.msgCallback={};
+			var that=this;
+			this.socket.onmessage=function(msg){
+				var data=JSON.parse(msg.data);
+				if(data._msgId){
+					var callback=that.msgCallback[data._msgId];
+					delete that.msgCallback[data._msgId];
+					clearTimeout(callback._timeoutid);
+					callback(data);
+				}else{
+					this.send(JSON.stringify({status: 'OK'}));
+					that.onmessage(data);
+				}
+			}
+			this.socket.onerror = function(error) {
+	            W.alert("socket错误");
+	        };
+	        this.socket.onclose = function(event) {
+	            that.onclose(event);
+	        };
+	        this.onclose=this.onmessage=W.noop;
+		}
+		Socket.prototype.sendMsg=function(json,callback){
+			var that=this;
+			this.msgid++;
+			var id='id'+this.msgid;
+			json._msgId=id;
+			
+			this.socket.send(JSON.stringify(json));
+			
+			callback._timeoutid=setTimeout(function(){
+				that.msgCallback[id]({status:'timeout'});
+				delete that.msgCallback[id];
+			},10000);//10秒超时
+			this.msgCallback[id]=callback;
+		}
+		
+		//开始游戏
+		function login(){
+			var cust_name=_g.nickname;
+			var logo=_g.headimgurl;
+			if(_user){
+				cust_name=_user.cust_name;
+				logo=_user.logo||_g.headimgurl;
+			}
+			socket=new Socket(function(){
+				socket.sendMsg({
+					type: 'LOGIN',
+					'game_id':game_id,
+					'open_id':open_id,
+					'name':cust_name,
+					'logo':logo
+				},function(res){
+					if(res.status!='OK')
+						W.confirm('与服务器连接失败，将无法记录成绩，请问是否重新连接？',function(b){
+							if(b)login();
+						})	
+				});
+			});
+			
+			socket.onmessage=function(data){
+				//服务器主动推送的信息(排行榜或者是序列)
+				if(data.type=="FINISH"){
+					var r=data.ranks;
+					var l=document.createDocumentFragment();
+					for(var i=0;i<r.length;i++){
+						l.appendChild(new rank(r[i]));
+					}
+					dom.rank.innerHTML='';
+					dom.rank.appendChild(l);
+				}else if(data.type==''){
+					
+				}
+			}
+			
+			socket.onclose=login;
+		}
+		
+		function rank(data){
+			var obj=new WiStormUI("div");
+			obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+			obj.template(dom.rankone,data);
+			return obj;
+		}
+		
+		
+		/*****上传图片*****/
+		function showMakeGame(){
+			dom.mg.classList.remove("toRight");
+			dom.mg.classList.add("fromRight");
+			setTimeout(showPicture,600);
+			history.pushState(null,location,location);
+			window.addEventListener("popstate",hideMakeGame);
+		}
+		
+		function hideMakeGame(){
+			dom.mg.classList.remove("fromRight");
+			dom.mg.classList.add("toRight");
+			window.removeEventListener('popstate',hideMakeGame);
+		}
+		//展示文件选择框
+		function showPicture(){
+			W("#inputf").click();
+		}
+		//隐藏文件选择框
+		function hidePicture(){
+			W("#picture").classList.remove('mui-active');
+		}
+		
+		function loadImg(){
+			if(!this.files.length){
+				W.toast("未选择文件");
+				return;
+			}
+			hidePicture();
+			var type=this.value.split('.').pop().toLocaleLowerCase();
+			var file =this.files[0];
+		    if((type!="jpg"&&type!="png"&&type!="jpeg"&&type!="gif")){
+		        this.value="";
+		        this.files=null;
+		        W.alert("抱歉，仅支持的jpg或png或者jpeg图片");
+		        return;
+		    }
+		    W.loading('正在加载图片……');
+		    var reader = new FileReader();
+		    reader.readAsDataURL(file);
+			reader.onload = function (e){
+				W.loading();
+				img=e.target.result;
+				resetImg();
+			}
+		}
+		
+		
+		
+		//在min与max之间取一个随机数，返回值中有可能会出现min和max
+		function getRandom(min,max){
+			var a=Math.random();
+			return Math.floor(a*(max-min+1)+min);
+		}
+		
+		
+		//转换成文件
+		function dataURLtoBlob(dataurl) {
+		    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+		        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+		    while(n--){
+		        u8arr[n] = bstr.charCodeAt(n);
+		    }
+		    return new Blob([u8arr], {type:mime});
+		}
+		//上传图片
+		function fileUpload(){
+			if(img.search(/data:image/)!=0){
+				W.toast('请上传文件再提交');
+				return;
+			}
+			W.loading("正在上传文件，请稍等");
+			var data={
+				dataUrl:dom.canvas.toDataURL(),
+				name:getRandom(0,10000).toString(),
+				suffix:'png'
+			}
+			Wapi.file.base64(function (res){
+				W.loading("上传成功，正在创建游戏");
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				img=res.image_file_url;
+				Wapi.game.add(function(res){
+					W.loading();
+					if (!res||res.status_code) {
+						W.errorCode(res);
+						return;
+					}
+					game_id=res.game_id;
+					resetImg();
+					dom.mg.classList.add("toRight");
+					dom.mg.classList.remove("fromRight");
+					W.toast('游戏创建成功，右上角就可以分享出去给朋友玩啦！还可以分别分享不同难度哦~~记得设置分享标题哦~');
+				},{
+					'open_id':open_id,
+					type:'1',
+					level:x,
+					material_url:img,
+					answer:makeSequence.sequence
+				});
+			},data,function(s){
+				W.loading("正在上传文件，请稍等……"+parseInt(s*100)+'%');
+			});
+		}
+		
+		//写出答案序列
+		function makeSequence(){
+			var a=[];
+			for (var i =0;i<l;i++) {
+				a.push(cards[i].i);
+			}
+			makeSequence.sequence=JSON.stringify(a);
+			console.log(makeSequence.sequence);
+			return makeSequence.sequence;
+		}
+		//写出答案序列
+		function makeCheckSequence(){
+			var a=[];
+			for (var i =0;i<l;i++) {
+				a[cards[i].i]=cards[i]._i;
+			}
+			console.log(JSON.stringify(a));
+			return a;
+		}
+		
+		//加载游戏进度
+		function loadGame(){
+			var a=W.ls(game_id)||[];
+			for (var i =0;i<a.length;i++) {
+				cards[a[i]].move(i);
+			}
+		}
+		
+		//获取广告
+		function getad(){
+			Wapi.ad.list(function(res){
+				console.log(res);
+				getad.ad=res.data;
+				resetAd.i=0;
+				resetAd();
+			});
+		}
+		
+		function resetAd(){
+			if(resetAd.i>=getad.ad.length)
+				resetAd.i=0;
+			var ad=getad.ad[resetAd.i++];
+			dom.ad.href=ad.url;
+			dom.adimg.src=ad.image;
+			setTimeout(resetAd,30000);
+		}
+	</script>
+</html>

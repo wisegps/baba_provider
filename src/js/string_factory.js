@@ -42,8 +42,9 @@ function $T_All(time) {
 
 function str2Date(time) {
 	var date = new Date();
-	var str_before = time.split('T')[0]; //获取年月日
-	var str_after = time.split('T')[1]; //获取时分秒
+	var t=time.split(/[T\s]/);
+	var str_before = t[0]; //获取年月日
+	var str_after = t[1]; //获取时分秒
 	var years = str_before.split('-')[0]; //分别截取得到年月日
 	var months = str_before.split('-')[1] - 1;
 	var days = str_before.split('-')[2];
@@ -51,7 +52,7 @@ function str2Date(time) {
 	var mins = str_after.split(':')[1];
 	var seces = str_after.split(':')[2].replace("Z", "");
 	var secs = seces.split('.')[0];
-	var smsecs = seces.split('.')[1];
+	var smsecs = seces.split('.')[1]||0;
 	date.setUTCFullYear(years, months, days);
 	date.setUTCHours(hours, mins, secs, smsecs);
 	return date;
@@ -140,7 +141,7 @@ function getBeginMonth() {
 /**
  * 到店时间描述
  */
-function $ArriveDesc(time) {
+function $ArriveDesc(time,status) {
 	if (time == undefined) {
 		return "";
 	}
@@ -152,6 +153,14 @@ function $ArriveDesc(time) {
 	var mm = parseInt(ts / 1000 / 60 % 60, 10); //计算剩余的分钟数  
 	//var ss = parseInt(ts / 1000 % 60, 10); //计算剩余的秒数  
 	var surfix = "前到店";
+	if(status==2){
+		surfix = "前完工";
+	}else if(status==3){
+		surfix = "前离店";
+	}else if(status==4){
+		surfix = "前开始作业";
+	}
+	
 	if (dd > 0) {
 		return dd + "天" + surfix;
 	} else if (hh > 0) {

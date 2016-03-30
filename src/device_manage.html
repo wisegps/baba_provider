@@ -12,9 +12,9 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 			
-		<title>叭叭商户版</title>
+		<title>WiCARE商户版</title>
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<script>link("W.css")</script>
 		<script>link("ui.css")</script>
 		<script src="ui/ui.js"></script>
@@ -64,11 +64,17 @@
 		.device>footer>.mui-btn-primary:enabled:active{
 			background: #459EBF;
 		}
+		.mui-icon.mui-pull-right {
+		    font-size: 15px;
+		    line-height: 24px;
+		    font-family: "微软雅黑";
+		    color: #79C6E4;
+		}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav noshadow">
 			<span class="mui-icon mui-icon-left-nav mui-pull-left W_back"></span>
-			<span class="mui-icon w_icon icon_scanning mui-pull-right"></span>
+			<a class="mui-icon mui-pull-right" href="order.html">订单</a>
 			<h1 class="mui-title">设备管理</h1>
 		</header>
 		<nav class="mui-bar mui-bar-tab top">
@@ -237,10 +243,13 @@
 		
 		//点击调用支付
 		dv.pay = function() {
-			//this.serial="55621854091";
+			var openId=_user.open_id;
+			if(!openId){
+				W.alert("openId缺失，不能下单，请在微信浏览器中打开。");
+			}
 			var data={
-				cust_id:_user.cust_id,
-				open_id:W.getSetting("openId"),
+				cust_id:_user.seller_id,
+				open_id:openId,
 				order_type: 1,
 				pay_key:this.serial,
 				product_name:"设备号码："+this.serial,
@@ -269,12 +278,15 @@
 		}
 		
 		var dom={},MAX_ID=0,param={
-				parent_cust_id: _user.cust_id,
+				seller_id: _user.seller_id,
 			    max_id:MAX_ID,
 			    access_token:_user.access_token,
 			};
-
-		window.onload=function(){
+		window.addEventListener("load",windowLoad);
+		function windowLoad(){
+			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[4]=="0")){
+				location="home.html";
+			}
 			var item=W(".tab_item",true);
 			for(var i=0;i<item.length;i++){
 				item[i].addEvent("click",changeItem);
@@ -285,7 +297,7 @@
 			dom.show=item[0];
 			changeItem.call(item[0]);
 			
-			W(".icon_scanning").addEvent("click",toScanner);
+			//W(".icon_scanning").addEvent("click",toScanner);
 		}
 		
 		//选择查看不同类型列表

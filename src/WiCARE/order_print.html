@@ -1,0 +1,309 @@
+<!--
+	作者：小刘
+	时间：2015-3-7
+	描述：订单打印
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>订单打印</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script src="../../wslib/ui/DateTime.js"></script>
+		<script src="../js/string_factory.js"></script> 
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+		<style>
+			body { color: #000; background: #fff; } 
+			.all{padding: 0 10%;}
+			.all table{width: 100%;}
+			.print{padding: .5em 2em;}
+			
+			/*.time_box{text-align: center;}*/
+			.print_order{padding: 0 10%;width: 100%;}
+			.print_order table{width: 100%;}
+			
+			.print_page1_hide{display: none;}
+			.print_page2{display: none;}
+			.print_pate2_visible{width:100%;}
+			.print_page2_col{width:40%;}
+		</style>
+	</head>
+	<body>
+		<button id="btn_print" class="print" style="display: block">打印</button>
+		<div id="time_box" class="time_box" style="display: block;">
+			<span class="time">
+				<!--<script id="begin_time"  class="ctime" data-ccc="ccc" style=" text-align:right;border: 0px #000000 solid; border-radius: 5px; width: 45%;">-->
+				<script id="begin_time"  class="ctime" data-ccc="ccc" style=" text-align:center;border: 0px #000000 solid; border-radius: 5px; width: 35%; background-color: #00cc99; margin-left:10%;">
+						echo(new DateSelector())
+				</script>
+			</span>
+			<span class="time" style="margin-left:3%">至</span>
+			<span class="time">
+				<!--<script id="end_time"  class="ctime" data-ccc="ccc" style="border: 0px #000000 solid; border-radius: 5px;width: 45%;">-->
+				<script id="end_time"  class="ctime" data-ccc="ccc" style="text-align:center;border: 0px #000000 solid; border-radius: 5px;width: 35%; float: right; margin-right:10%; background-color: #00cc99;">
+						echo(new DateSelector())
+				</script>
+			</span>
+		</div>
+		
+		<div id="content"></div>
+		<!--订单打印模板-->
+		<div id="all" class="all" hidden="true">
+			<table style="margin-top: 10px;">
+				<tr>
+					<td colspan="2">
+						订单号：<span name="order_id" class="order_num">1321654563213</span>
+					</td>
+				</tr>
+				<tr class="print_page1">
+					<td><span>日期：</span><span name="create_time">2016-02-23</span></td>
+					<td><span>产品：</span><span name="product_name" class="product">空气净化器</span></td>
+				</tr>
+				<tr class="print_page1">
+					<td><span>数量：</span><span name="quantity" class="num">3</span></td>
+					<td><span>单价：￥</span><span name="unit_price" class="price">350</span></td>
+				</tr>
+				<tr class="print_page1">
+					<td><span>收件人：</span><span name="receiver">李四</span></td>
+					<td><span>电话：</span><span name="tel" class="product">13366668888</span></td>
+				</tr>
+				<tr class="print_page1">
+					<td colspan="2" style="padding-bottom: 10px;">
+						<div style="width: 100px;float: left;">收件地址：</div>
+						<div name="address" class="address">广东省 深圳市 南山区 新安街道留仙三路36号创兴达商务大厦5层5010</div>
+					</td>
+				</tr>
+				<tr class="print_page1" style="border-top: 1px solid #000;">
+					<td colspan="2" style="color: red;text-align: right;padding:10px 5px 7px 5px;font-size: 15px;">
+						合计：￥<span name="total_price" class="add">1025</span>
+					</td>
+				</tr>
+				<tr class="print_page2" hidden="true">
+					<td id="sigle_serial"><span>产品号：</span><span name="serial">56624851896</span></td>
+					<td id="sigle_serial"><span>产品号：</span><span name="serial">56624851896</span></td>
+				</tr>
+				<tr class="print_page2" hidden="true">
+					<td colspan="2" style="color: red;text-align: right;padding:10px 5px 7px 5px;font-size: 15px;">
+					</td>
+				</tr>
+			</table>
+		</div>
+	</body>
+	<script>
+	var print_order_ids=[];
+	window.addEventListener("W.loginSuccess",function(){
+		var data={
+			access_token: _user.access_token,
+//			status:20491
+			status:20490
+		}
+		var op={
+			fields:'order_id,receiver,tel,address,create_time,product_name,unit_price,quantity,total_price,status,order_detail',
+			limit:-1
+		}
+		Wapi.order.list(showPrintOrders,data,op);
+	});
+	
+//	选择开始和结束时间
+	W("#begin_time").onchange=function(){
+		selectPrintOrder();
+	}
+	W("#end_time").onchange=function(){
+		selectPrintOrder();
+	}
+	function selectPrintOrder(){
+		var begin_time=W("#begin_time").value;
+		var end_time=W("#end_time").value;
+//		var print_orders=document.getElementsByClassName("print_order");
+		if(begin_time.length==10&&end_time.length==10){
+			console.log("begin_time:"+begin_time+",end_time:"+end_time);
+			var data={
+				access_token: _user.access_token,
+//				status:20491
+				status:20490
+			}
+			var op={
+				fields:'order_id,receiver,tel,address,create_time,product_name,unit_price,quantity,total_price,status,order_detail',
+				limit:-1,
+				create_time:begin_time+'@'+end_time
+			}
+			Wapi.order.list(showPrintOrders,data,op);
+		}
+	}
+	
+//	显示需要打印的订单
+	function showPrintOrders(res){
+		W("#content").innerHTML="";
+		for(var i=0;i<res.data.length;i++){
+			W("#content").appendChild(new printOrder(res.data[i]));
+		}
+	}
+//	需要打印的订单类
+	function printOrder(data) {
+		var printOrder = new WiStormUI("div"); //创建一个div组件
+		printOrder.merge(this);
+		printOrder.className = "print_order";
+		printOrder.creat_time=data.creat_time;
+		printOrder.setData(data);
+		return printOrder;
+	}
+	//给组件添加对象方法
+	printOrder.prototype.getData = function() {
+		return this.data;
+	}
+	printOrder.prototype.setData = function(data) {
+		this.innerHTML = W("#all").innerHTML;
+		
+		initText(this, "order_id", data.order_id);
+		print_order_ids.push(data.order_id);
+		
+		var create_time = NewDate(data.create_time).WtoString().slice(0,10);
+		initText(this, "create_time", create_time);
+		initText(this, "product_name", data.product_name);
+		initText(this, "quantity", data.quantity);
+		initText(this, "unit_price", data.unit_price);
+		initText(this, "receiver", data.receiver);
+		initText(this, "tel", data.tel);
+		initText(this, "address", data.address);
+		
+		var total_price=data.unit_price*data.quantity;
+		initText(this, "total_price", total_price);
+		
+		var serials=data.order_detail[0].serials;//真实数据
+//		var serials=temp_order_detail[0].serials;//测试数据
+		
+		for(var i=0;i<(Math.ceil(serials.length/2));i++){
+			var row=new serialRow();
+			this.appendChild(row);
+			for(var j=0;j<2;j++){
+				if(serials[i*2+j]){
+					row.appendChild(new singleSerial(serials[i*2+j]));
+				}
+			}
+		}
+		
+		initText(this, "order_detail", data.order_detail);
+		
+		this.data = data;
+	}
+	
+//	添加订单号的部分
+	function serialRow(){
+		var serialRow=new WiStormUI("tr");
+		serialRow.merge(this);
+		serialRow.className="print_page2";
+		console.log("creat a row");
+		return serialRow;
+	}
+	function singleSerial(data){
+		var singleSerial = new WiStormUI("td"); //创建一个组件
+		singleSerial.merge(this);
+		singleSerial.className="print_page2_col";
+		singleSerial.setData(data);
+		return singleSerial;
+	}
+	singleSerial.prototype.setData = function(data) {
+		this.innerHTML = W("#sigle_serial").innerHTML;
+		console.log(data);
+		initText(this, "serial", data.serial);
+		this.data = data;
+	}
+	
+	
+//	点击“打印”按钮进行打印
+	window.addEventListener("DOMContentLoaded",function(){
+//		W(".print").addEvent('click',printpage);
+//		document.getElementById("btn_print").addEvent('click',printpage);
+		W("#btn_print").addEvent('click',printpage);
+	});
+	function printpage(){
+//		var a =document.getElementById("content").innerHTML;
+//		window.document.body.innerHTML = a;
+		var btn_print=W("#btn_print");
+		var time_box=W("#time_box");
+		btn_print.getAttributeNode("style").value="display:none";
+		time_box.getAttributeNode("style").value="display:none";
+		
+		window.print();
+		if(confirm("是否打印成功？")){
+			for(var i=0;i<print_order_ids.length;i++){
+				updateOrderStatus(print_order_ids[i]);
+			}
+			printProductDetail();
+		}else{
+			btn_print.getAttributeNode("style").value="display:block";
+			time_box.getAttributeNode("style").value="display:block";
+		}
+	}
+	
+//	更新订单状态
+	function updateOrderStatus(print_order_ids){
+		var updateData={
+			_order_id:print_order_ids,
+			access_token: _user.access_token,
+//			status:20490
+			status:20491
+		};
+		Wapi.order.update(function(res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+		},updateData);
+	}
+	
+	
+	function printProductDetail(){
+		W("#btn_print").getAttributeNode("style").value="display:block";
+		var page1=document.getElementsByClassName("print_page1");
+		console.log("page1.length "+page1.length);
+		for(var i=page1.length-1;i>=0;i--){
+			page1[i].className="print_page1_hide";
+		}
+		var page2=document.getElementsByClassName("print_page2");
+		console.log("page2.length "+page2.length);
+		for(var i=page2.length-1;i>=0;i--){
+			page2[i].className="print_page2_visible";
+		}
+	}
+	
+	
+//	工具类 更改元素中的内容
+	function initText(ctx, name, value) {
+		var ele = ctx.querySelector("[name=" + name + "]");
+		if (ele != null) {
+			ele.innerText = $V(value);
+		}
+	}
+	
+//	订单号测试数据
+	var temp_order_detail=
+	[
+          {
+              product_id: 2,
+              product_name: 'WiCARE汽车环保卫士',
+              unit_price: 349,
+              discount: 1,                                 //折扣,默认为100%
+              quantity: 2,
+              total_price: 698,
+              serials: [
+                  {serial: "56624851896", status: 3},      //status  0：未出库 1：已出库 2: (已收货)未激活 3：已激活 4: 申请退货
+                  {serial: "56622821412", status: 3},
+                  {serial: "56624851896", status: 3},
+                  {serial: "56624851896", status: 3},
+                  {serial: "56624851896", status: 3},
+                  {serial: "56624851896", status: 3}
+              ]
+          }
+      ]
+	
+	</script>
+</html>

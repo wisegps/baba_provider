@@ -1,0 +1,311 @@
+<!--
+	作者：江海
+	时间：2016-3-7
+	描述：销售单详情
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>订单详情</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script src="../ui/ui.js"></script>
+		<script src="../js/string_factory.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+
+	</head>
+	<style>
+		body {
+			background-color: #f0f0f0;
+		}
+		
+		.mui-slider {
+			background: white;
+			margin-top: 1px;
+			text-align: center;
+			padding: 10px;
+			margin-bottom: 10px;
+		}
+		
+		.footer_box{
+			width:100%;
+			height: 30px;
+			text-align: center;
+			margin-bottom: 5px;
+		}
+		.btn_hide{
+			visibility: hidden;
+		}
+		.btn_left{
+			float: left;
+		}
+		.btn_right{
+			float: right;
+		}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav noshadow">
+			<h1 class="mui-title">订单详情</h1>
+		</header>
+		<div class="mui-content">
+
+			<div class="mui-slider">
+				<div class="mui-slider-group" id="car_group">
+
+				</div>
+			</div>
+			
+			<!--订单号模板-->
+			<div class="mui-slider-item car" id="car_tmp" hidden="true">
+				<div class="title_brand">
+					<span>订单号：</span>
+					<span name="order_id">123456789</span>
+				</div>
+			</div>
+			
+			<div id="car_list_left"></div>
+			
+		</div>
+		
+		<!--订单详情模板-->
+		<div class="ui_car_d" id="state_car_left" hidden="true">
+			<table>
+				<tr>
+					<td>
+						<span class="name">收件人：</span>
+						<span class="value" name="receiver">张三</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="name">联系电话：</span>
+						<span class="value" name="tel">13366668888</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="name">收件地址：</span>
+						<span class="value" name="address">深圳市宝安区</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="name">创建日期：</span>
+						<span class="value" name="create_time">2016-2-16</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="name">更新日期：</span>
+						<span class="value" name="update_time">2016-2-16</span>
+					</td>
+				</tr>
+				<tr>
+					<th colspan="2">
+				</tr>
+				<tr>
+					<td>
+						<span class="name">配送方式：</span>
+						<span class="value" name="express_company">顺丰快递</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="name">快递单号：</span>
+						<span class="value" name="tracking_number">00001</span>
+					</td>
+				</tr>
+				<tr>
+					<th colspan="2">
+				</tr>
+				<tr>
+					<td>
+						<span class="name">商品名称：</span>
+						<span class="value" name="product_name">空气净化器</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="name">商品单价：</span>
+						<span class="value" name="unit_price">350</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="name">商品数量：</span>
+						<span class="value" name="quantity">5</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="name">商品总额：</span>
+						<span class="value" name="total_price">1750</span>
+					</td>
+				</tr>
+				<tr>
+					<th colspan="2">
+				</tr>
+				<tr>
+					<td name="comment"><span class="name">备注:</span>
+						<span class="value"></span>
+					</td>
+				</tr>
+				<tr>
+					<th colspan="2">
+				</tr>
+			</table>
+		</div>
+	</body>
+	<script>
+		"use strict";
+		
+		var dom={
+			car_left:W("#state_car_left"),
+		}
+		var param = {
+			order_id:_g.order_id,
+			access_token: _user.access_token
+		};
+		
+//		获取order
+		window.addEventListener("W.loginSuccess",function(){
+			var op={
+				fields:'order_id,alipay_order_no,receiver,tel,address,create_time,update_time,express_company,tracking_number,product_name,unit_price,quantity,total_price,remark,status'
+			};
+			Wapi.order.get(getDetail,param,op);
+		});
+		
+//		获取order数据后显示订单号和详情
+		function getDetail(res) {
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			W("#car_group").appendChild(new orderNum(res));
+			W("#car_list_left").appendChild(new orderDetail(res));
+		}
+		
+//		显示订单号
+		function orderNum(data) {
+			var orderNum = new WiStormUI("div"); //创建一个div组件
+			orderNum.merge(this);
+			orderNum.className = "mui-slider-item car";
+			orderNum.setData(data);
+			return orderNum;
+		}
+		//给组件添加对象方法
+		orderNum.prototype.getData = function() {
+			return this.data;
+		}
+		orderNum.prototype.setData = function(data) {
+			this.innerHTML = W("#car_tmp").innerHTML;
+			initText(this, "order_id", data.order_id);
+			this.data = data;
+		}
+		
+//		显示订单详情
+		function orderDetail(data) {
+			var obj = new WiStormUI("div"); //创建一个div组件
+			obj.merge(this); //将原型cv.prototype中的方法赋予当前obj
+			obj.className = "ui_car_d"; //设置div的class属性
+			obj.data=data;
+			obj.setData(data); //设置obj的内容,setData()在下面cv.prototype中定义
+			return obj; //最后记得要返回组件
+		}
+		//给组件添加对象方法
+		orderDetail.prototype.getData = function() {
+			return this.data;
+		}
+		orderDetail.prototype.setData = function(data) {
+			this.innerHTML = W("#state_car_left").innerHTML;
+			initText(this, "receiver", data.receiver);
+			initText(this, "tel", data.tel);
+			initText(this, "address", data.address);
+			
+			var createTime=data.create_time.split("T")[0];
+			initText(this, "create_time", createTime);
+			var updateTime=data.update_time.split("T")[0];
+			initText(this, "update_time", updateTime);
+			
+			initText(this, "express_company", data.express_company);
+			initText(this, "tracking_number", data.tracking_number);
+			initText(this, "product_name", data.product_name);
+			initText(this, "unit_price", data.unit_price);
+			initText(this, "quantity", data.quantity);
+			
+			var totalPrice = data.quantity*data.unit_price;
+			initText(this, "total_price", totalPrice);
+			
+			initText(this, "remark", data.remark);
+			
+			initButton(this,data);
+			
+			this.data = data; //直接把数据缓存进入组件（按需求，如果数据是需要重复用的就这样缓存）
+		}
+		
+//		添加确认按钮，若状态已确认则不添加
+		function initButton(target,data){
+			console.log(data.status);
+			if(data.status==0){
+				var footer= document.createElement('footer');
+				footer.id="footer";
+				var btnCancel="<button id='btnCancel' type='button' class='mui-btn W_primary btn_left' style='width:20%'>取消</button>";
+				var btnSubmit="<button id='btnSubmit' type='button' class='mui-btn W_primary btn_right'>确定</button>";
+				footer.innerHTML="<div class='checkin_box footer_box'>"+btnCancel+btnSubmit+"</div>";
+				target.appendChild(footer);	
+				
+				footer.querySelector('.btn_left').addEventListener('click',cancelOrder);
+				footer.querySelector('.btn_right').addEventListener('click',submitOrder);
+			}
+		}
+		
+		function cancelOrder(){
+			var btnBox=this.parentNode;
+			var str="订单已取消";
+			updateOrderStatus(20485,btnBox,str);
+		}
+		function submitOrder(){
+			var btnBox=this.parentNode;
+			var str="订单已确认";
+			updateOrderStatus(20480,btnBox,str);
+		}
+//		更新订单状态
+		function updateOrderStatus(numStatus,obj,strStatus){
+			var updateData={
+				_order_id:_g.order_id,
+				access_token: _user.access_token,
+				status:numStatus
+			};
+			Wapi.order.update(function(res){
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				obj.innerHTML=strStatus;
+			},updateData);
+		}
+		
+		
+		/**
+		 * 传入元素的名字，设置值
+		 * @param {Object} ctx  this,上下文
+		 * @param {Object} name  
+		 * @param {Object} value
+		 */
+		function initText(ctx, name, value) {
+			var ele = ctx.querySelector("[name=" + name + "]");
+			if (ele != null) {
+				ele.innerText = $V(value);
+			}
+		}
+	</script>
+</html>

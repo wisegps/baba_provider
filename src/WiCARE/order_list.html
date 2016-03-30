@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+
+		<title>后台订单管理</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+		<script src="../ui/ui.js"></script>		
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script src="../../wslib/toolkit/WxSdk.js" defer="defer"></script>
+		<script src="../../wslib/ui/DateTime.js"></script>
+		<script src="../js/string_factory.js"></script>
+	</head>
+	<style>
+		body {
+			background-color: #f0f0f0;
+		    font-size: 14px;
+		    line-height: 22px;
+			}
+		.preview{display:table;width:100%;background:white;margin-top: 10px;}	
+		.t_row{display:table-row;background-color: #fff;}
+		#l_cell,#r_cell{display:table-cell;padding-top:15px;padding-bottom:15px;font-size: 15px;}
+		.t_value{color:#50b7de;}
+		.t_label{color:#999;font-size:normal;}
+		.time_box{background:white;margin-top:2px;margin-bottom:10px;width:100%;text-align:center;}
+		.list_order{display:block;width:100%;}
+		.btn{float:right;margin-top:10px;background-color: #50b7de;color:white;}
+		.orderprice{text-align: left;border-top:2px solid #CCCCCC;width:100%;height:50px;line-height:50px;margin-top:10px;}
+		.top{margin-top:5px;}
+		.time{color:#52b8e0;}
+		.btn{    padding: 0 30px;}
+		input[type=text]{
+		margin-bottom: 0;
+		}
+		.main-details{padding-top: }
+		.main-details {
+	        padding: 44px .5em .5em .5em;
+		    background-color: white;
+		    margin-top: 5px;
+		}
+		.main-details table tr td{
+			padding: 3px 0;
+		}
+		.scanning-box{padding: .5em;text-align: center;}
+		.scanning-box textarea{font-size: 12px;height: 120px;padding: 10px;}
+		.scanning-box button{
+		    padding: .3em 2em;
+			text-align: center;
+		    background-color: #50b7de;
+			color: white;
+		}
+		.address{width: 75%;float: left;}
+		.load{
+			float: right;
+    		color: #999;
+		}
+		.ui_car_d{margin-bottom: .3em;}
+		#box{display: none;}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">后台订单管理</h1>
+		</header>
+		<div class="mui-content" id="mui-content">
+			<center>
+				<div class="preview" id="preview">
+					<div class="t_row">
+						<div id="l_cell" style="background-color: #C7C7C7;">
+							<label class="t_value">0</label>
+							<br/>
+							<label class="t_label">
+								待发货
+							</label>
+						</div>
+						
+						<div id="r_cell">
+							<label class="t_value">0</label>
+							<br/>
+							<label class="t_label">
+								已发货
+							</label>
+						</div>
+					</div>
+				</div>
+			</center>			
+				
+			
+		<div id="box">
+			<div class="time_box">
+						<span class="time">
+							<script id="begin_time"  class="ctime" data-ccc="ccc" style=" text-align:right;border: 0px #000000 solid; border-radius: 5px; width: 45%;">
+									echo(new DateSelector())
+							</script>
+						</span>
+						<span class="time">至</span>
+						<span class="time">
+							<script id="end_time"  class="ctime" data-ccc="ccc" style="border: 0px #000000 solid; border-radius: 5px;width: 45%;">
+									echo(new DateSelector())
+							</script>
+						</span>
+			</div>
+			<div id="order-list"></div>
+		</div>
+		<div id="processing-order"></div>
+		</div>
+		<div class="child_view has_nav fromRight" id="Details" style="display: none;">
+			<div class="mui-bar mui-bar-nav">
+				<a id="f_back" class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+				<h1 class="mui-title">后台发货</h1>				
+			</div>
+			<div class="main-details">
+				<table>
+					<tr>
+						<td colspan="2">
+							订单：<span class="order_num">1321654563213</span>
+							<span style="float: right;font-size: 15px;color: #50B8E0;">未出货</span>
+						</td>
+					</tr>
+					<tr>
+						<td><span style="color: #ccc;">日期：</span><span id="date">2016-02-23</span></td>
+						<td><span style="color: #ccc;">产品：</span><span class="product">空气净化器</span></td>
+					</tr>
+					<tr>
+						<td><span style="color: #ccc;">数量：</span><span class="num">3</span></td>
+						<td><span style="color: #ccc;">单价：￥</span><span class="price">350</span></td>
+					</tr>
+					<tr style="display: none;"><td colspan="2"><span style="color: #ccc;">备注:</span><span class="remark">remark</span></td></tr>
+					<tr>
+						<td colspan="2" style="padding-bottom: 10px;"><div style="width: 70px;float: left;color: #ccc;">收货地址：</div><div class="address">广东省 深圳市 南山区 新安街道留仙三路36号创兴达商务大厦5层5010</div></td>
+					</tr>
+					<tr style="border-top: 1px solid #eee;">
+						<td colspan="2" style="color: #D81111;text-align: right;padding:10px 5px 7px 5px;font-size: 15px;">合计：￥<span class="add">1025</span></td>
+					</tr>
+				</table>
+			</div>
+			<div class="scanning-box">
+				<textarea id="code-value"></textarea>
+				<button class="Qcode" style="margin-right: 3.5em;">扫描</button>
+				<button class="submit">确定</button>				
+			</div>
+		</div>
+				
+	</body>
+	<script>
+		var MAX_ID;
+		var dom={
+			content:W('.mui-content'),
+			main:W('#Details'),
+			val:W("#code-value"),
+			Lcell:W("#l_cell"),//未处理订单
+			Rcell:W("#r_cell"),//已处理订单
+			box:W("#box"),
+			Porder:W("#processing-order")
+		};
+		dom.left = new Array();
+		dom.right =new Array();
+		dom.arr = new Array()
+		
+		function showLeft(){
+				dom.box.style.display="none";
+				dom.Porder.style.display='block';
+				dom.Lcell.style.backgroundColor="#C7C7C7";
+				dom.Rcell.style.backgroundColor="#fff";
+		}
+		function showRight(){
+				dom.Porder.style.display='none';
+				dom.box.style.display="block";
+				dom.Rcell.style.backgroundColor="#C7C7C7";
+				dom.Lcell.style.backgroundColor="#fff";
+		}
+		window.addEventListener("DOMContentLoaded",function(){
+			select(0);//默认时间
+			//select(2);//生成未处理订单
+			W("#begin_time").addEvent("change",function(){
+				select();
+			})
+			W("#end_time").addEvent("change",function(){
+				select();
+			})
+			W(".Qcode").addEvent('click',QRcode);//扫描绑定事件
+			W(".submit").addEvent('click',updateStatus);//确定改变订单和设备状态
+			dom.Lcell.addEvent('click',showLeft);//未处理订单
+			dom.Rcell.addEvent('click',showRight);//已处理订单
+		});
+		//监听地址变化触发hide方法
+		window.addEventListener("popstate",hide);
+		//创建UI组件
+		function cv(data){
+			var obj=new WiStormUI("div");
+				obj.merge(this);
+				obj.className="ui_car_d";
+				obj.id='W'+data.order_id;
+				obj.setData(data);
+				return obj;
+		}
+		cv.prototype.setData=function(data){
+			var oStatus,str,statArr= ['商品出库','订单完成','商品在途','正在配送','等待收货','上门自提','商品退库','正在退款'];
+			if(data.status==20488 || data.status==20480)
+				oStatus='<button class="btn">发货</button>';
+			else{
+				if(data.status==20491)
+					str=statArr[0];
+					
+				if(data.status==20495)
+					str=statArr[1];
+										
+				if(data.status==20483)
+					str=statArr[2];
+										
+				if(data.status==20492)
+					str=statArr[3];
+					
+				if(data.status==20493)
+					str=statArr[4];
+					
+				if(data.status==20494)
+					str=statArr[5];
+					
+				if(data.status==20496)
+					str=statArr[6];
+					
+				if(data.status==20497)
+					str=statArr[7];
+	
+				oStatus='<span class="load">'+str+'</span>';
+			}
+			var remark='';
+			if(data.remark)
+				remark='<tr><td colspan="2"><span style="color: #ccc;">备注:</span>'+data.remark+'</td></tr>'
+			this.innerHTML='<div class="top"><span class="name" style="color:#000000">订单号：</span><span class="value" name="order">'+data.order_id+'</span></div><table class="top"><tr><td><span class="name">产品：</span><span class="value" name="order">'+data.product_name+'</span></td><td><span class="name">日期：</span><span class="value" name="order">'+data.create_time.slice(0,10)+'</span></td></tr><tr><td><span class="name">数量：</span><span class="value" name="order">'+data.quantity+'</span></td><td><span class="name">单价：</span><span class="value" name="order">'+data.unit_price+'</span></td></tr>'+remark+'</table><div class="top"><span class="name">收货地址：</span><span class="value" name="order">'+data.address+'</span></div><div class="orderprice">'+oStatus+'<span class="name" style="color:red">合计：</span><span class="value" name="order" style="color:red">￥'+data.quantity*data.unit_price+'</span></div>';
+			if(this.querySelector('.btn'))
+				this.querySelector('.btn').addEvent('click',show);
+			this.data=data;
+		}
+		//点击发货滑动到发货页
+		function show(){
+			dom.val.value='';
+			dom.content.style.display='none';
+			dom.main.style.display='block';
+			var data=W.parents(this,2).data;
+			dom.orderData=data;
+			history.pushState(null,"order_list.html?order_id="+dom.orderData.order_id);//	
+			W(".order_num").innerText=data.order_id;
+			W("#date").innerText=data.create_time.slice(0,10);
+			W(".product").innerText=data.product_name;
+			W(".num").innerText=data.quantity;
+			W(".price").innerText=data.unit_price;
+			W(".address").innerText=data.address;
+			W(".add").innerText=data.unit_price*data.quantity;
+			if(data.remark){
+				W.parents(W(".remark"),2).style.display='block';
+				W(".remark").innerText=data.remark;
+			}			
+		}
+		//隐藏发货页
+		function hide(){
+			dom.content.style.display='block';
+			dom.main.style.display='none';
+			
+		}
+		/**
+		 * index 0:时间显示为今天0点到现在的时间  1：选择时间以后 显示这个时间段已处理的订单 
+		 * @param {Object} index
+		 */
+		function select(index) {	
+			var begin = W("#begin_time").value + " 00:00:00";
+			var end = W("#end_time").value;
+			var list = document.createDocumentFragment();
+			var lists = document.createDocumentFragment();
+			var data={
+				cust_id:_user.cust_id,
+				access_token: _user.access_token,
+				max_id:MAX_ID
+			}
+			if(!MAX_ID)
+				delete data.max_id;
+			var op={
+				fields:'order_id,cust_id,seller_id,saler_id,address,order_type,status,product_name,unit_price,quantity,remark,create_time',
+				sorts:"order_id",
+				page:"order_id",
+				limit:"20"						
+			}
+			if(index==0){
+				begin=W("#begin_time").value=getBeginToday();
+				end=W("#end_time").value = getFullCurrentTime();
+				data.create_time = begin + "@" + end;
+				Wapi.order.list(function(res){
+					if (res && res.status_code) {
+						W.errorCode(res);
+						return;
+					}
+					if(res.data.length>0){
+						MAX_ID=res.data[res.data.length-1].order_id;
+						for(var i=0;i<res.data.length;i++){
+							if(res.data[i].status==20480 || res.data[i].status==20488){
+								list.appendChild(new cv(res.data[i]));
+								dom.left.push(res.data[i]);
+							}else{
+								lists.appendChild(new cv(res.data[i]));
+								dom.right.push(res.data[i]);
+							}
+						}			
+						doms(list,lists,res);
+					}
+				},data,op);
+			}else if(!index){
+					if(dom.box.style.display=="block"){
+						dom.right.unone();
+						if (begin != undefined) {
+							data.create_time = begin + "@" + end;
+						}
+						Wapi.order.list(function(res){
+							if (res && res.status_code) {
+								W.errorCode(res);
+								return;
+							}
+							if(res.data.length>0){
+								MAX_ID=res.data[res.data.length-1].order_id;
+								for(var i=0;i<res.data.length;i++){
+									if(res.data[i].status!=20480 &&res.data[i].status!=20488){
+										lists.appendChild(new cv(res.data[i]));
+										dom.right.push(res.data[i]);
+									}
+								}
+								doms(list,lists,res);
+							}
+						},data,op);
+					}else{
+						dom.left.unone();//数组去重
+						Wapi.order.list(function(res){
+							if (res && res.status_code) {
+								W.errorCode(res);
+								return;
+							}
+							if(res.data.length>0){
+								MAX_ID=res.data[res.data.length-1].order_id;
+								for(var i=0;i<res.data.length;i++){
+									if(res.data[i].status==20480 || res.data[i].status==20488){
+										list.appendChild(new cv(res.data[i]));
+										dom.left.push(res.data[i]);
+									}
+								}
+								doms(list,lists,res);
+							}
+						},data,op);
+					}
+			}/*else{//测试
+				var data={
+					cust_id:_user.cust_id,
+					access_token: _user.access_token,
+					product_name: "空气净化器",
+					quantity:1,
+					unit_price:200,
+					status: 20488,
+					create_time:'2016-02-06',
+					address: "深圳市宝安区创兴达商务大厦1201号1540室",
+					remark:'how do you konw'
+				};
+				Wapi.order.add(function(res){
+					if (res && res.status_code) {
+						W.errorCode(res);
+						return;
+					}
+					
+				},data);
+			}*/
+		}
+		/**
+		 * 显示订单数量  向下自动加载
+		 */
+		function doms(list,lists,res){
+			if(dom.left){
+				W("#l_cell>.t_value").innerText=dom.left.length;
+			}
+			if(dom.right){
+				W("#r_cell>.t_value").innerText=dom.right.length;							
+			}			
+			var add =dom.left.length+dom.right.length;
+			if(res.total>add){
+				var autoLoad;						//把加载的存起来		
+				if(dom.autoLoad){
+					autoLoad=dom.autoLoad;
+				}else if(WiStorm.agent.ios){
+					if(dom.box.style.display=="block"){
+						autoLoad=new ui_autoLoad(W('.mui-content'),select);
+						//W('#order-list').appendChild(autoLoad);
+						W('.mui-content').appendChild(autoLoad);
+					}else{
+						autoLoad=new ui_autoLoad(dom.Porder,select);
+						dom.Porder.appendChild(autoLoad);						
+					}
+				}else{
+					autoLoad=new ui_autoLoad(document,select);
+				}	
+				dom.autoLoad=autoLoad;
+			}else if(dom.autoLoad){
+				//删除自动加载组件,释放内存
+				dom.autoLoad.remove();
+				delete dom.autoLoad;
+			}
+			dom.Porder.appendChild(list);
+			W('#order-list').appendChild(lists);
+		}
+		/**
+		 * 数组去重
+		 */
+		Array.prototype.unone = function(){
+		 var res = [];
+		 var json = {};
+			for(var i = 0; i < this.length; i++){
+			  	if(!json[this[i]]){
+			     	res.push(this[i]);
+					json[this[i]] = 1;
+				}
+			}
+	 		return res;
+		}
+		/**
+		 * 扫描二维码
+		 */
+		//var c=0;//测试
+		function code(str){		
+/*			c++;
+			str=str+c;
+*/			if(W(".num").innerHTML>dom.arr.length){
+				dom.arr.push(str);
+				if(dom.arr.length==1){
+					dom.val.value=dom.arr[0];
+				}else{			
+					dom.val.value=dom.arr.unone();
+				}
+			}else{
+				W.alert('扫描不能超过数量');
+			}
+		}
+		
+	function QRcode(){
+		if(W.native){//判断scanner是否存在
+			W.native.scanner.start(code);
+		}else{
+			W.toast("等待扫描二维码组件");
+			window.addEventListener("nativeSdkReady",QRcode);
+		}
+	}
+/*	W.native={};//测试
+	W.native.scanner={
+		start:function(callback){
+			callback("55621854091");
+		}
+	}*/
+	/**
+	 * 点击确定 修改当前订单的状态  和  扫描的设备状态
+	 */
+	function updateStatus(){
+		if(dom.arr.length==W(".num").innerText){
+			updateQRcodeStatus();
+			updateOrderStatus();
+			W.toast('订单提交成功,您的设备已出库');
+		}else{
+			W.alert('扫描数量与发货数量不相等');	
+		}
+		dom.arr.length=0;
+	}
+	// 扫描的设备状态
+	function updateQRcodeStatus(){
+			var str= W("#code-value").value;
+			str=str.replace(new RegExp(",",'g'),"|");
+			//测试
+			str=str.slice(0,11);
+			var data={
+				_serial:str,
+				seller_id:_user.seller_id,
+				access_token:_user.access_token,
+				status:1
+			}
+			if(dom.orderData.status==20488)
+				data.status=3;
+			Wapi.device.update(function(res){
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				console.log('设备状态已改变');
+			},data);//设备列表接口		
+	}
+	//订单的状态 
+	function updateOrderStatus(){	
+		var det=[],detData={};
+		detData.product_id=2;
+		detData.product_name=dom.orderData.product_name;
+		detData.unit_price=dom.orderData.unit_price;
+		detData.discount=1;
+		detData.quantity=dom.orderData.quantity;
+		detData.total_price=dom.orderData.unit_price*dom.orderData.quantity;
+		detData.arr=[];
+		for (var i=0;i<dom.arr.length;i++) {
+			var j={};
+			j.serial=dom.arr[i];
+			j.status=1;
+			detData.arr.push(j);
+		}
+		det.push(detData);
+		var data={
+			cust_id:_user.cust_id,
+			access_token: _user.access_token,
+			_order_id:dom.orderData.order_id,
+			status:20491,
+			order_detail:det
+		}
+		Wapi.order.update(function (res){
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;				
+			}		
+			console.log('订单状态已改变');
+			dom.orderData.status=20491;
+			var obj =W("#W"+dom.orderData.order_id);
+			obj.parentNode.removeChild(obj);
+			W('#order-list').appendChild(new cv(dom.orderData));
+			W("#l_cell>.t_value").innerText=W('#processing-order').childNodes.length;
+			W("#r_cell>.t_value").innerText=W('#order-list').childNodes.length;
+			showRight();
+			hide();
+		},data);		
+	}
+	</script>
+
+</html>

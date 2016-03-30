@@ -12,10 +12,10 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 
-		<title>提醒设置</title>
+		<title>WiCARE商户版</title>
 		<!--必须最先引入WiStorm.js文件-->
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<!--使用link()引入css文件，无需写路径，直接写文件名即可,尽量少引入css，样式如果少（小于10k为少），
 		可以直接写在style元素里，放到body元素后面-->
 		<script>
@@ -150,11 +150,14 @@
 		});
 		var MAX_ID = 0,
 			param = {
-				seller_id: _user.cust_id,
+				seller_id: _user.seller_id,
 				access_token: _user.access_token,
 				max_id: MAX_ID
 			};
 		window.addEventListener("DOMContentLoaded", function() {
+			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[5]=="0")){
+				location="home.html";
+			}
 			loadMore();
 		});
 

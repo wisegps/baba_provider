@@ -25,7 +25,7 @@
 			<h1 class="mui-title">选择车型</h1>
 			<div style="padding: 0 .5em;text-align: center;background-color: #f6f6f6;margin: 0 -10px;">
 				<span class="ico ico_search" style="z-index:2;position: absolute;left: 1.1em;top: 1em;"></span>
-				<input type="search" id="search_text" placeholder="请输入关键字" onkeyup="searchSeries()">
+				<input type="search" id="search_text" placeholder="请输入关键字">
 			</div>
 		</header>
 		<div id="brand">
@@ -56,167 +56,252 @@
         
 		<div class="glass"></div>-->
 	</body>
-	<script type="text/javascript">
-		var _imageUrl_= "http://img.wisegps.cn/logo/",Tid;
-		if(_g.select=="multi")
-			var car=[];
-		else 
-			var car={};
-			
-		window.onload=function(){
-			W("header>.mui-icon-left-nav").addEvent("click",function(){
-				window.parent.ui_carSeries.box.hide();
-			});
-			var b=W("div>.mui-icon-left-nav",true);
-			for(var i=0;i<b.length;i++){
-				b[i].addEvent("click",function(){
-					var v=W(".no_scroll",true);//恢复ios下的“滚动权”
-					v[v.length-1].classList.remove("no_scroll");
-					
-					W.parents(this,".child_view").style.display="none";
-				});
-			}
-		  W.vehicleApi.getBrands(getCarBrand);//获取车的品牌列表
-		
-		  //W("#range").addEvent("touchstart",letterS).addEvent("touchmove",letterM).addEvent("touchend",letterE);
-		  if(_g.select=="multi")
-		  	W(".mui-pull-right").addEvent("click",function(){
-		  		window.parent.ui_carSeries.finish(car);
-		  	}).style.display="block";
-		}
-		function getCarBrand(res){//获取汽车品牌
-		  window.Bjson=res.data;
-		  var F="";
-		  //var Fs="";
-		  var img;
-		  var body=W("#main_div");
-		  for(var i=0;i<Bjson.length;i++){
-		    F=Bjson[i].t_spell;
-		    //Fs+="<t>"+F+"</t><br>";
-		    var div=document.createElement("div");
-		    div.innerHTML='<div class="T" id="'+Bjson[i].t_spell+'">'+Bjson[i].t_spell+'</div>';
-		    for(var j=i;j<Bjson.length&&Bjson[j].t_spell==F;j++){
-		      if(Bjson[j].url_icon)img=_imageUrl_+Bjson[j].url_icon;
-		      else img="../../img/icon_car_moren.png";
-		      
-		      div.innerHTML+='<div class="car" id="id_'+Bjson[j].id+'" onclick="chooseT(this)"><img src="'+img+'">'+Bjson[j].name+'</div>';
-		    }
-		    body.appendChild(div);
-		    i=j-1;
-		  }
-		  //W("#range").innerHTML=Fs;
-		}
-		
-		function chooseT(h){//选择该品牌，获取该品牌车型，或者该车型下的车款
-			var main=W.parents(h,".main");
-		  Tid=main.id;//判断是选择车型还是车款
-		  var id=h.id.slice(3);
-		  var name=W.trim(h.innerText);
-		  var aUrl="";
-		  if(Tid!="series_main"){
-		  	if(_g.intent=="brand"){//如果只是选择品牌
-		  		if(_g.select=="multi"||typeof _g.select=="number"){//如果是多选
-		  			//判断是否已经被选择
-		  			if(h.classList.contains("select")){
-		  				deleteBrand(id);
-		  				h.classList.remove("select");
-		  				return;
-		  			}
-		  			var tem={
-				  		brandId:id,
-				  		brand:name
-				  	}
-			  		car.push(tem);
-			  		h.classList.add("select");
-		  		}else{
-		  			car.brandId=id;
-		    		car.brand=name;
-		    		window.parent.ui_carSeries.finish(car);
-		  		}
-		  	}else{
-		  		main.classList.add("no_scroll");
-		  		car.brandId=id;
-		    	car.brand=name;
-		    	W.vehicleApi.getSeriess(getSeriesOrType,id);
-		  	}
-		  }else{
-		  	main.classList.add("no_scroll");
-		    car.series=name;
-		    car.seriesId=id;
-		    W.vehicleApi.getTypes(getSeriesOrType,id);
-		  }
-		}
-				function getSeriesOrType(json){
-		      if(json.status_code){
-		        if(json.err_msg){
-		          W.alert("发生错误："+json.err_msg+"；错误码:"+json.status_code);
-		        }
-		      }else{
-		        var Did,html="";
-		        if(json.total)
-		        	json=json.data;
-		      
-		        if(!json.length){
-		          car.typeId=car.seriesId;
-		          car.type=car.series;
-		          window.parent.ui_carSeries.finish(car);
-		          return;
-		        }
-		        if(Tid!="series_main"){
-		          Did="series";
-		          for (var i=json.length-1;i>=0;i--) {
-		            html+="<div class='car' onclick='chooseT(this)' id='id_"+json[i].id+"'>"+json[i].show_name+"</div>";
-		          };
-		        }else{
-		          Did="car_type";
-		          for (var i=json.length-1;i>=0;i--) {
-		            html+="<div class='car' onclick='chooseType(this)' id='id_"+json[i].id+"'>"+json[i].go_name+" "+json[i].name+"</div>";
-		          };
-		        }
-		        W("#"+Did+" .main").innerHTML=html;
-		        W("#"+Did+">.mui-bar-nav>.mui-title").innerText=name;
-		        W("#"+Did).style.display="block";
-		      }
-		    }
-		function chooseType(h){//选择完车款返回给父页面，调用父页面的ui_resultCar方法
-		  var id=h.id.slice(3);
-		  var name=W.trim(h.innerText);
-		  car.typeId=id;
-		  car.type=name;
-		  window.parent.ui_carSeries.finish(car);
-		}
+<script type="text/javascript">
+var _imageUrl_ = "http://img.wisegps.cn/logo/",Tid;
+if (_g.select == "multi")
+	var car = [];
+else
+	var car = {};
+	
+var dom={
+	main_div:W("#main_div"),
+	series_main:W("#series_main"),
+	car_type:W("#car_type"),
+	series:W("#series"),
+	series_title:W("#series .mui-title"),
+	type_title:W("#car_type .mui-title"),
+	search_div:W("#search_div"),
+	search_text:W("#search_text")
+}
+var Bjson;//品牌列表数据
+window.addEventListener("load",windowLoad);
+function windowLoad(){
+	W("header>.mui-icon-left-nav").addEvent("click", function() {
+		window.parent.ui_carSeries.box.hide();
+	});
+	var b = W("div>.mui-icon-left-nav", true);
+	for (var i = 0; i < b.length; i++) {
+		b[i].addEvent("click", function() {
+			W.parents(this, ".child_view").classList.add("hide");
+			var v = W(".no_scroll", true); //恢复ios下的“滚动权”
+			v[v.length - 1].classList.remove("no_scroll");
+		});
+	}
+	W.vehicleApi.getBrands(getCarBrand); //获取车的品牌列表
+	
+	dom.series_main.addEvent("click",chooseT);
+	dom.search_div.addEvent("click",chooseT);
+	dom.car_type.addEvent("click",chooseType);
+	dom.search_text.addEvent("keyup",searchSeries);
+	if (_g.select == "multi")
+		W(".mui-pull-right").addEvent("click", function() {
+			window.parent.ui_carSeries.finish(car);
+		}).style.display = "block";
+}
 
-		function searchSeries(){
-		  //搜索
-		  var val=event.target.value;
-		  var str=W.trim(val);
-		  W.dom.search_div=W("#search_div");
-		  if(str==""||!str){
-		    W.dom.search_div.style.display='none';
-		    return;
-		  }
-		  var exp=new RegExp(str,"i");
-		  var tempHtml=""
-		  for (var i = Bjson.length - 1; i >= 0; i--) {
-		    if(Bjson[i].name.search(exp)!=-1){
-		      tempHtml+=W("#id_"+Bjson[i].id).outerHTML;
-		    }
-		  };
-		  
-		  W.dom.search_div.innerHTML=tempHtml;
-		  W.dom.search_div.style.display="block";
+function getCarBrand(res) { //获取汽车品牌
+	Bjson = res.data;
+	var F = "";
+	var img;
+	var temBody=document.createDocumentFragment();
+	
+	for (var i = 0; i < Bjson.length; i++) {
+		F = Bjson[i].t_spell;
+		var temDiv=document.createDocumentFragment();
+		for (var j = i; j < Bjson.length && Bjson[j].t_spell == F; j++) {
+			temDiv.appendChild(new brand(Bjson[j]));
 		}
-		
-		//从已选择的品牌中删除
-		function deleteBrand(id){
-			for(var i=car.length-1;i>=0;i--){
-				if(car[i].brandId==id){
-					car.splice(i,1);
-					break;
+		var div = document.createElement("div");
+		div.innerHTML = '<div class="T" id="' + Bjson[i].t_spell + '">' + Bjson[i].t_spell + '</div>';
+		div.appendChild(temDiv);
+		temBody.appendChild(div);
+		i = j - 1;
+	}
+	dom.main_div.appendChild(temBody);
+	dom.main_div.addEvent("click",chooseT);
+}
+
+function chooseT() { //选择该品牌，获取该品牌车型，或者该车型下的车款
+	if(!event.target.classList.contains("car")){
+		return;
+	}
+	var h=event.target;
+	var main=this;
+	Tid = main.id; //判断是选择车型还是车款
+	var d=h.id;
+	var id = d.slice(d.search(/\d/));
+	var name = W.trim(h.innerText);
+	var aUrl = "";
+	if (Tid != "series_main") {
+		if (_g.intent == "brand") { //如果只是选择品牌
+			if (_g.select == "multi" || _g.select>1) { //如果是多选
+				//判断是否已经被选择
+				if (h.classList.contains("select")) {
+					deleteBrand(id);
+					h.classList.remove("select");
+					return;
 				}
+				var tem = {
+					brandId: id,
+					brand: name
+				}
+				car.push(tem);
+				h.classList.add("select");
+			} else {
+				car.brandId = id;
+				car.brand = name;
+				window.parent.ui_carSeries.finish(car);
 			}
+		} else {
+			dom.series.classList.remove("hide");
+			main.classList.add("no_scroll");
+			dom.series_title.innerText=name;
+			car.brandId = id;
+			car.brand = name;
+			W.vehicleApi.getSeriess(getSeriesOrType, id);
 		}
-	</script>
+	} else {
+		main.classList.add("no_scroll");
+		dom.type_title.innerText=name;
+		car.series = name;
+		car.seriesId = id;
+		W.vehicleApi.getTypes(getSeriesOrType, id);
+	}
+}
+
+function getSeriesOrType(json) {
+	if (json.status_code) {
+		if (json.err_msg) {
+			W.alert("发生错误：" + json.err_msg + "；错误码:" + json.status_code);
+		}
+	} else {
+		var Did, html = "";
+		if (json.total)
+			json = json.data;
+
+		if (!json.length) {
+			dom.series_main.classList.remove("no_scroll");
+			car.typeId = car.seriesId;
+			car.type = car.series;
+			resetChoose();
+			window.parent.ui_carSeries.finish(car);
+			return;
+		}
+		var temBody=document.createDocumentFragment();
+		if (Tid != "series_main") {
+			Did = "series";
+			for (var i = json.length - 1; i >= 0; i--) {
+				temBody.appendChild(new series(json[i]));
+			};
+		} else {
+			Did = "car_type";
+			for (var i = json.length - 1; i >= 0; i--) {
+				temBody.appendChild(new series(json[i]));
+			};
+		}
+		var tem=dom[Did];
+		tem.classList.remove("hide");
+		var main=tem.querySelector(".main");
+		main.innerHTML ='';
+		main.appendChild(temBody);
+	}
+}
+
+function chooseType() { //选择完车款返回给父页面，调用父页面的ui_resultCar方法
+	if(!event.target.classList.contains("car")){
+		return;
+	}
+	var h=event.target;
+	var id = h.id.slice(3);
+	var name = W.trim(h.innerText);
+	car.typeId = id;
+	car.type = name;
+	resetChoose();
+	window.parent.ui_carSeries.finish(car);
+}
+
+function searchSeries() {
+	//搜索
+	var val = event.target.value;
+	var str = W.trim(val);
+	if (str == "" || !str) {
+		dom.search_div.style.display = 'none';
+		return;
+	}
+	var exp = new RegExp(str, "i");
+	var tempHtml=document.createDocumentFragment();
+	for (var i = Bjson.length - 1; i >= 0; i--) {
+		if (Bjson[i].name.search(exp) != -1) {
+			var cloneN=W("#id_"+Bjson[i].id).cloneNode(true);
+			cloneN.id="_"+cloneN.id;
+			tempHtml.appendChild(cloneN);
+		}
+	};
+
+	dom.search_div.innerHTML = '';
+	dom.search_div.appendChild(tempHtml);
+	dom.search_div.style.display = "block";
+}
+
+//从已选择的品牌中删除
+function deleteBrand(id) {
+	for (var i = car.length - 1; i >= 0; i--) {
+		if (car[i].brandId == id) {
+			car.splice(i, 1);
+			break;
+		}
+	}
+}
+
+//选择完成之后，恢复原界面
+function resetChoose(){
+	var v=W(".child_view",true);
+	var m=W(".no_scroll",true);
+	for(var i=0;i<v.length;i++){
+		v[i].classList.add("hide");	
+	}
+	for(var i=0;i<m.length;i++){
+		m[i].classList.remove("no_scroll");	
+	}
+	dom.search_text.value="";
+	dom.search_div.style.display = "none";
+}
+
+//车辆品牌组件
+function brand(data){
+	var obj=new WiStormUI("div");//创建一个div组件
+	obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+	
+	obj.className="car";//设置div的class属性
+	obj.id="id_"+data.id;
+	obj.setData(data);//设置obj的内容,setData()在下面cv.prototype中定义
+	return obj;//最后记得要返回组件
+}
+
+brand.prototype.setData=function(data){
+	var img;
+	if (data.url_icon) 
+		img = _imageUrl_ + data.url_icon;
+	else 
+		img = "../../img/icon_car_moren.png";
+
+	this.innerHTML='<img src="' + img + '">' + data.name;	
+}
+
+//车辆型号组件
+function series(data){
+	var obj=new WiStormUI("div");//创建一个div组件
+	obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+	obj.className="car";//设置div的class属性
+	obj.id="id_"+data.id;
+	if(data.go_name)
+		obj.innerHTML=data.name+" "+data.go_name;
+	else
+		obj.innerHTML=data.name;
+	return obj;//最后记得要返回组件
+}
+
+</script>
 	<style type="text/css">
 	#main_div,#search_div {
 		padding-top: 85px;
@@ -281,6 +366,9 @@
 		line-height: 2em;
 		font-size: 14px;
 	}
+	.car:active,.car:hover{
+		background: #eee;
+	}
 	
 	.car img {
 		width: 2em;
@@ -307,15 +395,8 @@
 		line-height: 24px;
 		font-family: "微软雅黑";
 	}
-	.car.select:after{
-	    content: "\2605";
-	    float: right;
-	    width: 2em;
-	    text-align: center;
-	    height: 2em;
+	.car.select{
 	    background: #5cb85c;
-	    color: #fff;
-	    border-radius: 1em;
 	}
 	.mui-icon.mui-pull-right{
 		display: none;

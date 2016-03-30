@@ -12,7 +12,7 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 
-		<title>排行榜</title>
+		<title>WiCARE空气指数排行榜</title>
 		<script src="../../wslib/WiStorm.js"></script>
 		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
 		<script>link("W.css")</script>
@@ -198,7 +198,13 @@
 	cv.prototype.setData=function(data){
 		var text=data.air_praise?text=data.air_praise:text=0;
 		var mileage=Math.round(data.total_distance);
+		if(!mileage){
+			mileage=0;
+		}
+		data.avg_air=data.avg_air?data.avg_air=data.avg_air:data.avg_air=0;
+		data.avg_air=parseInt(data.avg_air);
 		this.innerHTML='<div class="nav-list1"><i>'+data.rank+'</i></div><div class="nav-list2"><img src="'+data.logo+'" /></div><div class="nav-list3"><p>'+data.cust_name+'<img class="logo" src="http://img.wisegps.cn/logo/m_'+data.brand_id+'_100.png" onerror=\'javascript:this.src="../../img/icon_car_moren.png"\'></p><p style="color:#999999;font-size:.8em;">'+mileage+'KM</p></div><div class="nav-list4"><b>'+data.avg_air+'</b></div><div class="nav-list5"><span style="font-size:0.9em;padding: 0 30%;" class="li">'+text+'</span><span class="w_icon icon_evaluation"></span></div></div>';	
+		
 		var a=this.querySelector(".w_icon");
 		if(text>0){
 			a.style.color="red";	
@@ -210,8 +216,8 @@
 	
 	cv.editData=function(){
 		
-		var b= this.childNodes[0];
-		var b2=this.childNodes[1];
+		var b= this.childNodes[0];//点赞数
+		var b2=this.childNodes[1];//图标
 		var timer=null;
 		var like=0;
 		if(this._data_click){
@@ -251,10 +257,10 @@
 		var nav=W.parents(b2,2);
 		
 		var data={
-			access_token:_user.access_token,
 			_day_trip_id:nav.data.day_trip_id,
 			air_praise:like
 		}
+		
 		Wapi.device.incDayTrip(function(res){
 			if(res&&res.status_code){
 				W.errorCode(res);
@@ -270,7 +276,7 @@
 	 
 	 * 创建方法把json的内容添加到页面 头部的 中间的 下面列表的
 	 * */
-var dom={};
+	var dom={},customs;
 	function makeTop(res){    
 			if(!dom.cusList)
 				dom.cusList=W("#first");
@@ -279,15 +285,16 @@ var dom={};
 			list.appendChild(new abc(cus));	
 			dom.cusList.appendChild(list);
 		}
-		
+		var bbb=true;
 		function makeone(res){
 			if(!dom.custList)
 				dom.custList=W("#mui");
-			var list=document.createDocumentFragment();
-			var cust=res;
-			list.appendChild(new cv(cust));	
-			dom.custList.appendChild(list);
-			
+			if(res.cust_name==_user.cust_name){	
+				dom.custList.appendChild(new dv(res));
+				bbb=false;
+			}else{
+				return;
+			}
 			if(W.native){
 				//说明sdk准备好了，可以直接使用
 				setShare(res);
@@ -301,24 +308,29 @@ var dom={};
 		
 		//设置分享朋友圈和发送给朋友
 		function setShare(res){
-			wx.onMenuShareTimeline({
-			    title: '我的爱车今天空气指数为'+res.avg_air+'，排名第'+res.rank+'名', // 分享标题
-			    link: 'http://h5.bibibaba.cn/baba/wx/src/baba/rank.html', // 分享链接
-			    imgUrl: _user.logo, // 分享图标
-			    success: function(){},
-			    cancel: function(){}
-			});
-			wx.onMenuShareAppMessage({
-			    title: '我的爱车今天空气指数为'+res.avg_air+'，排名第'+res.rank+'名', // 分享标题
-			    desc: '叭叭空气净化器', // 分享描述
-			    link: 'http://h5.bibibaba.cn/baba/wx/src/baba/rank.html', // 分享链接
+			var op={
+			    title: '我的爱车今天WiCARE空气指数为'+parseInt(res.avg_air)+'，排名第'+res.rank+'名', // 分享标题
+			    desc: 'WiCARE空气净化器', // 分享描述
+			    link: 'http://h5.bibibaba.cn/baba/wx/src/baba/rank.html?intent=logout', // 分享链接
 			    imgUrl:_user.logo, // 分享图标
 			    success: function(){},
 			    cancel: function(){}
-			});
+			}
+			if(res.rank=="20+"){
+				var one=customs[0].avg_air;//排名第一的空气质量，作为参考
+				var t=45-one;
+				var txt="超越了全国99%的用户";
+				if(t<80){
+					t=(1-t/80)*100;
+					txt="超越了全国"+t.toFixed(1)+"%的用户";
+				}
+				op.title='我的爱车今天WiCARE空气指数'+txt;
+			}
+			wx.onMenuShareTimeline(op);
+			wx.onMenuShareAppMessage(op);
 		}
 		
-		
+		/*20名的排行列表*/
 		function makeList(res){
 			if(res&&res.status_code){
 				W.errorCode(res);
@@ -327,24 +339,35 @@ var dom={};
 			if(!dom.customList)
 				dom.customList=W("#alldata");
 			var list=document.createDocumentFragment();
-			var customs=res.data;
-				
-			for(var i=0;i<customs.length;i++){
+			customs=res.data;
+			for(var i=0;i<customs.length;i++){	
+				if(customs[i].cust_name==""){
+					customs.splice(i,1);
+					i--;
+					continue;
+				}
 				customs[i].rank=i+1;
-				list.appendChild(new cv(customs[i]));	
+				list.appendChild(new cv(customs[i]));
+				if(_g.intent!="logout")
+					makeone(customs[i]);
+			}
+			if(bbb&&_g.intent!="logout"){
+				//不在前20名内
+				var cust = {
+					rank:"20+",
+					logo:_user.logo,
+					cust_name:_user.cust_name
+				}
+				makeone(cust);
 			}
 			dom.customList.appendChild(list);
-			makeTop(customs[0]);
-			makeone(customs[0]);
-			
+			makeTop(customs[0]);		
 		}
-		
-		
 		/*
 		 
 		 * 最后通过onload方法进行页面加载
 		 * */
-		window.addEventListener("W.loginSuccess",function(){
+		window.addEventListener("load",function(){
 			var oDay=new Date();
 			var Y=oDay.getFullYear();
 			var M=oDay.getMonth()+1;
@@ -352,7 +375,10 @@ var dom={};
 				M=dayaddO(M);
 			 	D=dayaddO(D);
 			var TodayDate=Y+"-"+M+"-"+D;
-			var data={rcv_day:TodayDate, access_token:_user.access_token}
+			var data={
+				rcv_day:TodayDate,
+				avg_air: ">0"
+			}
 			var op={
 				fields:"brand_id,cust_name,logo,total_distance,avg_air,air_praise,day_trip_id", 
 				sorts: "avg_air",
@@ -369,14 +395,23 @@ var dom={};
 					}
 				 return i;
 			}
-	//W.userApi.getDeviceList(makeTop,data); 
-		//W.userApi.searchCustomerVehicle(makeList,data);
-		//W.userApi.getVehicleList(makeone,data);
-		//Wapi.device.getDayTripList(makeone,data,op)
-		
-		/*wistorm_api.incDayTrip(query_json, update_json, test_access_token, function (obj) {
-   				 console.log(obj);
-			});
-		*/
+			
+	function dv(data){
+		var obj=new WiStormUI("div");
+			obj.merge(this);
+			obj.className="nav";
+			obj.setData(data);
+			return obj;
+	}	
+	dv.prototype.setData=function(data){
+		var text=data.air_praise?data.air_praise:0;
+		var mileage=Math.round(data.total_distance);
+		if(!mileage){
+			mileage=0;
+		}
+		data.avg_air=data.avg_air?parseInt(data.avg_air):"";
+		this.innerHTML='<div class="nav-list1"><i></i></div><div class="nav-list2"><img src="'+data.logo+'" /></div><div class="nav-list3"><p>'+data.cust_name+'<img class="logo" src="http://img.wisegps.cn/logo/m_'+data.brand_id+'_100.png" onerror=\'javascript:this.src="../../img/icon_car_moren.png"\'></p><p style="color:#999999;font-size:.8em;">第'+data.rank+'名</p></div><div class="nav-list4"><b>'+data.avg_air+'</b></div></div>';	
+		this.data=data;
+	}
 	</script>
 </html>

@@ -1,0 +1,249 @@
+<!--
+	作者：小吴
+	时间：2015-12-30
+	描述：用户分享页
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>WiCARE空气指数</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script>link("W.css")</script>
+		<script src="../../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../../wslib/toolkit/WxSdk.js" defer="defer"></script>
+		<script src="../../wslib/toolkit/WCharts.js" defer="defer"></script>
+	</head>
+	<style>
+		.mui-content{
+			background: url(img/bg.jpg) no-repeat;
+			background-size: 100%;
+			background-color: #eee;
+			padding: 1em .5em;
+			overflow-x: hidden;
+		}
+		.mui-content-box{
+			height: 46vh;
+		}
+		#mui-box{
+			height: auto;
+			margin:0 auto;
+			background: white;
+			padding:10px;
+			padding-top: 0;
+			border-radius: 5px;
+			box-shadow: 1px 2px 10px rgba(0,0,0,.5);
+		}
+		.mui-box-img{
+			width:auto;
+			text-align: center;
+		}
+		.mui-box-img img{
+			width:60px;
+			height:60px;
+			border-radius: 50%;
+			margin-top: -30px;
+			padding:2px;
+		}
+		.mui-box-car{
+			height:14vh;
+			padding:10px;
+			margin:0 auto;
+		}
+		.mui-box-car span,strong{
+			width:100%;
+			text-align: center;
+			font-size:1.5em;
+			display: block;
+			padding:3px;
+		}
+		.mui-box-bottom{
+			height: 15vh;
+		}
+		.mui-box-nav1{float:left;width:45%;}
+		.mui-box-nav1 span,.mui-box-nav2 span{
+			width:100%;
+			text-align: center;
+			display: block;
+			padding:3px;
+			color:#666;
+		}
+		.mui-box-nav2{float:right;width:45%;}
+		.mui-box-a{
+    		margin: auto;
+			text-align: center;
+			margin-top: 1em;
+		}
+		.mui-box-a a{
+			color:green;
+			font-size:.9em;
+		}
+		.w_icon{font-size:1.5em} 
+		
+		@keyframes like
+			{
+				0%   {transform:scale3d(1,1,1) translate3d(0,0,0);opacity: 1;}
+				100% {transform:scale3d(2,2,1) translate3d(-10px,-10px,0);opacity: 0;}
+			}
+			
+			@-webkit-keyframes like
+			{
+				0%   {-webkit-transform:scale3d(1,1,1) translate3d(0,0,0);opacity: 1;}
+				100% {-webkit-transform:scale3d(2,2,1) translate3d(-10px,-10px,0);opacity: 0;}
+			}
+			
+			.like{
+				position: absolute;
+			    left:25%;
+				animation: like 1s;
+				-webkit-animation: like 1s;
+				animation-fill-mode: forwards;
+				-webkit-animation-fill-mode: forwards;
+				color:red !important;
+			}
+		#air_history{
+			height: 35vh;
+		}
+		.ddd{
+			position: absolute;
+		    top: 35px;
+		    bottom: 30px;
+		    left: 45px;
+		    right: 25px;
+		    background: #fff;
+		    animation: ddd 3s;
+		    -webkit-animation: ddd 3s;
+		    animation-fill-mode: forwards;
+		    -webkit-animation-fill-mode: forwards;
+		}
+		
+		@keyframes ddd {
+		    0% {transform: translate3d(0,0,0);}
+		    100% {transform: translate3d(100%,0,0);}
+		}
+		@-webkit-keyframes ddd {
+		    0% {-webkit-transform: translate3d(0,0,0);}
+		    100% {-webkit-transform: translate3d(100%,0,0);}
+		}
+		#history{
+			background: #fff;
+			position: relative;
+			overflow: hidden;
+			margin-bottom: 40px;
+			/*display: none;*/
+		}
+	</style>
+	<body>
+		<div class="mui-content">
+			<div class="mui-content-box" id="mui-box" >
+				<div id="history">
+					<div id="air_history"></div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<script>
+		function cv(data){
+			var obj=new WiStormUI("div");
+			obj.merge(this);
+			obj.className="mui-content-box";
+			obj.setData(data);
+			return obj;
+		}
+		cv.prototype.setData=function(data){
+			var text=data.air_praise?text=data.air_praise:text=0;
+			data.avg_air=data.avg_air?data.avg_air=data.avg_air:data.avg_air=0;
+			var avg_air='<strong style="color:#5cb85c">'+parseInt(data.avg_air)+'</strong>';
+			this.innerHTML='<div class="mui-box-img"><img src="'+data.logo+'"></div><div class="mui-box-car"><span style="font-size:1em;color:#666">WiCARE空气指数</span>'+avg_air+'</div><div class="mui-box-bottom"><div class="mui-box-nav1"><span>排名</span><span>第'+data.rank+'名</span></div><div class="mui-box-nav2"><span class="w_icon icon_evaluation"></span><span>'+text+'</span></div></div><div class="mui-box-a"><a href="rank.html">进入空气净化指数排行榜</a></div>';
+			var a=this.querySelector(".w_icon");
+				if(text>0){
+					a.style.color='red';
+				}
+			this.querySelector(".mui-box-nav2").addEvent("tap",cv.editData);
+			this.data=data;
+		}
+		
+		cv.editData=function(){
+			var b=this.childNodes[0];//图标
+			var b2=this.childNodes[1];//点赞数
+			var timer=null;
+			var like=0;
+			if(this._data_click){
+				like=-1;
+				this._data_click=false;
+				showtist("-1",'');
+				
+			}
+			else{
+				like=1;
+				this._data_click=true;
+				showtist("",'icon_evaluation');
+			}
+			b2.innerHTML=b2.innerHTML*1+like;
+			if(like==1){
+				b2.style.color='red';
+			}
+			if(like==-1){
+				b2.style.color="#000";
+			}
+			if(b2.innerHTML>0){
+				b.style.color='red';
+			}else{
+				b.style.color='#000';
+			}
+			function showtist(html,Sclass){
+				var oSpan=document.createElement("span");
+				oSpan.className=' like ';
+				oSpan.innerHTML=html;
+				oSpan.className+=Sclass;
+				b.appendChild(oSpan);
+				if(oSpan){
+					timer=setTimeout(function(){
+						oSpan.parentNode.removeChild(oSpan);
+					},1000)
+				}
+			}
+			var nav=W.parents(b,3);
+			var data={
+				access_token:_user.access_token,
+				_day_trip_id:nav.data.day_trip_id,
+				air_praise:like
+			}
+			Wapi.device.incDayTrip(function(res){
+				if(res&&res.status_code){
+					W.errorCode(res);
+					return;
+				}
+			},data);
+		}
+		
+		var dom={
+			airshow:W("#mui-box"),
+			air_history:W("#air_history"),
+			history:W("#history")
+		};
+		window.addEventListener("load",function(){
+			if(!_g.data){
+				dom.airshow.style.marginTop="34vh";
+				return;
+			}
+			var share=JSON.parse(_g.data);
+			dom.airshow.appendChild(new cv(share));
+			var option=JSON.parse(_g.option);
+			var myChart = echarts.init(dom.air_history);
+			myChart.setOption(option); 
+			
+			var tem=document.createElement("div");
+			tem.className="ddd";
+			dom.history.appendChild(tem);
+			//dom.history.style.display="block";
+		});
+	
+	</script>
+	
+</html>

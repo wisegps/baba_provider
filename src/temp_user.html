@@ -12,7 +12,7 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 
-		<title>叭叭</title>
+		<title>WiCARE</title>
 		<script src="../wslib/WiStorm.js"></script>
 		<script>link("W.css")</script>
 		<script src="../wslib/api/Wapi.js"></script>
@@ -80,11 +80,9 @@
 					document.write("请使用微信浏览器打开");
 				}
 			}
-			if(_g.open_id)
-				W.setCookie("__login_redirect_uri__","");
 			
 			//微信登录
-			if (WiStorm.agent.weixin&&!_g.open_id) {
+			if (WiStorm.agent.weixin&&!_g.openid) {
 				W.wxLogin();	
 			}
 		</script>
@@ -102,12 +100,27 @@
 					<input type="text" placeholder="短信验证码" name="valid_code">	
 					<label><span class="w_icon icon_sms"></label>
 				</div>
+				<div class="right">
+					<a id="register" href="../index.html?intent=register">注册新账号</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+					<a href="../index.html?intent=forget">忘记密码</a>
+				</div>
 				<button type="button" class="mui-btn mui-btn-block w" id="login_but" disabled="disabled">绑定</button>
 			</form>
 		</div>
 	</body>
 	<script for="register">
-		var bf=W("#bind_form"),dom={};
+		var bf=W("#bind_form"),registerUrl;
+		var dom={
+			register:W("#register")
+		}
+		var uri=W.getCookie("__login_redirect_uri__");
+		var reg=/src\/baba\/\S*.html/;
+		if(reg.test(uri)){
+			registerUrl="../index.html?intent=register&type=user";
+		}else{
+			registerUrl="../index.html?intent=register";
+		}
+		dom.register.href=registerUrl;
 		//检测手机是否已注册
 		function checkMobile(){
 			var v=W.trim(this.value);
@@ -123,8 +136,26 @@
 					addTally(dom.mi);
 					checkMobile.pass=2;
 					dom.sms_b.status=false;
+					dom.sms_b.style.background="#5cb85c";
 				}else{
-					W.toast("该手机号尚未绑定车辆或设备，请联系商家绑定");
+					var opt={
+						"y":"去注册",
+						"n":"取消",
+						"callback":function(o){
+							if(!o)
+								return;
+							location=registerUrl;
+						}
+					}
+					if(reg.test(uri)){
+						opt.title="该手机号尚未绑定车辆";
+						opt.content="请联系商户或者注册用户";
+					}else{
+						opt.title="该手机号尚未注册";
+						opt.content="请注册用户";
+					}
+					
+					W.confirm(opt);
 					checkMobile.pass=1;
 					addErr(dom.mi);
 				}
@@ -240,7 +271,7 @@
 			var data={
 				_mobile:dom.mi.value,
 				valid_code:dom.ci.value,
-				login_id:_g.open_id,
+				login_id:_g.openid,
 				logo:_g.headimgurl
 			}
 			W.userApi.bind(function(json){

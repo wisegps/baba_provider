@@ -12,9 +12,9 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 
-		<title>叭叭商户版</title>
+		<title>WiCARE商户版</title>
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<script>link("W.css")</script>
 		
 		<script src="../wslib/api/Wapi.js" defer="defer"></script>
@@ -56,13 +56,16 @@
 		#main{display: table;width: 100%;}
 		.card{
 			display: table-cell;
+			display: none;
+			width: 33.333%;
 			padding: 2em 0;
 			font-size: 13px;
 			color: #4D4D4D;
 			border-bottom: 1px solid #eee;
 			border-right: 1px solid #eee;
+			position: relative;
 		}
-		.card:active{background: #ccc;}
+		.card:active{background: #f9f9f9;}
 		.card-icon{display: block;font-size: 2.5em;}
 		.card-row{display: table-row;}
 		.shop_name{line-height: 5em;font-size: 2em;text-shadow: 2px 3px 3px rgba(0,0,0,.7);}
@@ -75,6 +78,19 @@
 		.mui-bar-tab .mui-tab-item.mui-active {
 		    color: #50B7DE;
 		}
+		.span_news{  
+		    width: 1.5em;
+		    height: 1.5em;
+		    position: absolute;
+		    background-color: #F13F40;
+		    color: white;
+		    text-align: center;
+		    line-height: 1.5em;
+		    border-radius: 100%;
+		    font-size: 12px;
+		    top: 1.5em;
+		}
+		#customer_advisory,#settings,nav.mui-bar-tab{display: none;}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav">
@@ -120,9 +136,9 @@
 					</div>
 					<div class="card" data-name="customer_add.html?intent=add" data-open="false">
 						<span class="card-icon w_icon icon_establish" style="color: #FFCC4F;"></span>
-						<span class="card-name">新建客户</span>
+						<span class="card-name">新增客户</span>
 					</div>
-					<div class="card" data-name="error_car.html" data-open="false">
+					<div class="card" data-name="error_car.html" data-open="false" id="error_car">
 						<span class="card-icon w_icon icon_abnormal" style="color: #42D7C1;"></span>
 						<span class="card-name">异常车况</span>
 					</div>
@@ -155,29 +171,88 @@
 						<span class="card-name">设置中心</span>
 					</div>
 				</div>
+				<div class="card-row">
+					<div class="card" data-name="child_account.html" data-open="false">
+						<span class="card-icon w_icon icon_account" style="color: #66CAEE;"></span>
+						<span class="card-name">子帐号管理</span>
+					</div>
+				</div>
 			</div>
 		</div>
 	</body>
 	<script>
-		function doubleClickBack(){
-			//实现双击返回关闭应用
-			history.pushState(null,"close","close");
-			history.pushState(null,"closeWindow","closeWindow");
-			history.pushState(null,"home.html","home.html");
+		var dom={
+			cards:W(".card",true)
 		}
-		window.addEventListener("DOMContentLoaded",function(){
-			//页面加载完
+
+		//监听 html加载完成事件
+		window.addEventListener("W.loginSuccess",function(){
 			getShopData();//获取并展示店铺当天数据（包括店铺图片）
 			addEvent();
 			W(".shop_name").innerText=_user.cust_name;
-			doubleClickBack();
-		})
-		//监听 html加载完成事件
-		window.addEventListener("load",function(){
-			//window.plus.webview.create("search.html","search.html");
-			window.plus.webview.create("customer_advisory.html","customer_advisory.html");
-			window.plus.webview.create("settings.html","settings.html");
+			//识别身份，按权限加载
+			if(_user.cust_type!=2&&_user.cust_type!=3){
+					var type=["无车车主","车主","商户","员工"];
+					W.alert("商户版叭叭只支持商户使用，如需成为商户请联系我们<a href='tel:88362578'>联系客服</a>",function(){
+						top.location="baba/air_home.html";
+					});
+					return;
+			}else{
+				if(_user.cust_type==2){
+					_user.privilege="";
+					for(var i=0;i<dom.cards.length;i++){
+						_user.privilege+="1";
+					}
+				}
+				if(_user.cust_type==3){//员工
+					if(!_user.privilege)return;
+					if(_user.privilege.search(/\s/)>-1){
+						W.alert("权限配置不正确");
+						return;
+					}
+				}
+				var row=W(".card-row");
+				row._i=0;
+				for(var i=0;i<dom.cards.length;i++){
+					if(_user.privilege[i]=="1"){
+						dom.cards[i].style.display="table-cell";
+						if(row._i<3){
+							row._i++;
+							row.appendChild(dom.cards[i]);
+						}else{
+							row=row.nextElementSibling;
+							row._i=1;
+							row.appendChild(dom.cards[i]);
+						}
+					}
+				}
+				if(_user.privilege[6]=="1"){//预加载客户咨询
+					window.plus.webview.create("customer_advisory.html","customer_advisory.html");
+					W.dom.msg.style.display="table-cell";
+					W.dom.nav.style.display="table";
+				}
+				if(_user.privilege[8]=="1"){//预加载设置中心
+					window.plus.webview.create("settings.html","settings.html");
+					W.dom.setting.style.display="table-cell";
+					W.dom.nav.style.display="table";
+				}
+				if(_user.privilege[2]=="1"){
+					Wapi.user.getExceptionList(exception,{seller_id:_user.seller_id,access_token:_user.access_token});
+				}
+			}
 		});
+		function exception(res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			if(res.total){
+				var s=document.createElement("span");
+				s.className="span_news";
+				s.innerText=res.total;
+				W("#error_car").appendChild(s);
+			}
+		}
 		
 		function addEvent(){//添加事件监听器
 			W.dom.search=W("#search");
@@ -192,10 +267,9 @@
 			W.dom.search.addEvent("click",openView);
 			W.dom.home.addEvent("click",function(){
 				window.plus.webview.currentWebview().show();
-				doubleClickBack();
 			});
 			
-			var cards=W(".card",true);
+			var cards=dom.cards;
 			for(var i=cards.length-1;i>=0;i--){
 				cards[i].addEvent("click",openView);
 			}
@@ -205,24 +279,10 @@
 				var t=W(".mui-active");
 				if(t)
 					t.classList.remove("mui-active");
-				if(ref.indexOf(".html")){
-					if(ref=="closeWindow"){
-						W.toast("再返回一次退出应用");
-						setTimeout("history.go(1)",5000);
-					}else if(ref=="close"){
-						if(WiStorm.agent.weixin&&W.native)
-							W.native.close();
-						else{
-							history.go(1);
-						}
-					}
-					t=W.dom.home;
-				}else if(ref=="customer_advisory.html")
+				if(ref=="customer_advisory.html")
 					t=W.dom.msg;
 				else if(ref=="settings.html")
 					t=W.dom.setting;
-				else 
-					return;
 				t.classList.add("mui-active");
 				W.dom.nav.style.display="block";
 			});
@@ -279,7 +339,7 @@
 			var data={
 				begin_time:begin_time.WtoString(),
 				end_time:end_time,
-				parent_cust_id:_user.cust_id,
+				seller_id:_user.seller_id,
 				access_token:_user.access_token
 			}
 			

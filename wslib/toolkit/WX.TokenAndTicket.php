@@ -1,7 +1,7 @@
 <?php
 session_start();
 $appId="wxa5c196f7ec4b5df9";//公众号id
-$appSecret="e89542d7376fc479aac35706305fc23f";//公众号秘钥
+$appSecret="公众号秘钥";//公众号秘钥
 $url="https://api.weixin.qq.com/cgi-bin/";//微信接口
 $tokenUrl=$url."token?grant_type=client_credential&appid=$appId&secret=$appSecret";//获取token的接口
 $ticketUrl=$url."ticket/getticket?type=jsapi&access_token=";//获取ticket的接口

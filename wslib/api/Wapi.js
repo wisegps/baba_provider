@@ -1,5 +1,196 @@
-var Wapi={};Wapi.encrypt={};Wapi.encrypt.hexcase=0;Wapi.encrypt.b64pad="";Wapi.encrypt.chrsz=8;Wapi.encrypt.hex_md5=function(a){return Wapi.encrypt.binl2hex(Wapi.encrypt.core_md5(Wapi.encrypt.str2binl(a),a.length*Wapi.encrypt.chrsz))};Wapi.encrypt.b64_md5=function(a){return Wapi.encrypt.binl2b64(Wapi.encrypt.core_md5(Wapi.encrypt.str2binl(a),a.length*Wapi.encrypt.chrsz))};Wapi.encrypt.str_md5=function(a){return Wapi.encrypt.binl2str(Wapi.encrypt.core_md5(Wapi.encrypt.str2binl(a),a.length*Wapi.encrypt.chrsz))};Wapi.encrypt.hex_hmac_md5=function(a,b){return Wapi.encrypt.binl2hex(Wapi.encrypt.core_hmac_md5(a,b))};Wapi.encrypt.b64_hmac_md5=function(a,b){return Wapi.encrypt.binl2b64(Wapi.encrypt.core_hmac_md5(a,b))};Wapi.encrypt.str_hmac_md5=function(a,b){return Wapi.encrypt.binl2str(Wapi.encrypt.core_hmac_md5(a,b))};Wapi.encrypt.core_md5=function(p,k){p[k>>5]|=128<<((k)%32);p[(((k+64)>>>9)<<4)+14]=k;var o=1732584193;var n=-271733879;var m=-1732584194;var l=271733878;for(var g=0;g<p.length;g+=16){var j=o;var h=n;var f=m;var e=l;o=Wapi.encrypt.md5_ff(o,n,m,l,p[g+0],7,-680876936);l=Wapi.encrypt.md5_ff(l,o,n,m,p[g+1],12,-389564586);m=Wapi.encrypt.md5_ff(m,l,o,n,p[g+2],17,606105819);n=Wapi.encrypt.md5_ff(n,m,l,o,p[g+3],22,-1044525330);o=Wapi.encrypt.md5_ff(o,n,m,l,p[g+4],7,-176418897);l=Wapi.encrypt.md5_ff(l,o,n,m,p[g+5],12,1200080426);m=Wapi.encrypt.md5_ff(m,l,o,n,p[g+6],17,-1473231341);n=Wapi.encrypt.md5_ff(n,m,l,o,p[g+7],22,-45705983);o=Wapi.encrypt.md5_ff(o,n,m,l,p[g+8],7,1770035416);l=Wapi.encrypt.md5_ff(l,o,n,m,p[g+9],12,-1958414417);m=Wapi.encrypt.md5_ff(m,l,o,n,p[g+10],17,-42063);n=Wapi.encrypt.md5_ff(n,m,l,o,p[g+11],22,-1990404162);o=Wapi.encrypt.md5_ff(o,n,m,l,p[g+12],7,1804603682);l=Wapi.encrypt.md5_ff(l,o,n,m,p[g+13],12,-40341101);m=Wapi.encrypt.md5_ff(m,l,o,n,p[g+14],17,-1502002290);n=Wapi.encrypt.md5_ff(n,m,l,o,p[g+15],22,1236535329);o=Wapi.encrypt.md5_gg(o,n,m,l,p[g+1],5,-165796510);l=Wapi.encrypt.md5_gg(l,o,n,m,p[g+6],9,-1069501632);m=Wapi.encrypt.md5_gg(m,l,o,n,p[g+11],14,643717713);n=Wapi.encrypt.md5_gg(n,m,l,o,p[g+0],20,-373897302);o=Wapi.encrypt.md5_gg(o,n,m,l,p[g+5],5,-701558691);l=Wapi.encrypt.md5_gg(l,o,n,m,p[g+10],9,38016083);m=Wapi.encrypt.md5_gg(m,l,o,n,p[g+15],14,-660478335);n=Wapi.encrypt.md5_gg(n,m,l,o,p[g+4],20,-405537848);o=Wapi.encrypt.md5_gg(o,n,m,l,p[g+9],5,568446438);l=Wapi.encrypt.md5_gg(l,o,n,m,p[g+14],9,-1019803690);m=Wapi.encrypt.md5_gg(m,l,o,n,p[g+3],14,-187363961);n=Wapi.encrypt.md5_gg(n,m,l,o,p[g+8],20,1163531501);o=Wapi.encrypt.md5_gg(o,n,m,l,p[g+13],5,-1444681467);l=Wapi.encrypt.md5_gg(l,o,n,m,p[g+2],9,-51403784);m=Wapi.encrypt.md5_gg(m,l,o,n,p[g+7],14,1735328473);n=Wapi.encrypt.md5_gg(n,m,l,o,p[g+12],20,-1926607734);o=Wapi.encrypt.md5_hh(o,n,m,l,p[g+5],4,-378558);l=Wapi.encrypt.md5_hh(l,o,n,m,p[g+8],11,-2022574463);m=Wapi.encrypt.md5_hh(m,l,o,n,p[g+11],16,1839030562);n=Wapi.encrypt.md5_hh(n,m,l,o,p[g+14],23,-35309556);o=Wapi.encrypt.md5_hh(o,n,m,l,p[g+1],4,-1530992060);l=Wapi.encrypt.md5_hh(l,o,n,m,p[g+4],11,1272893353);m=Wapi.encrypt.md5_hh(m,l,o,n,p[g+7],16,-155497632);n=Wapi.encrypt.md5_hh(n,m,l,o,p[g+10],23,-1094730640);o=Wapi.encrypt.md5_hh(o,n,m,l,p[g+13],4,681279174);l=Wapi.encrypt.md5_hh(l,o,n,m,p[g+0],11,-358537222);m=Wapi.encrypt.md5_hh(m,l,o,n,p[g+3],16,-722521979);n=Wapi.encrypt.md5_hh(n,m,l,o,p[g+6],23,76029189);o=Wapi.encrypt.md5_hh(o,n,m,l,p[g+9],4,-640364487);l=Wapi.encrypt.md5_hh(l,o,n,m,p[g+12],11,-421815835);m=Wapi.encrypt.md5_hh(m,l,o,n,p[g+15],16,530742520);n=Wapi.encrypt.md5_hh(n,m,l,o,p[g+2],23,-995338651);o=Wapi.encrypt.md5_ii(o,n,m,l,p[g+0],6,-198630844);l=Wapi.encrypt.md5_ii(l,o,n,m,p[g+7],10,1126891415);m=Wapi.encrypt.md5_ii(m,l,o,n,p[g+14],15,-1416354905);n=Wapi.encrypt.md5_ii(n,m,l,o,p[g+5],21,-57434055);o=Wapi.encrypt.md5_ii(o,n,m,l,p[g+12],6,1700485571);l=Wapi.encrypt.md5_ii(l,o,n,m,p[g+3],10,-1894986606);m=Wapi.encrypt.md5_ii(m,l,o,n,p[g+10],15,-1051523);n=Wapi.encrypt.md5_ii(n,m,l,o,p[g+1],21,-2054922799);o=Wapi.encrypt.md5_ii(o,n,m,l,p[g+8],6,1873313359);l=Wapi.encrypt.md5_ii(l,o,n,m,p[g+15],10,-30611744);m=Wapi.encrypt.md5_ii(m,l,o,n,p[g+6],15,-1560198380);n=Wapi.encrypt.md5_ii(n,m,l,o,p[g+13],21,1309151649);o=Wapi.encrypt.md5_ii(o,n,m,l,p[g+4],6,-145523070);l=Wapi.encrypt.md5_ii(l,o,n,m,p[g+11],10,-1120210379);m=Wapi.encrypt.md5_ii(m,l,o,n,p[g+2],15,718787259);n=Wapi.encrypt.md5_ii(n,m,l,o,p[g+9],21,-343485551);o=Wapi.encrypt.safe_add(o,j);n=Wapi.encrypt.safe_add(n,h);m=Wapi.encrypt.safe_add(m,f);l=Wapi.encrypt.safe_add(l,e)}return Array(o,n,m,l)};Wapi.encrypt.md5_cmn=function(h,e,d,c,g,f){return Wapi.encrypt.safe_add(Wapi.encrypt.bit_rol(Wapi.encrypt.safe_add(Wapi.encrypt.safe_add(e,h),Wapi.encrypt.safe_add(c,f)),g),d)};Wapi.encrypt.md5_ff=function(g,f,k,j,e,i,h){return Wapi.encrypt.md5_cmn((f&k)|((~f)&j),g,f,e,i,h)};Wapi.encrypt.md5_gg=function(g,f,k,j,e,i,h){return Wapi.encrypt.md5_cmn((f&j)|(k&(~j)),g,f,e,i,h)};Wapi.encrypt.md5_hh=function(g,f,k,j,e,i,h){return Wapi.encrypt.md5_cmn(f^k^j,g,f,e,i,h)};Wapi.encrypt.md5_ii=function(g,f,k,j,e,i,h){return Wapi.encrypt.md5_cmn(k^(f|(~j)),g,f,e,i,h)
-};Wapi.encrypt.core_hmac_md5=function(c,f){var e=Wapi.encrypt.str2binl(c);if(e.length>16){e=Wapi.encrypt.core_md5(e,c.length*Wapi.encrypt.chrsz)}var a=Array(16),d=Array(16);for(var b=0;b<16;b++){a[b]=e[b]^909522486;d[b]=e[b]^1549556828}var g=Wapi.encrypt.core_md5(a.concat(Wapi.encrypt.str2binl(f)),512+f.length*Wapi.encrypt.chrsz);return Wapi.encrypt.core_md5(d.concat(g),512+128)};Wapi.encrypt.safe_add=function(a,d){var c=(a&65535)+(d&65535);var b=(a>>16)+(d>>16)+(c>>16);return(b<<16)|(c&65535)};Wapi.encrypt.bit_rol=function(a,b){return(a<<b)|(a>>>(32-b))};Wapi.encrypt.str2binl=function(d){var c=Array();var a=(1<<Wapi.encrypt.chrsz)-1;for(var b=0;b<d.length*Wapi.encrypt.chrsz;b+=Wapi.encrypt.chrsz){c[b>>5]|=(d.charCodeAt(b/Wapi.encrypt.chrsz)&a)<<(b%32)}return c};Wapi.encrypt.binl2str=function(c){var d="";var a=(1<<Wapi.encrypt.chrsz)-1;for(var b=0;b<c.length*32;b+=Wapi.encrypt.chrsz){d+=String.fromCharCode((c[b>>5]>>>(b%32))&a)}return d};Wapi.encrypt.binl2hex=function(c){var b=Wapi.encrypt.hexcase?"0123456789ABCDEF":"0123456789abcdef";var d="";for(var a=0;a<c.length*4;a++){d+=b.charAt((c[a>>2]>>((a%4)*8+4))&15)+b.charAt((c[a>>2]>>((a%4)*8))&15)}return d};Wapi.encrypt.binl2b64=function(d){var c="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";var f="";for(var b=0;b<d.length*4;b+=3){var e=(((d[b>>2]>>8*(b%4))&255)<<16)|(((d[b+1>>2]>>8*((b+1)%4))&255)<<8)|((d[b+2>>2]>>8*((b+2)%4))&255);for(var a=0;a<4;a++){if(b*8+a*6>d.length*32){f+=Wapi.encrypt.b64pad}else{f+=c.charAt((e>>6*(3-a))&63)}}}return f};function WiStormAPI(){this.url="http://o.bibibaba.cn/router/rest";this.appKey=WiStorm.config.app_key;this.appSecret=WiStorm.config.app_secret;this.encrypt=Wapi.encrypt}WiStormAPI.prototype.getApi=function(c,f,e){var d={format:"json",v:"1.0",sign_method:"md5"};d.timestamp=new Date().WtoString();d.app_key=this.appKey;this.jsonConcat(d,c);this.jsonConcat(d,e);var a=this.makeUrl(d);var b={dataType:d.format,type:"get",timeout:10000,success:f,error:function(i,g,h){console.log(g)}};this.ajax(a,b)};WiStormAPI.prototype.postApi=function(a,f,d){var e={format:"json",v:"1.0",sign_method:"md5"};e.timestamp=new Date().WtoString();e.app_key=this.appKey;this.jsonConcat(e,a);var b=this.makeUrl(e);var c={data:d,dataType:e.format,type:"post",timeout:10000,success:f(res),error:function(i,g,h){console.log(g)}};this.ajax(b,c)};WiStormAPI.prototype.makeUrl=function(h){var b="";var e="";var j=[];for(g in h){j.push(g)}j.sort();var f="",g,d="",a;for(var c=0;c<j.length;c++){g=j[c];a=encodeURI(h[g]);f+=g+a;d+="&"+g+"="+a}f=this.appSecret+f+this.appSecret;b=this.encrypt.hex_md5(f).toUpperCase();e=this.url+"?sign="+b+d;console.log(e);return e};WiStormAPI.prototype.jsonConcat=function(b,a){for(key in a){b[key]=a[key]}};WiStormAPI.prototype.ajax=function(c,b){var e={dataType:"json",timeout:10000,type:"GET",success:Wapi._noop,error:Wapi._noop};var g={"X-Requested-With":"XMLHttpRequest","Accept":"*/*","Content-Type":"application/x-www-form-urlencoded"};e.url=c;this.jsonConcat(e,b);this.jsonConcat(g,b.headers);e.type=e.type.toUpperCase();var f="";if(e.data){for(items in e.data){f+="&"+items+"="+e.data[items]}if(e.type=="GET"){e.url+="?"+f.slice(1)}}var d=new XMLHttpRequest();if(e.timeout>0){d.abortTimeout=setTimeout(function(){d.onreadystatechange=Wapi._noop;d.abort();e.error(d,"timeout",e)},e.timeout)}d.onreadystatechange=function(){if(d.readyState===4){d.onreadystatechange=Wapi._noop;clearTimeout(d.abortTimeout);var h,j=false;if((d.status>=200&&d.status<300)||d.status===304||d.status===0){var i=e.dataType;var k=d.responseText;try{if(i==="xml"){h=d.responseXML}else{if(i==="json"){h=JSON.parse(k)}else{h=k}}}catch(l){j=l}if(j){e.error(d,"parsererror",e)}else{e.success(h,d,e)}}else{e.error(d,d.status?"error":"abort",e)}}};d.open(e.type,e.url,true);for(var a in e.headers){d.setRequestHeader(a,e.headers[a])}d.setRequestHeader("Content-type","application/x-www-form-urlencoded");d.send(f);return d};Wapi._=new WiStormAPI();Wapi._noop=function(){};
+var Wapi={};Wapi.encrypt={};Wapi.encrypt.hexcase=0;Wapi.encrypt.b64pad="";Wapi.encrypt.chrsz=8;Wapi.encrypt.hex_md5=function(s){return Wapi.encrypt.binl2hex(Wapi.encrypt.core_md5(Wapi.encrypt.str2binl(s),s.length*Wapi.encrypt.chrsz))};Wapi.encrypt.b64_md5=function(s){return Wapi.encrypt.binl2b64(Wapi.encrypt.core_md5(Wapi.encrypt.str2binl(s),s.length*Wapi.encrypt.chrsz))};Wapi.encrypt.str_md5=function(s){return Wapi.encrypt.binl2str(Wapi.encrypt.core_md5(Wapi.encrypt.str2binl(s),s.length*Wapi.encrypt.chrsz))};Wapi.encrypt.hex_hmac_md5=function(key,data){return Wapi.encrypt.binl2hex(Wapi.encrypt.core_hmac_md5(key,data))};Wapi.encrypt.b64_hmac_md5=function(key,data){return Wapi.encrypt.binl2b64(Wapi.encrypt.core_hmac_md5(key,data))};Wapi.encrypt.str_hmac_md5=function(key,data){return Wapi.encrypt.binl2str(Wapi.encrypt.core_hmac_md5(key,data))};Wapi.encrypt.core_md5=function(x,len){x[len>>5]|=128<<((len)%32);x[(((len+64)>>>9)<<4)+14]=len;var a=1732584193;var b=-271733879;var c=-1732584194;var d=271733878;for(var i=0;i<x.length;i+=16){var olda=a;var oldb=b;var oldc=c;var oldd=d;a=Wapi.encrypt.md5_ff(a,b,c,d,x[i+0],7,-680876936);d=Wapi.encrypt.md5_ff(d,a,b,c,x[i+1],12,-389564586);c=Wapi.encrypt.md5_ff(c,d,a,b,x[i+2],17,606105819);b=Wapi.encrypt.md5_ff(b,c,d,a,x[i+3],22,-1044525330);a=Wapi.encrypt.md5_ff(a,b,c,d,x[i+4],7,-176418897);d=Wapi.encrypt.md5_ff(d,a,b,c,x[i+5],12,1200080426);c=Wapi.encrypt.md5_ff(c,d,a,b,x[i+6],17,-1473231341);b=Wapi.encrypt.md5_ff(b,c,d,a,x[i+7],22,-45705983);a=Wapi.encrypt.md5_ff(a,b,c,d,x[i+8],7,1770035416);d=Wapi.encrypt.md5_ff(d,a,b,c,x[i+9],12,-1958414417);c=Wapi.encrypt.md5_ff(c,d,a,b,x[i+10],17,-42063);b=Wapi.encrypt.md5_ff(b,c,d,a,x[i+11],22,-1990404162);a=Wapi.encrypt.md5_ff(a,b,c,d,x[i+12],7,1804603682);d=Wapi.encrypt.md5_ff(d,a,b,c,x[i+13],12,-40341101);c=Wapi.encrypt.md5_ff(c,d,a,b,x[i+14],17,-1502002290);b=Wapi.encrypt.md5_ff(b,c,d,a,x[i+15],22,1236535329);a=Wapi.encrypt.md5_gg(a,b,c,d,x[i+1],5,-165796510);d=Wapi.encrypt.md5_gg(d,a,b,c,x[i+6],9,-1069501632);c=Wapi.encrypt.md5_gg(c,d,a,b,x[i+11],14,643717713);b=Wapi.encrypt.md5_gg(b,c,d,a,x[i+0],20,-373897302);a=Wapi.encrypt.md5_gg(a,b,c,d,x[i+5],5,-701558691);d=Wapi.encrypt.md5_gg(d,a,b,c,x[i+10],9,38016083);c=Wapi.encrypt.md5_gg(c,d,a,b,x[i+15],14,-660478335);b=Wapi.encrypt.md5_gg(b,c,d,a,x[i+4],20,-405537848);a=Wapi.encrypt.md5_gg(a,b,c,d,x[i+9],5,568446438);d=Wapi.encrypt.md5_gg(d,a,b,c,x[i+14],9,-1019803690);c=Wapi.encrypt.md5_gg(c,d,a,b,x[i+3],14,-187363961);b=Wapi.encrypt.md5_gg(b,c,d,a,x[i+8],20,1163531501);a=Wapi.encrypt.md5_gg(a,b,c,d,x[i+13],5,-1444681467);d=Wapi.encrypt.md5_gg(d,a,b,c,x[i+2],9,-51403784);c=Wapi.encrypt.md5_gg(c,d,a,b,x[i+7],14,1735328473);b=Wapi.encrypt.md5_gg(b,c,d,a,x[i+12],20,-1926607734);a=Wapi.encrypt.md5_hh(a,b,c,d,x[i+5],4,-378558);d=Wapi.encrypt.md5_hh(d,a,b,c,x[i+8],11,-2022574463);c=Wapi.encrypt.md5_hh(c,d,a,b,x[i+11],16,1839030562);b=Wapi.encrypt.md5_hh(b,c,d,a,x[i+14],23,-35309556);a=Wapi.encrypt.md5_hh(a,b,c,d,x[i+1],4,-1530992060);d=Wapi.encrypt.md5_hh(d,a,b,c,x[i+4],11,1272893353);c=Wapi.encrypt.md5_hh(c,d,a,b,x[i+7],16,-155497632);b=Wapi.encrypt.md5_hh(b,c,d,a,x[i+10],23,-1094730640);a=Wapi.encrypt.md5_hh(a,b,c,d,x[i+13],4,681279174);d=Wapi.encrypt.md5_hh(d,a,b,c,x[i+0],11,-358537222);c=Wapi.encrypt.md5_hh(c,d,a,b,x[i+3],16,-722521979);b=Wapi.encrypt.md5_hh(b,c,d,a,x[i+6],23,76029189);a=Wapi.encrypt.md5_hh(a,b,c,d,x[i+9],4,-640364487);d=Wapi.encrypt.md5_hh(d,a,b,c,x[i+12],11,-421815835);c=Wapi.encrypt.md5_hh(c,d,a,b,x[i+15],16,530742520);b=Wapi.encrypt.md5_hh(b,c,d,a,x[i+2],23,-995338651);a=Wapi.encrypt.md5_ii(a,b,c,d,x[i+0],6,-198630844);d=Wapi.encrypt.md5_ii(d,a,b,c,x[i+7],10,1126891415);c=Wapi.encrypt.md5_ii(c,d,a,b,x[i+14],15,-1416354905);b=Wapi.encrypt.md5_ii(b,c,d,a,x[i+5],21,-57434055);a=Wapi.encrypt.md5_ii(a,b,c,d,x[i+12],6,1700485571);d=Wapi.encrypt.md5_ii(d,a,b,c,x[i+3],10,-1894986606);c=Wapi.encrypt.md5_ii(c,d,a,b,x[i+10],15,-1051523);b=Wapi.encrypt.md5_ii(b,c,d,a,x[i+1],21,-2054922799);a=Wapi.encrypt.md5_ii(a,b,c,d,x[i+8],6,1873313359);d=Wapi.encrypt.md5_ii(d,a,b,c,x[i+15],10,-30611744);c=Wapi.encrypt.md5_ii(c,d,a,b,x[i+6],15,-1560198380);b=Wapi.encrypt.md5_ii(b,c,d,a,x[i+13],21,1309151649);a=Wapi.encrypt.md5_ii(a,b,c,d,x[i+4],6,-145523070);d=Wapi.encrypt.md5_ii(d,a,b,c,x[i+11],10,-1120210379);c=Wapi.encrypt.md5_ii(c,d,a,b,x[i+2],15,718787259);b=Wapi.encrypt.md5_ii(b,c,d,a,x[i+9],21,-343485551);a=Wapi.encrypt.safe_add(a,olda);b=Wapi.encrypt.safe_add(b,oldb);c=Wapi.encrypt.safe_add(c,oldc);d=Wapi.encrypt.safe_add(d,oldd)}return Array(a,b,c,d)};Wapi.encrypt.md5_cmn=function(q,a,b,x,s,t){return Wapi.encrypt.safe_add(Wapi.encrypt.bit_rol(Wapi.encrypt.safe_add(Wapi.encrypt.safe_add(a,q),Wapi.encrypt.safe_add(x,t)),s),b)};Wapi.encrypt.md5_ff=function(a,b,c,d,x,s,t){return Wapi.encrypt.md5_cmn((b&c)|((~b)&d),a,b,x,s,t)};Wapi.encrypt.md5_gg=function(a,b,c,d,x,s,t){return Wapi.encrypt.md5_cmn((b&d)|(c&(~d)),a,b,x,s,t)};Wapi.encrypt.md5_hh=function(a,b,c,d,x,s,t){return Wapi.encrypt.md5_cmn(b^c^d,a,b,x,s,t)};Wapi.encrypt.md5_ii=function(a,b,c,d,x,s,t){return Wapi.encrypt.md5_cmn(c^(b|(~d)),a,b,x,s,t)};Wapi.encrypt.core_hmac_md5=function(key,data){var bkey=Wapi.encrypt.str2binl(key);if(bkey.length>16){bkey=Wapi.encrypt.core_md5(bkey,key.length*Wapi.encrypt.chrsz)}var ipad=Array(16),opad=Array(16);for(var i=0;i<16;i++){ipad[i]=bkey[i]^909522486;opad[i]=bkey[i]^1549556828}var hash=Wapi.encrypt.core_md5(ipad.concat(Wapi.encrypt.str2binl(data)),512+data.length*Wapi.encrypt.chrsz);return Wapi.encrypt.core_md5(opad.concat(hash),512+128)};Wapi.encrypt.safe_add=function(x,y){var lsw=(x&65535)+(y&65535);var msw=(x>>16)+(y>>16)+(lsw>>16);return(msw<<16)|(lsw&65535)};Wapi.encrypt.bit_rol=function(num,cnt){return(num<<cnt)|(num>>>(32-cnt))};Wapi.encrypt.str2binl=function(str){var bin=Array();var mask=(1<<Wapi.encrypt.chrsz)-1;for(var i=0;i<str.length*Wapi.encrypt.chrsz;i+=Wapi.encrypt.chrsz){bin[i>>5]|=(str.charCodeAt(i/Wapi.encrypt.chrsz)&mask)<<(i%32)}return bin};Wapi.encrypt.binl2str=function(bin){var str="";var mask=(1<<Wapi.encrypt.chrsz)-1;for(var i=0;i<bin.length*32;i+=Wapi.encrypt.chrsz){str+=String.fromCharCode((bin[i>>5]>>>(i%32))&mask)}return str};Wapi.encrypt.binl2hex=function(binarray){var hex_tab=Wapi.encrypt.hexcase?"0123456789ABCDEF":"0123456789abcdef";var str="";for(var i=0;i<binarray.length*4;i++){str+=hex_tab.charAt((binarray[i>>2]>>((i%4)*8+4))&15)+hex_tab.charAt((binarray[i>>2]>>((i%4)*8))&15)}return str};Wapi.encrypt.binl2b64=function(binarray){var tab="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";var str="";for(var i=0;i<binarray.length*4;i+=3){var triplet=(((binarray[i>>2]>>8*(i%4))&255)<<16)|(((binarray[i+1>>2]>>8*((i+1)%4))&255)<<8)|((binarray[i+2>>2]>>8*((i+2)%4))&255);for(var j=0;j<4;j++){if(i*8+j*6>binarray.length*32){str+=Wapi.encrypt.b64pad}else{str+=tab.charAt((triplet>>6*(3-j))&63)}}}return str};
+/**
+ * 框架的api基类，所有api类都继承此类
+ * @constructor
+ */
+function WiStormAPI(){
+	this.url="http://o.bibibaba.cn/router/rest";
+	this.appKey=WiStorm.config.app_key;
+	this.appSecret=WiStorm.config.app_secret;
+	this.encrypt=Wapi.encrypt;
+};
+
+/**
+ * get方法的接口调用
+ * @param {Object} data
+ * @param {Object} callback
+ * @param {Object} op
+ */
+WiStormAPI.prototype.getApi=function(data,callback,op){
+	var D={
+		format: 'json',   //返回数据格式
+	    v: '1.0',         //接口版本
+	    sign_method: 'md5'//签名方式
+	}
+	D.timestamp=new Date().WtoString();
+	D.app_key=this.appKey;
+	this.jsonConcat(D,data);
+	this.jsonConcat(D,op);
+
+	var url=this.makeUrl(D);
+	var ajaxSetting={
+		dataType:D.format,//服务器返回json格式数据
+		type:'get',//HTTP请求类型
+		timeout:10000,//超时时间设置为10秒；
+		success:callback,
+		error:function(xhr,type,errorThrown){//异常处理；
+			throw ("apiError:"+type);
+		}
+	}
+	this.ajax(url,ajaxSetting);
+}
+
+WiStormAPI.prototype.postApi=function(getData,callback,data){
+	var D={
+		format: 'json',   //返回数据格式
+	    v: '1.0',         //接口版本
+	    sign_method: 'md5'//签名方式
+	}
+	D.timestamp=new Date().WtoString();
+	D.app_key=this.appKey;
+	this.jsonConcat(D,getData);
+
+	var url=this.makeUrl(D);
+	var ajaxSetting={
+		data:data,
+		dataType:D.format,//服务器返回json格式数据
+		type:'post',//HTTP请求类型
+		timeout:10000,//超时时间设置为10秒；
+		success:callback(res),
+		error:function(xhr,type,errorThrown){//异常处理；
+			throw ("apiError:"+type);
+		}
+	}
+	this.ajax(url,ajaxSetting);
+}
+
+WiStormAPI.prototype.makeUrl=function(json){
+	var sign="";
+	var URL="";
+	var reg=new RegExp("(^\\s*)|(\\s*$)", "g");
+	//按key名进行排序
+	var keyArr=[];
+	for(key in json){
+		keyArr.push(key);
+	}
+	keyArr.sort();
+	
+	//拼装
+	var signText="",key,getData="",val;
+	for(var i=0;i<keyArr.length;i++){
+		key=keyArr[i];
+		val=json[key];
+		if(val===null||val===undefined)
+			val="";
+		else if(typeof val=="object"){
+			val=JSON.stringify(val);			
+		}else
+			val=val.toString();
+		val=encodeURI(val.replace(reg,""));
+		signText+=key+val;
+		getData+="&"+key+"="+val;
+	}
+	signText=this.appSecret+signText+this.appSecret;
+	sign=this.encrypt.hex_md5(signText).toUpperCase();
+	URL=this.url+"?sign="+sign+getData;
+	console.log(URL);
+	return URL;
+}
+
+/**
+ * 合并两个json对象，如果存在相同属性，取第二个json的属性值
+ * @param {Object} json1
+ * @param {Object} json2
+ */
+WiStormAPI.prototype.jsonConcat=function(json1,json2){
+	for(key in json2){
+		json1[key]=json2[key];
+	}
+};
+
+/**
+ * 框架的ajax，mui的ajax转化而来，无依赖
+ * @param {String} url
+ * @param {Object} options，具体可参考http://dev.dcloud.net.cn/mui/ajax/
+ */
+WiStormAPI.prototype.ajax=function(url,options) {
+	var json={
+		dataType:"json",
+		timeout:10000,
+		type:"GET",
+		success:Wapi._noop,
+		error:Wapi._noop
+	}
+	var headers = {
+		"X-Requested-With": "XMLHttpRequest",
+		"Accept": "*/*",
+		"Content-Type": "application/x-www-form-urlencoded"
+	};
+	json.url=url;
+	this.jsonConcat(json,options);
+	this.jsonConcat(headers,options.headers);
+	
+	json.type=json.type.toUpperCase();
+    var data="";
+    if(json.data){
+	    for (items in json.data){
+			data+="&"+items+"="+json.data[items];
+		}
+		if(json.type=="GET")
+			json.url+="?"+data.slice(1);
+    }
+	
+	var xmlhttp=new XMLHttpRequest();
+	if (json.timeout>0){
+		xmlhttp.abortTimeout=setTimeout(function(){
+			xmlhttp.onreadystatechange=Wapi._noop;
+			xmlhttp.abort();
+			json.error(xmlhttp,'timeout',json);
+			json.success({"status_code":-2,"err_msg":"获取信息超时"});
+		}, json.timeout);
+	}
+	xmlhttp.onreadystatechange=function(){
+		if (xmlhttp.readyState === 4) {
+			xmlhttp.onreadystatechange = Wapi._noop;
+			clearTimeout(xmlhttp.abortTimeout);
+			var result, error = false;
+			if ((xmlhttp.status >= 200 && xmlhttp.status < 300) || xmlhttp.status === 304 ||xmlhttp.status === 0){
+				var dataType=json.dataType;
+				var resultText = xmlhttp.responseText||'{"status_code":-1,"err_msg":"无返回信息"}';
+				try {
+					if (dataType === 'xml') {
+						result = xmlhttp.responseXML;
+					} else if (dataType === 'json') {
+						result = JSON.parse(resultText);
+					}else
+						result=resultText;
+				} catch (e) {
+					error = e;
+				}
+				if (error) {
+					json.error(xmlhttp,'parsererror',json);
+				} else {
+					json.success(result, xmlhttp, json);
+				}
+			} else {
+				json.error(xmlhttp,xmlhttp.status ? 'error' : 'abort', json);
+			}
+		}
+	}
+	xmlhttp.open(json.type,json.url,true);
+	
+	for (var name in json.headers) {
+		xmlhttp.setRequestHeader(name,json.headers[name]);
+	}
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    xmlhttp.send(data);
+    
+    return xmlhttp;
+};
+
+Wapi._=new WiStormAPI();
+Wapi._noop=function(){};
+
 /**
  * 用户信息相关api类
  * @constructor
@@ -26,27 +217,6 @@ WUserApi.prototype.bind=function(callback,data,op){
 	this.getApi(data,callback,OP);
 }
 
-/**
- * 第三方登录
- * 参数：
- *      login_id: 第三方登陆返回的标识ID
- * 	返回：
- *      cust_id: 用户id
- *      cust_name: 用户名称
- *      access_token: 全局令牌
- *      valid_time: 有效时间
- * @param {Object} callback
- * @param {Object} loginId
- * @param {Object} op
- */
-WUserApi.prototype.sso_login=function(callback,loginId,op){
-	var data={
-		login_id:loginId
-	};
-	this.jsonConcat(data,op);				    //把用户传入的配置覆盖默认配置
-	data.method="wicare.user.sso_login"; 		//接口名称
-   	this.getApi(data,callback);
-};
 
 /**
  * 注册
@@ -123,6 +293,10 @@ WUserApi.prototype.create=function(callback,data,op){
 	this.jsonConcat(OP,op);
 	OP.method="wicare.user.create"; //接口名称
 	
+	if(data.obj_name){
+		data.obj_name=data.obj_name.toUpperCase();
+	}
+	
 	this.getApi(data,callback,OP);	//调用新接口
 }
 
@@ -134,9 +308,9 @@ WUserApi.prototype.create=function(callback,data,op){
  * @param {Object} data,需要令牌,access_token
  * @param {Object} op
  */
-WUserApi.prototype.getUser=function(callback,data,op){
+WUserApi.prototype.get=function(callback,data,op){
 	var OP={
-		fields:'cust_id,cust_name,cust_type,car_brand,car_series,parent_cust_id,logo,remark,create_time,update_time,photo,address,tel,mobile,seller_id'//默认返回的字段
+		fields:'cust_id,cust_name,cust_type,saler_id,car_brand,car_series,parent_cust_id,logo,remark,create_time,update_time,photo,address,tel,mobile,seller_id'//默认返回的字段
 	};
 	this.jsonConcat(OP,op);
 	OP.method="wicare.user.get"; //接口名称
@@ -210,6 +384,10 @@ WUserApi.prototype.getVehicleList=function(callback,data,op){
 		delete data.parent_cust_id;
 	}
 	
+	if(data.obj_name){//车牌号转换成大写
+		data.obj_name=data.obj_name.toUpperCase();
+	}
+	
 	this.getApi(data,callback,OP);
 }
 
@@ -227,6 +405,12 @@ WUserApi.prototype.getVehicleList=function(callback,data,op){
 WUserApi.prototype.searchCustomerVehicle=function(callback,data,op){
 	if(data.obj_name)
 		data.obj_name="^"+data.obj_name;
+	
+	if(data.parent_cust_id){
+		data.seller_id=data.parent_cust_id;
+		delete data.parent_cust_id;
+	}
+	data.seller_id+="|0";
 	Wapi.user.getVehicleList(callback,data,op);
 }
 
@@ -732,6 +916,49 @@ WDeviceApi.prototype.getDayTripList=function(callback,data,op){
 }
 
 /**
+ * 获取gps字段信息
+ * @param {Object} callback
+ * @param {Object} data
+ * @param {Object} op
+ */
+WDeviceApi.prototype.getDeviceGpsDataList=function(callback,data,op){
+	var OP={
+		fields:'rcv_time,lon,lat',	//默认返回的字段
+		sorts:"rcv_time",
+		page:"rcv_time",
+		limit:"1000"
+	};
+	
+	this.jsonConcat(OP,op);				    //把用户传入的配置覆盖默认配置
+	OP.method="wicare.gps_datas.list"; 				//接口名称
+	
+	this.getApi(data,callback,OP);
+}
+
+/**
+ * 获取空气历史
+ * @param {Object} callback
+ * @param {Object} data
+ * @param {Object} op
+ */
+WDeviceApi.prototype.getDeviceAirDataList=function(callback,data,op){
+	var OP={
+		fields:'rcv_time,air',	//默认返回的字段
+		sorts:"rcv_time",
+		page:"rcv_time",
+		limit:"1000"
+	};
+	
+	this.jsonConcat(OP,op);				    //把用户传入的配置覆盖默认配置
+	OP.method="wicare.air_datas.list"; 				//接口名称
+	
+	if(!data.air){
+		data.air=">0";
+	}
+	this.getApi(data,callback,OP);
+}
+
+/**
  * 发送设备指令
  * @param {Object} callback
  * @param {Object} data
@@ -786,7 +1013,6 @@ WFileApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
  */
 WFileApi.prototype.upload=function(callback,file,updateProgress,op){
 	var OP={
-		auth_code:WiStorm.config.test_code,
 		format: 'json',   //返回数据格式
 	    v: '1.0',         //接口版本
 	    sign_method: 'md5',//签名方式
@@ -976,7 +1202,9 @@ WVehicleApi.prototype.update=function(callback,data,op){
 		data._obj_id=data.obj_id;
 		delete data.obj_id;
 	}
-	
+	if(data.obj_name){
+		data.obj_name=data.obj_name.toUpperCase();
+	}
 	this.getApi(data,callback,OP);		//调用新接口
 }
 
@@ -1091,6 +1319,22 @@ WVehicleApi.prototype.getBusinessList=function(callback,data,op){
 }
 
 
+/**
+ * 字典接口api类
+ * @constructor
+ */
+function WDictApi(){}
+WDictApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+WDictApi.prototype.get=function(callback,data,op){
+	var OP={
+		fields:'dict_value'
+	}
+	this.jsonConcat(OP,op);
+	OP.method='wicare.dict.get';//接口名称
+	
+	this.getApi(data,callback,OP);		//调用新接口
+}
 
 
 
@@ -1104,6 +1348,7 @@ W.developerApi=Wapi.developer=new WDeveloperApi();//开发者
 W.userApi=Wapi.user=new WUserApi();//用户
 W.baseApi=Wapi.base=new WBaseApi();//基本
 W.commApi=Wapi.comm=new WCommApi();//通信
+Wapi.dict=new WDictApi();//字典表
 
 
 

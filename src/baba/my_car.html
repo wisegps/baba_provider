@@ -25,7 +25,7 @@
 	#car_list{background: #fff;overflow: hidden;}
 	.car{
 	    white-space: nowrap;
-	    border-bottom: 1px solid #ccc;
+	    border-bottom: 1px solid #efefef;
 	    transform:translate3d(0,0,0);
 	    -webkit-transform:translate3d(0,0,0);
 	    transition: transform .5s;
@@ -81,13 +81,12 @@
 	#add_btn{
 		text-align: center;
 	    background: #fff;
-	    border-top: 1px solid #ccc;
 	    padding: .5em;
 	    line-height: 1em;
 	}
 	.form{padding: .5em;line-height: 2.5em;font-size: 16px;}
 	.row{
-		border-bottom: 1px solid #ccc;
+		border-bottom: 1px solid #efefef;
     	display: table;
     	width: 100%;
 	}
@@ -118,7 +117,7 @@
 	    padding-left: 0;
 	    text-align: left;
 	}
-	#province{width: auto;}
+	#province{width: 1em;}
 	#car_picker{height: 40px;text-align: left;width:auto;}
 	.car .mui-btn-primary{
 		background: #50B7DF;
@@ -184,6 +183,7 @@
 						</div>
 					</div>
 				</form>
+				<div style="color: #ccc;" id='serial'></div>
 				<button id="save" type="button" class="mui-btn mui-btn-block w">保存</button>
 			</div>
 		</div>
@@ -200,7 +200,6 @@
 		obj.addEvent("touchstart",car.touchS);
 		obj.addEvent("touchmove",car.touchM);
 		obj.addEvent("touchend",car.touchE);//监听触摸事件以分辨手势
-		obj.querySelector(".car_details").addEvent("click",edit);
 		
 		return obj;//最后记得要返回组件
 	}
@@ -217,27 +216,30 @@
 		var b0=document.createElement("div");//创建删除按钮
 		b0.className="option";
 		b0.innerText="删除";
-		if(data.device_id){//如果已经绑定设备，则创建解除绑定和修改终端按钮
+		if(data.device_id){//如果已经绑定设备，则创建解除绑定按钮
 			var b1=b0.cloneNode(true);
 			b1.innerText="解除绑定";
-			var b2=b0.cloneNode(true);
-			b2.innerText="修改终端";
 			b1.addEvent("click",car.relieve);		
-			b2.addEvent("click",car.update);
 			active.appendChild(b1);
-			active.appendChild(b2);
-			active.style.width="12.5em";
+			active.style.width="8.5em";
 		}else{
-			var b=document.createElement("button");//创建删除按钮
+			var b=document.createElement("button");//创建绑定终端
 			b.type="button";
 			b.className="mui-btn mui-btn-primary";
-			b.innerText="绑定终端";
+			var b1=b.cloneNode(true);
+			b.innerText="扫描绑定";
 			b.addEvent("click",car.update);
-			this.querySelector(".car_details").appendChild(b);
+			
+			b1.innerText="输入绑定";
+			b1.addEvent("click",car.inputUpdate);
+			b1.style.right="6.5em";
+			var det=this.querySelector(".car_details");
+			det.appendChild(b);
+			det.appendChild(b1);
 		}
 		b0.addEvent("click",car.delete);
 		active.appendChild(b0);//添加按钮
-		
+		this.querySelector(".car_details").addEvent("click",edit);
 		this.data=data;
 	}
 	
@@ -261,7 +263,10 @@
 		Wapi.vehicle.delete(function(res){
 			W.loading();
 			if (res && res.status_code) {
-				W.errorCode(res);
+				if(res.status_code==36873){
+					W.alert("该车辆由商户添加，无法删除");
+				}else
+					W.errorCode(res);
 				return;
 			}
 			W.toast("删除成功");
@@ -281,7 +286,7 @@
 		});
 	}
 	car.update=function(){
-		//点击修改终端
+		//点击绑定终端
 		if(this.tagName){//判断是否是元素
 			var thisCar=W.parents(this,2);
 			thisCar.hideOption();
@@ -300,6 +305,27 @@
 			car.update.addEvent=true;
 		}
 	}
+	car.inputUpdate=function(){
+		//输入序列号绑定设备
+		var thisCar=W.parents(this,2);
+		thisCar.hideOption();
+		W.focus(thisCar);//设置为伪焦点,扫描返回后找到伪焦点元素处理
+		event.stopPropagation(); //阻止冒泡
+		event.preventDefault();
+		var opt={
+			"title":"绑定设备",
+			"content":"请输入设备序列号（通常印在设备底部以及设备说明书上）",
+			"y":___.ok,
+			"n":___.cancel,
+			"callback":function(res){
+				if(res){
+					receive(res);
+				}
+			}
+		}
+		W.prompt(opt);
+	}
+	
 	car.relieve=function(){
 		//点击解除绑定
 		var thisCar=W.parents(this,2);
@@ -383,13 +409,19 @@
 			W.loading();
 			return;
 		}
+		if(res.status!=3){
+			W.toast("该设备未激活，不能进行绑定。");
+			W.loading();
+			return;
+		}
 		var target=W.getFocus();
 		var carData=target.data;
 		var device_id=carData.device_id=res.device_id;
 		var data={
 			_obj_id:carData.obj_id,
 			access_token:_user.access_token,
-			device_id:device_id
+			device_id:device_id,
+			seller_id:res.seller_id
 		}
 		Wapi.vehicle.update(function(res){//修改车辆绑定信息
 			if (res && res.status_code) {
@@ -418,6 +450,23 @@
 				W.toast("绑定新设备成功");
 			},data);
 		},data);
+		
+		//修改用户的seller_id
+		if(!_user.seller_id||_user.seller_id==0){
+			_user.seller_id=res.seller_id;
+			var uData={
+				_cust_id:_user.cust_id,
+				access_token:_user.access_token,
+				seller_id:res.seller_id
+			}
+			Wapi.user.update(function(res){
+				if (res && res.status_code) {
+					W.errorCode(res);
+					W.alert("修改用户资料，请重试绑定");
+					return;
+				}
+			},uData);
+		}
 	}
 	</script>
 	
@@ -431,7 +480,8 @@
 			mileage:W("[name='mileage']"),
 			frame:W("[name='frame_no']"),
 			engine:W("[name='engine_no']"),
-			save:W("#save")
+			save:W("#save"),
+			serial:W("#serial")
 		};
 		
 		window.addEventListener("W.loginSuccess",function(){
@@ -473,7 +523,9 @@
 				cust_id:_user.cust_id,
 				access_token:_user.access_token
 			}
-
+			var op={
+				fields:"nick_name,cust_name,obj_id,cust_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,engine_no,mileage"
+			}
 			//调用接口，获取用户车辆,并绘制到页面上
 			Wapi.user.getVehicleList(function(res){
 				if (res && res.status_code) {
@@ -492,7 +544,7 @@
 					list.appendChild(new car(cars[i]));
 				}
 				dom.list.appendChild(list);
-			},data);
+			},data,op);
 		}
 	</script>
 	
@@ -539,6 +591,17 @@
 			dom.series.value=car_json;
 			dom.series.innerText=data.car_series+" "+data.car_type;
 			
+			if(data.device_id&&!data.serial){
+				Wapi.device.getOne(function(res){
+					dom.serial.innerHTML="序列号："+res.serial;
+					data.serial=res.serial;
+				},{'device_id':data.device_id,'access_token':_user.access_token}
+				,{'fields':'serial'});
+			}else if(data.serial){
+				dom.serial.innerHTML="序列号:"+data.serial;
+			}
+			
+			
 			dom.add.querySelector(".mui-title").innerText="修改车辆";
 			dom.save.intent="edit";
 			dom.save.data=data;
@@ -547,7 +610,6 @@
 		
 		//保存车辆信息
 		function saveCar(){
-			W.loading(true);
 			var data={
 				cust_id:_user.cust_id,
 				cust_name:_user.cust_name,
@@ -574,8 +636,12 @@
 				W.toast("车辆昵称为必填项");
 				return;
 			}
+			var numTest=/\D/;
 			if(!data.mileage){
 				W.toast("里程为必填项");
+				return;
+			}else if(numTest.test(data.mileage)){
+				W.toast("里程必须为数字");
 				return;
 			}
 			if(!data.obj_name){
@@ -584,7 +650,7 @@
 			}else{
 				data.obj_name=W("#province").innerText+data.obj_name;
 			}
-			
+			W.loading(true);
 			if(this.intent=="edit"){//如果意图为
 				var carData=this.data;
 				data._obj_id=carData.obj_id;

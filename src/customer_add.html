@@ -12,10 +12,10 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 
-		<title>新增客户</title>
+		<title>WiCARE商户版</title>
 
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<script src="ui/ui.js"></script>
 		<script src="js/validate.js"></script>
 		<script>
@@ -185,6 +185,9 @@
 		var updateObjId = "";
 		var toPage = "car_manage.html";
 		window.addEventListener("DOMContentLoaded", function() {
+			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[1]=="0")){
+				location="home.html";
+			}
 			var mSession = _g;
 			if (mSession.intent != "edit") {
 				return;
@@ -336,7 +339,7 @@
 					}
 				}
 			}
-			var seller_id = W.getSetting("user").cust_id;
+			var seller_id = _user.seller_id;
 			var cust_name = W("#cust_name").value; //用户名称*
 			var mobile = W("#mobile").value; //手机*
 			var short_province = W("#short_province").innerText; //粤，湘
@@ -400,7 +403,9 @@
 					history.pushState(null, "home.html", "home.html");
 					location = toPage;
 				}
-			} else {
+			}else if(res.status_code == 8){
+				W.alert("该车辆您已经添加过了");
+			}else{
 				W.errorCode(res);
 			}
 		}

@@ -1,0 +1,481 @@
+<!--
+	作者：小吴
+	时间：2015-11-10
+	描述：车辆管理页面,目前用于展示框架的使用，会尽量详细的写各种注释
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+			
+		<title>WiCARE商户版</title>
+
+		<script src="../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+
+		<script>link("W.css")</script>
+		<script src="../wslib/api/newWapi.js" defer="defer"></script>
+	</head>
+	<style>
+		#acc_list{background: #fff;overflow: hidden;}
+		.acc{
+		    white-space: nowrap;
+		    border-bottom: 1px solid #efefef;
+		    transform:translate3d(0,0,0);
+		    -webkit-transform:translate3d(0,0,0);
+		    transition: transform .5s;
+		    -webkit-transition: -webkit-transform .5s;
+		}
+		.acc.show_option{
+			transform:translate3d(-12.5em,0,0);
+			-webkit-transform:translate3d(-12.5em,0,0);
+		}
+		.acc>div{
+			display: inline-block;
+			padding: .5em;
+			width: 100%;
+			position: relative;
+		}
+		.logo{
+			display: inline-block;
+			width: 60px;
+		}
+		.logo>img{
+			width: 50px;
+			vertical-align: middle;
+		}
+		.details{
+			display: inline-block;
+			vertical-align: middle;
+			font-size: 16px;
+		}
+		.privilege{font-size: .9em;}
+		.acc>.operation{
+		    display: inline-table;
+		    width: 4em;
+		    padding: 0;
+		    height: 67px;
+		    vertical-align: middle;
+		    text-align: center;
+		}
+		.option{
+			display: table-cell;
+			vertical-align: middle;
+		    width: 4em;
+		    padding: 0 1em;
+		    border-right: 1px solid;
+		    background: #4DB8EF;
+		    color: #fff;
+		    white-space: normal;
+		}
+		.option:last-child{
+			background: #F56D77;
+		    border-right: none;
+		}
+		#add_car{background: #efefef;position: fixed;padding-top:44px}
+		#add_btn{
+			text-align: center;
+		    background: #fff;
+		    padding: .5em;
+		    line-height: 1em;
+		    font-size: .5em;
+    		color: #ccc;
+		}
+		#main{display: table;width: 100%; text-align: center;background: #fff;}
+		.card{
+			display: table-cell;
+			width: 33.33333%;
+			padding: 2em 0;
+			font-size: 13px;
+			color: #4D4D4D;
+			border-bottom: 1px solid #eee;
+			border-right: 1px solid #eee;
+			position: relative;
+		}
+		.card:active{background: #f9f9f9;}
+		.card-icon{display: block;font-size: 2.5em;}
+		.card-row{display: table-row;}
+		.child_view{position: fixed;}
+		.mui-icon.mui-pull-right {
+		    font-size: 15px;
+		    line-height: 24px;
+		    font-family: "微软雅黑";
+		    color: #79C6E4;
+		}
+		.icon_star{  
+		    position: absolute;
+		   	color: #5cb85c;
+		    top: 10px;
+		    right: 0;
+		    font-size: 50px;
+		}
+		#cust_name{margin: 0;margin-top: 10px;}
+		#submit{width: 90%;margin: 1em auto;}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left" href="home.html"></a>
+			<h1 class="mui-title">帐号管理</h1>
+		</header>
+		<div class="mui-content">
+			<div id="acc_list">
+				<div class="null_tip">
+					<h1>NULL</h1>
+					<p>您目前还没有子帐号。</p>
+				</div>
+			</div>
+			
+			<!--<div id="add_btn">
+				<img src="baba/img/icon_add.png" style="width: 2.5em;">
+				<div>添加子帐号</div>
+			</div>-->
+		</div>
+		<div class="child_view hide" style="padding-top: 44px;overflow: auto;" id="privilege">
+			<div class="mui-bar mui-bar-nav">
+				<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+				<h1 class="mui-title">请分配权限</h1>
+			</div>
+			<div style="text-align: center; padding-top: .5em;border-bottom: 1px solid #eee;">
+				<div class="logo" style="display: block;margin: auto;">
+					<img id="logo" src="http://img.wisegps.cn/logo/m_8_100.png">
+				</div>
+				<p id="cust_name">用户名</p>
+				<p id="mobile">用户手机号</p>
+			</div>
+			<div id="main">
+				<div class="card-row">
+					<div class="card">
+						<span class="card-icon w_icon icon_stores" style="color: #FF5D5B;"></span>
+						<span class="card-name">客户到店</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_establish" style="color: #FFCC4F;"></span>
+						<span class="card-name">新增客户</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_abnormal" style="color: #42D7C1;"></span>
+						<span class="card-name">异常车况</span>
+					</div>
+				</div>
+				<div class="card-row">
+					<div class="card">
+						<span class="card-icon w_icon icon_vehicle" style="color: #66CAEE;"></span>
+						<span class="card-name">车辆管理</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_equipment" style="color: #FF6A68;"></span>
+						<span class="card-name">设备管理</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_remind" style="color: #FFD87D;"></span>
+						<span class="card-name">提醒设置</span>
+					</div>
+				</div>
+				<div class="card-row">
+					<div class="card">
+						<span class="card-icon w_icon icon_consultation" style="color: #68DECD;"></span>
+						<span class="card-name">客户咨询</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_store_management" style="color: #FFCC4F;"></span>
+						<span class="card-name">店面管理</span>
+					</div>
+					<div class="card">
+						<span class="card-icon w_icon icon_set" style="color: #42D7C1;"></span>
+						<span class="card-name">设置中心</span>
+					</div>
+				</div>
+				<div class="card-row">
+					<div class="card" data-name="child_account.html" data-open="false">
+						<span class="card-icon w_icon icon_account" style="color: #66CAEE;"></span>
+						<span class="card-name">子帐号管理</span>
+					</div>
+				</div>
+			</div>
+			<div class="mui-input-row mui-radio" style="margin-top: 1em;">
+				<label>是否能接收推送：</label>
+				<input type="radio" name="receive_push" value="1" id="receive_push">
+			</div>
+			<button type="button" class="mui-btn mui-btn-block w" id="submit">保存</button>
+		</div>
+	</body>
+	<script>
+	"use strict";
+	var dom={
+		add:W(".icon_add"),
+		list:W("#acc_list"),
+		cust_name:W("#cust_name"),
+		mobile:W("#mobile"),
+		main:W("#main"),
+		pri:W("#privilege"),
+		logo:W("#logo"),
+		submit:W("#submit"),
+		push:W("#receive_push")
+	}
+	//_g.newAccount='{"mobile":"15611111111","valid_code":"1234","password":"123456","valid_type":1,"cust_type":3,"cust_name":"员工小吴","seller_id":1279,"logo":"http://img4.duitang.com/uploads/item/201601/21/20160121102221_LjFyB.thumb.700_0.png"}';
+	var newAccount;
+	var cards;
+	
+	window.addEventListener("load",function(){
+		if(_user.cust_type==3&&(!_user.privilege||_user.privilege[9]=="0")){
+			location="home.html";
+		}
+		var params={
+			seller_id:_user.seller_id,
+			cust_type:3
+		}
+		Wapi.user.list(makeList,params);
+		if(_g.newAccount){
+			newAccount=JSON.parse(_g.newAccount);
+			var opt={
+				"y":"确认",
+				"n":"不认识",
+				title:"【"+newAccount.cust_name+"】",
+				content:"手机号："+newAccount.mobile+"，申请成为您的员工；如果手机号不属实，请点击“不认识”。",
+				"callback":function(o){
+					if(!o)
+						return;
+					//去分配权限	
+					edit(newAccount);
+				}
+			}
+			W.confirm(opt);
+		}
+		window.addEventListener("popstate",hidePri);
+		dom.submit.addEvent("click",submitData);
+		
+		cards=dom.main.querySelectorAll(".card");
+		for(var i=0;i<cards.length;i++){
+			cards[i].addEvent("click",newOrDel);
+		}
+	});
+	
+	function makeList(res){
+		if(res&&res.status_code){
+			W.errorCode(res);
+			return;
+		}
+		var arr=res.data;
+		if(!arr.length){
+			return;
+		}
+		W(".null_tip").style.display="none";
+		var l=document.createDocumentFragment();
+		for(var i=0;i<arr.length;i++){
+			l.appendChild(new acc(arr[i]));
+		}
+		dom.list.appendChild(l);
+	}
+		
+	function acc(data){
+		var obj=new WiStormUI("div");//创建一个div组件
+		obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+		
+		obj.className="acc";//设置div的class属性
+		obj.id="id_"+data.cust_id;
+		obj.setData(data);//设置obj的内容,setData()在下面cv.prototype中定义
+		obj.addEvent("touchstart",acc.touchS);
+		obj.addEvent("touchmove",acc.touchM);
+		obj.addEvent("touchend",acc.touchE);//监听触摸事件以分辨手势
+		
+		return obj;//最后记得要返回组件
+	}
+	acc.prototype.setData=function(data){
+		data.privilege=data.privilege||"无权限";
+		this.innerHTML='<div class="acc_details"><div class="logo"><img src="'+data.logo+'"></div><div class="details"><div class="type">'+data.cust_name+'，'+data.mobile+'</div><div class="privilege">'+data.privilege+'</div></div></div><div class="operation"><div class="option">删除</div></div>';
+		var b0=this.querySelector(".option");
+		b0.addEvent("click",acc.delete);
+		this.querySelector(".acc_details").addEvent("click",acc.edit);
+		this.data=data;
+	}
+	
+	acc.prototype.showOption=function(){//显示操作按钮
+		var w=this.querySelector(".operation").offsetWidth;
+		this.style.transform='translate3d(-'+w+'px,0,0)';
+		this.style.webkitTransform='translate3d(-'+w+'px,0,0)';
+	}
+	acc.prototype.hideOption=function(){//隐藏操作按钮
+		this.style.transform='';
+		this.style.webkitTransform='';
+	}
+	
+	acc.prototype.delete=function(){//删除子帐号
+		var that=this;
+		var d=this.data;
+		var data={
+			access_token: _user.access_token,
+			_cust_id:d.cust_id,
+			'cust_type':0,
+			seller_id:0,
+			privilege:'000000000000',
+    		receive_push:'0'
+		}
+		Wapi.user.update(function(res){
+			if(res.status_code){
+				W.errorCode(res);
+				return;
+			}
+			that.parentElement.removeChild(that);
+		},data);
+	}
+	
+	acc.delete=function(){
+		var that=W.parents(this,2);
+		W.confirm("确认删除该子帐号吗？",function(b){
+			if(b)
+				that.delete();
+		});
+	}
+
+	acc.touchS=function(){
+		//监听触摸开始事件
+		this.touchStart=event.touches[0].pageX;
+		this.touchY=event.touches[0].pageY;
+	}
+	acc.touchE=function(){
+		var e=event.changedTouches[0].pageX-this.touchStart;
+		if(e<-30){
+			this.showOption();
+		}else if(e>30){
+			this.hideOption();
+		}
+	}
+	acc.touchM=function(){
+		var y=Math.abs(event.changedTouches[0].pageY-this.touchY);
+		var x=Math.abs(event.changedTouches[0].pageX-this.touchStart);
+		if(x>y)
+			event.preventDefault();
+	}//触摸移动事件应付微信神经病的
+	
+	//编辑权限
+	acc.edit=function(){
+		var account=this.parentElement.data;
+		edit(account);
+	}
+	
+	//添加星号
+	function addStar(dom){
+		var span=document.createElement("span");
+		span.className="icon_star w_icon";
+
+		dom.appendChild(span);
+		dom._star=span;
+	}
+	
+	//修改权限
+	function edit(data){
+		dom.logo.src=data.logo||"http://img.wisegps.cn/logo/m_8_100.png";
+		dom.cust_name.innerHTML=data.cust_name;
+		dom.mobile.innerHTML=data.mobile;
+		if(data.privilege){//已经设置了权限
+			for(var i=0;i<cards.length;i++){
+				if(data.privilege[i]==1)
+					addStar(cards[i]);
+			}
+		}
+		history.pushState(null,location,location);
+		dom.pri.data=data;
+		dom.pri.classList.remove("hide");
+		dom.pri.classList.remove("toRight");
+		dom.pri.classList.add("fromRight");
+	}
+	//隐藏权限页
+	function hidePri(){
+		dom.pri.classList.remove("fromRight");
+		dom.pri.classList.add("toRight");
+	}
+	
+	//新增或者删除星号
+	function newOrDel(){
+		if(this._star){
+			this.removeChild(this._star);
+			delete this._star;
+		}else
+			addStar(this);
+	}
+	
+	//保存权限设置
+	function submitData(){
+		var accData=dom.pri.data;
+		//收集权限
+		var p="";
+		for(var i=0;i<cards.length;i++){
+			if(cards[i]._star)
+				p+="1";
+			else 
+				p+="0";
+		}
+		if(dom.push.checked){
+			accData.receive_push=1;
+		}else{
+			accData.receive_push=0;
+		}
+		
+		if(accData.cust_id){//子帐号已经创建的情况
+			var params={
+				_cust_id:accData.cust_id,
+				privilege:p
+			}
+			Wapi.user.update(function(res){
+				if (res.status_code) {
+					W.alert("保存错误，请重试");
+					W.errorCode(res);
+					return;
+				}
+				var acco=W("#id_"+accData.cust_id);
+				if(acco){
+					accData.privilege=p;
+					acco.setData(accData);
+				}
+			},params);
+		}else{//子帐号还未创建
+			//先注册
+			W.loading("正在创建子帐号");
+			var reg_data={
+				mobile:accData.mobile,
+				valid_code:accData.valid_code,
+				password:accData.password,
+				valid_type:1
+			}
+			Wapi.user.register(function(res){
+				if(res.status_code){
+					W.loading();
+					W.errorCode(res);
+					return;
+				}else{
+					//注册成功更新其他字段
+					var data={
+						access_token: _user.access_token,
+						_cust_id:res.cust_id,
+						cust_name:accData.cust_name,
+						'cust_type':3,
+						seller_id:_user.seller_id,
+						privilege:p,
+						receive_push:accData.receive_push,
+						saler_id:_user.saler_id
+					}
+					if(accData.login_id){
+						data.login_id=accData.login_id;
+						data.logo=_accData.headimgurl;
+					}
+					Wapi.user.update(registerSuccess,data);//更新用户名等资料
+				}
+			},reg_data);
+		}
+	}
+	function registerSuccess(res){//更新完用户名等资料
+		W.loading();
+		if(res.status_code){
+			W.errorCode(res);
+			return;
+		}else{
+			W.toast("保存成功");
+		}
+		dom.list.appendChild(new acc(newAccount));
+	}
+	</script>
+</html>

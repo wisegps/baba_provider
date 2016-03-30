@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<title>WiCARE-游戏</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script>link("W.css")</script>
+		<script src="../../wslib/api/newWapi.js" defer="defer"></script>
+		<script src="../../wslib/toolkit/WxSdk.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+	</head>
+	<style>
+		#game_view{
+			font-size: 0;
+			margin: auto;
+		}
+		#game_view>span{
+			display: inline-block;
+		    position: absolute;
+		    color: #fff;
+		    z-index: 1;
+		    font-size: 24px;
+		    padding: .5em;
+		    text-shadow: 2px 3px 10px rgba(0,0,0,0.5);
+		}
+		.card{
+			position: absolute;
+			top: 0;
+			left: 0;
+  			background-repeat: no-repeat;
+		}
+		.can_move{
+			transition: transform .5s;
+			-moz-transition: -moz-transform .5s;
+			-webkit-transition: -webkit-transform .5s;
+			transform: translate3d(0,0,0);
+			-webkit-transform: translate3d(0,0,0);
+			-moz-transform: translate3d(0,0,0);
+		}
+		.control{
+			position: fixed;
+		    bottom: 0;
+		    width: 100%;
+		    padding: .5em;
+		    text-align: center;
+		}
+		button{
+			color: #fff;
+			margin: 5px;
+		}
+		.mui-btn.mui-btn-block.w{
+			width: 90%;
+			margin: auto;
+			margin-top: 5px;
+			-webkit-transition: none;
+    		transition: none;
+		}
+		.ad{
+			max-height: 44px;
+			height: 44px;
+		}
+		.ad img{
+			height: 44px;
+		    text-align: center;
+		    max-width: 100%;
+		}
+	</style>
+	<script>
+		var open_id=_g.openid;
+		if(!open_id)
+			W.getOpenId();
+		_g.id=_g.id||0;
+	</script>
+	<body>
+		<div class="mui-content">
+			<div class="ad">
+				<a href="../buy.html?intent=logout">
+					<img src="../../img/ad.jpg" />
+				</a>
+			</div>
+			<button type="button" id='makeMyGame' class="mui-btn mui-btn-block w">制作我自己的游戏</button>
+			<div id="game"></div>
+		</div>
+		<div class="control">
+			<button type="button" data-val="3" style="background: #5cb85c;">幼儿水平</button>
+			<button type="button" data-val="4" style="background: #5bc0de;">来点挑战</button>
+			<button type="button" data-val="5" style="background: #f0ad4e;">摧残意志</button><br>
+			<button type="button" data-val="6" style="background: #d9534f;">丧心病狂</button>
+			<button type="button" data-val="8" style="background: #000;">放弃治疗</button>
+			<button type="button" data-val="10" style="background: #fff;color: #000;">妈的智障</button>
+		</div>
+		<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<label for="inputf">
+						<div>
+							选择图片
+							<input type="file" capture="camera" id="inputf" name="inputf" style="display: none;"accept="image/*"/>
+						</div>
+					</label>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<a id="noActive">取消</a>
+				</li>
+			</ul>
+		</div>
+	</body>
+	<script>
+		var dom={
+			body:W('body'),
+			gv:W("#game_view"),
+			main:W(".mui-content"),
+			game:W("#game"),
+			make:W("#makeMyGame")
+		}
+		//获取图片的长宽方法
+		var imgReady=(function(){var list=[],intervalId=null,tick=function(){var i=0;for(;i<list.length;i++){list[i].end?list.splice(i--,1):list[i]()}!list.length&&stop()},stop=function(){clearInterval(intervalId);intervalId=null};return function(url,ready,load,error){var onready,width,height,newWidth,newHeight,img=new Image();img.src=url;if(img.complete){ready.call(img);load&&load.call(img);return}width=img.width;height=img.height;img.onerror=function(){error&&error.call(img);onready.end=true;img=img.onload=img.onerror=null};onready=function(){newWidth=img.width;newHeight=img.height;if(newWidth!==width||newHeight!==height||newWidth*newHeight>1024){ready.call(img);onready.end=true}};onready();img.onload=function(){!onready.end&&onready();load&&load.call(img);img=img.onload=img.onerror=null};if(!onready.end){list.push(onready);if(intervalId===null){intervalId=setInterval(tick,40)}}}})();
+		var vmin=0;
+		if(dom.body.width>dom.body.height)
+			vmin=dom.body.offsetHeight;
+		else
+			vmin=dom.body.offsetWidth;
+		
+		var img=_g.img||"http://pic.4j4j.cn/upload/pic/20130815/31e652fe2d.jpg",img_w,img_h;
+		var gw=90*vmin/100;//game_view的高宽,单位是px
+		var x=_g.x||3;//3x3的游戏
+		var wh;//图片格的高度和宽度
+		var l;//格子的数量
+		var r;//空格的实时位置
+		var c;//card的background-size等等各种属性
+		var win={
+			s:0,//总计多少步
+			win:true,//是否胜利
+			l:[],//等级
+			upset:false//是否打乱了
+		};//记录总共使用了多少步
+		var upset_id;//定时id
+		
+		window.addEventListener("load",function(){
+			setShare();
+			var b=W(".control button",true);
+			for(var i=0;i<b.length;i++){
+				b[i].addEvent('click',setX);
+				win.l[b[i].dataset.val]=(b[i].innerText);
+			}
+			win.l[2]=b[i-1].innerText;
+			W("#noActive").addEvent('click',hidePicture);
+			dom.make.addEvent('click',showPicture);
+			W("#inputf").addEvent('change',fileUpload);
+			resetImg();
+		})
+		//更换图片
+		function resetImg(){
+			c={
+				bsw:gw,
+				bsh:gw,
+				sx:0,//图片起始点的x
+				sy:0//图片起始点的y
+			}
+			imgReady(img, function () {
+			    img_w=this.width;
+			    img_h=this.height;
+			    var min;
+			    if(img_w>img_h){
+			    	c.bsw=gw*img_w/img_h;
+			    	c.sx=(c.bsw-gw)/2;
+			    }else{
+			    	c.bsh=gw*img_h/img_w;
+			    	c.sy=(c.bsh-gw)/2;
+			    }
+			    resetGame();
+			});
+		}
+		
+		function resetGame(){
+			dom.game.innerHTML='';
+			dom.gv=document.createElement('div');
+			dom.gv.id='game_view';
+			dom.gv.className='center';
+			dom.gv.style.width=gw+'px';
+			dom.gv.style.height=gw+'px';
+			dom.s=document.createElement('span');
+			dom.gv.appendChild(dom.s);
+			dom.game.appendChild(dom.gv);
+			wh=gw/x;
+			l=x*x;//格子的数量
+			r=getRandom(0,(l-1));//随机缺失一块
+			var tem=document.createDocumentFragment();
+			for (var i=0;i<l;i++) {
+				if(i!=r)
+					tem.appendChild(new card(i));
+			}
+			dom.gv.appendChild(tem);
+			clearTimeout(upset_id);
+			upset_id=setTimeout(upset,1000);
+			setShare();
+			W.loading();
+		}
+		
+		function setX(){
+			W.loading(true);
+			x=parseInt(this.dataset.val);
+			if(x==10)
+				x=getRandom(0,1)*8+2;
+			win.win=true;
+			setTimeout(resetGame,50);
+		}
+		
+		//打乱顺序
+		function upset(){
+			var s;
+			if(x>=6)
+				s=getRandom(x*20,x*40);
+			else
+				s=getRandom(x*8,x*15);
+			
+			var cards,j;
+			for(var i=0;i<s;i++){
+				cards=getCanMove();
+				j=getRandom(0,cards.length-1);
+				cards[j].move();
+			}
+			dom.gv.addEvent("touchstart",touchS).addEvent("touchmove",touchM).addEvent("touchend",touchE);//监听触摸事件以分辨手势
+			win.s=0;
+			dom.s.innerHTML=win.s;
+			win.win=false;
+		}
+		
+		function getCanMove(){
+			var a=new Array();
+			var tem=getCardBy(r+1);
+			if(tem)a.push(tem);
+			tem=getCardBy(r-1);
+			if(tem)a.push(tem);
+			tem=getCardBy(r+x);
+			if(tem)a.push(tem);
+			tem=getCardBy(r-x);
+			if(tem)a.push(tem);
+			return a;
+		}
+		
+		function touchS(){
+			//监听触摸开始事件
+			this.touchX=event.touches[0].pageX;
+			this.touchY=event.touches[0].pageY;
+		}
+		function touchE(){
+			if(win.win)return;
+			var X=event.changedTouches[0].pageX-this.touchX;
+			var Y=event.changedTouches[0].pageY-this.touchY;
+			var _x=Math.abs(X);
+			var _y=Math.abs(Y);
+			if(_x<=30&&_y<=30)return;
+			var t;
+			if(_x>_y){
+				t=getCardBy(r+(X/_x)*-1);
+				if(t)t.move();
+			}else{
+				t=getCardBy(r+(Y/_y)*x*-1);
+				if(t)t.move();
+			}
+		}
+		function touchM(){
+			event.preventDefault();
+		}//触摸移动事件应付微信神经病的
+		
+		//根据位置获取在该位置上的元素,如果为空，则返回false
+		function getCardBy(i){
+			var cards=dom.gv.children;
+			for(var j=0;j<cards.length;j++){
+				if(cards[j].i==i)
+					return cards[j];
+			}
+			return false;
+		}
+		
+		//检查是不是完成了游戏
+		function checkWin(){
+			if(win.win)return;
+			var cards=dom.gv.children;
+			for(var j=0;j<cards.length;j++){
+				if(cards[j]._i!=cards[j].i)
+					return;
+			}
+			win.win=true;
+			setShare();
+			W.alert('赢了！！！可以点击下面的等级按钮挑战不同级别哦！也可以制作自己的游戏分享出去，摧残他们的意志吧少年！');
+		}
+		
+		
+		//方块组件
+		function card(i){
+			var obj=new WiStormUI("div");//创建一个div组件
+			obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+			
+			obj.className="card can_move";//设置div的class属性
+			obj.id="id_"+i;
+			obj.setData(i);//设置obj的内容,setData()在下面cv.prototype中定义
+			return obj;//最后记得要返回组件
+		}
+		card.prototype.setData=function(i){
+			var r=parseInt(i/x),co=i%x;//行，列
+			this.style.backgroundImage='url("'+img+'")';
+			this.style.backgroundPosition='-'+(wh*co+c.sx)+'px -'+(wh*r+c.sy)+'px';
+			this.style.backgroundSize=c.bsw+'px '+c.bsh+'px';
+			this.style.width=this.style.height=wh+'px';
+			this.moveTo(co,r);
+			this.addEvent('click',card.move);
+			this.i=this._i=i;//实时序号，正确序号
+		}
+		//移动到某个位置
+		card.prototype.moveTo=function(x,y){
+			var px=wh*x,py=wh*y;
+			this.style.transform=this.style.webkitTransform='translate3d('+px+'px,'+py+'px,0)';
+			this.x=x;
+			this.y=y;
+		}
+		//获取该格的位置
+		card.prototype.getXy=function(){
+			var j={
+				x:this.x,
+				y:this.y
+			}
+			return j;
+		}
+		//移动到缺失的一格中去
+		card.prototype.move=function(){
+			//不能移动的情况
+			var iy=this.y,//原来的行
+				ix=this.x,//原来的列
+				ry=parseInt(r/x),//空格的行
+				rx=r%x,//空格的列
+				xc=Math.abs(rx-ix),//列差
+				yc=Math.abs(ry-iy);//行差
+			if((ix==rx&&yc==1)||(iy==ry&&xc==1)){
+				this.moveTo(rx,ry);
+				var i=this.i;
+				this.i=r;
+				r=i;
+				win.s++;
+				dom.s.innerHTML=win.s;
+				setTimeout(checkWin,500);
+				return i
+			}else
+				return false;
+		}
+		card.move=function(){
+			this.move();
+		}
+		
+		
+		
+		/*****上传图片*****/
+		//展示文件选择框
+		function showPicture(){
+			W("#picture").classList.add('mui-active');		
+			W("#picture").style.display='block';
+			var tem=W(".mui-backdrop");
+			if(tem)
+				tem.style.display="block";
+			else{
+				var odiv=document.createElement('div');
+				odiv.className="mui-backdrop mui-backdrop-action mui-active";
+				odiv.addEvent("click",hidePicture);
+				W("body").appendChild(odiv);
+			}
+		}
+		//隐藏文件选择框
+		function hidePicture(){
+			W("#picture").classList.remove('mui-active');
+			W(".mui-backdrop").style.display="none";
+		}
+		
+		function fileUpload(){
+			var h=this;
+			if(!h.files.length){
+				W.toast("未选择文件");
+				return;
+			}
+			hidePicture();
+			var type=h.value.slice(-3).toLocaleLowerCase();
+			var file =h.files[0];
+		    if((type!="jpg"&&type!="png"&&type!="jpeg")){
+		        h.value="";
+		        h.files=null;
+		        W.alert("抱歉，仅支持的jpg或png或者jpeg图片");
+		        return;
+		    }
+			fileUpload.code=1;//利用方法的全局调用 直接给方法添加属性 可以避免命名污染  
+			W.loading("正在上传文件，请稍等");
+			Wapi.file.upload(function (res){
+				W.loading();
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				fileUpload.code=2;
+				W.alert('右上角点击分享到朋友圈或者发送给好友，好友也可以来拼你上传的图片哦!');
+				img=res.image_file_url;
+				resetImg();
+			},file,function(s){
+				W.loading("正在上传文件，请稍等……"+parseInt(s*100)+'%');
+			});
+		}
+		
+		/*****设置分享******/
+		function setShare(){
+			var name=_user?_user.cust_name:"";
+			var share_url=WiStorm_root+'src/game/puzzle.html?intent=logout&needOpenId=true&id='+open_id+'&name='+name+'&x='+x+'&img='+encodeURIComponent(img);
+			history.pushState(null,"",share_url);
+			if(!W.fillFriend.fill){
+				W.fillFriend(_g.id,open_id,_g.name,name);
+				W.fillFriend.fill=true;
+			}
+			if(!W.native){
+				window.addEventListener("nativeSdkReady",setShare);
+				return;
+			}
+			W.debug(open_id);
+			var op={
+			    title: '←_←曹植7步成诗，我6步成图，你要不要来挑战一下我的照片？', // 分享标题
+			    desc: 'WiCARE空气净化器', // 分享描述
+			    link: share_url, // 分享链接
+			    imgUrl:img, // 分享图标
+			    success: function(){},
+			    cancel: function(){}
+			}
+			if(win.win){
+				op.title='我花了'+win.s+'步完成【'+win.l[x]+'】级别，要不要试试?';
+			}
+			
+			wx.onMenuShareTimeline(op);
+			wx.onMenuShareAppMessage(op);
+		}
+		
+		//在min与max之间取一个随机数，返回值中有可能会出现min和max
+		function getRandom(min,max){
+			var a=Math.random();
+			return Math.floor(a*(max-min+1)+min);
+		}
+	</script>
+</html>

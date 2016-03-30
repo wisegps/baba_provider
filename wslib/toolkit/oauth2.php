@@ -9,6 +9,7 @@ if(isset($_GET['code'])){
     //echo $_GET['code'];
     $code = $_GET['code'];
     $userinfo = getUserInfo($code);
+	$userinfo["sso_login"]="sso_login";
     //echo "nickname:".$userinfo["nickname"];
 }else{
     echo 'No code';
@@ -17,7 +18,7 @@ if(isset($_GET['code'])){
 
 function getUserInfo($code){
     $appid = "wxa5c196f7ec4b5df9";
-    $appsecret = "e89542d7376fc479aac35706305fc23f";
+    $appsecret = "公众号秘钥";
     $access_token = "";
 
     // 根据code获取access_token
@@ -28,12 +29,35 @@ function getUserInfo($code){
     $access_token = $access_token_array['access_token'];
 //    echo "access_token:$access_token";
     $openid = $access_token_array['openid'];
-
+	
+	if($_GET['state']=='snsapiBase'){
+		$arr=array("openid"=>$access_token_array['openid']);
+		return $arr;
+	}
+		
     // 根据access token获取用户信息
     $userinfo_url = "https://api.weixin.qq.com/sns/userinfo?access_token=$access_token&openid=$openid";
     $userinfo_json = https_request($userinfo_url);
     $userinfo_array = json_decode($userinfo_json, true);
+	$login_info=sso_login($userinfo_array["openid"]);
+	
+	if($login_info){
+		$userinfo_array=array_merge($userinfo_array,$login_info);
+	}
+	$userinfo_array["open_id"]=$userinfo_array["openid"];
     return $userinfo_array;
+}
+
+function sso_login($login_id){
+	$d=date('Y-m-d H:i:s',strtotime('+8 hour'));
+	$D=date('Y-m-d%20H:i:s',strtotime('+8 hour'));
+	$str='21fb644e20c93b72773bf0f8d0905052app_key9410bc1cbfa8f44ee5f8a331ba8dd3fcformatjsonlogin_id'.$login_id.'methodwicare.user.sso_loginsign_methodmd5timestamp'.$D.'v1.0weixin_appsecret公众号秘钥21fb644e20c93b72773bf0f8d0905052';
+	$sing=strtoupper(md5($str));
+	
+	$url = "http://o.bibibaba.cn/router/rest?app_key=9410bc1cbfa8f44ee5f8a331ba8dd3fc&v=1.0&format=json&sign_method=md5&method=wicare.user.sso_login&weixin_appsecret=公众号秘钥&timestamp=".$D."&login_id=".$login_id."&sign=".$sing;
+    $info_json = https_request($url);
+    $info_array = json_decode($info_json, true);
+	return $info_array;
 }
 
 function https_request($url){
@@ -52,11 +76,15 @@ function https_request($url){
 
 setcookie("_wx_user_", json_encode($userinfo), time()+86400,"/",$_SERVER['HTTP_HOST']);
 $cookie_url=$_COOKIE["__login_redirect_uri__"];
-$u_data='open_id='.$userinfo["openid"]."&headimgurl=".$userinfo['headimgurl'].'&nickname='.$userinfo["nickname"]."&sex=".$userinfo["sex"].'&province='.$userinfo["province"].'&city='.$userinfo["city"].'&privilege='.$userinfo["privilege"];
+$u_data="";
+foreach($userinfo as $x=>$x_value) {
+  $u_data=$u_data."&".$x."=".$x_value;
+}
 if(strpbrk($cookie_url,"?"))
-	$url=$cookie_url."&".$u_data;
-else 
-	$url=$cookie_url."?".$u_data;
+	$url=$cookie_url.$u_data;
+else{
+	$url=$cookie_url."?".substr($u_data,1);
+}
 header("Location: ".$url);
 exit;
 ?>

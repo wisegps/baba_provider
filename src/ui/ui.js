@@ -35,7 +35,7 @@ ui_checkInBtn.finish=function(){
 	
 	var car=box.car_data;
 	var params={
-		seller_id:_user.cust_id,
+		seller_id:_user.seller_id,
 		cust_id: car.cust_id,
 		cust_name: car.cust_name,
 		obj_id: car.obj_id,

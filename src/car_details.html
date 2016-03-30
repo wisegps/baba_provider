@@ -12,9 +12,9 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 			
-		<title>叭叭商户版</title>
+		<title>WiCARE商户版</title>
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<script>link("W.css")</script>
 		<script>link("ui.css")</script>
 		
@@ -113,7 +113,7 @@
 		.nav2 ul{margin:0;padding:0;font-size:12px;display: table;width: 100%;}
 		.nav2 ul li{overflow:hidden;color:#999999;width:25%;display: table-cell;list-style: none;line-height:2em;}
 		.nav2 ul li>span{width:100%;display:inline-block;text-align:center;}
-		.nav2 ul li a{width:100%;display:inline-block;text-align:center;color:#7bc9e6;}
+		.nav2 ul li a{width:100%;display:inline-block;text-align:center;color:#7bc9e6;height: 2em;overflow: hidden;}
 		.nav2 .line{margin-left:15%;width:65%;border: 1px solid #CCCCCC; -webkit-transform: rotate(-45deg);-moz-transform: rotate(-45deg);}
 		.mui-icon.mui-icon-star-filled{
 			display: inline;
@@ -137,7 +137,7 @@
 		<header class="mui-bar mui-bar-nav">
 			<span class="mui-icon mui-icon-left-nav mui-pull-left W_back"></span>
 			<span class="mui-icon mui-pull-right">详情</span>
-			<h1 class="mui-title">车况历史</h1>
+			<h1 class="mui-title">车辆历史</h1>
 		</header>
 		<nav class="mui-bar mui-bar-tab top">
 			<div class="tab_item active" data-target="repair">
@@ -178,10 +178,10 @@
 			</div>
 			<div class="list" id="health">
 				<div class="chart">
-					<div id="mileage" class="charts_card"></div>
-					<div id="fuel" class="charts_card"></div>
 					<div id="dpdy" class="charts_card"></div>
 					<div id="sw" class="charts_card"></div>
+					<div id="mileage" class="charts_card"></div>
+					<div id="fuel" class="charts_card"></div>
 				</div>
 				<div class="no_chart">
 					<p>
@@ -220,9 +220,11 @@
 			e:W("#end"),
 			list:W("#repair")
 		},_startTime,_endTime,_car;
-		window.onload=function(){
+		
+		window.addEventListener("load",load);
+		function load(){
 			var p={
-				parent_cust_id:_user.cust_id,
+				seller_id:_user.seller_id,
 				obj_id:_g.obj_id,//在url中传递过来的obj_id
 				access_token:_user.access_token,
 				max_id:0
@@ -253,7 +255,7 @@
 			
 			//检测车辆是否在异常列表内
 			var p={
-				seller_id:_user.cust_id,
+				seller_id:_user.seller_id,
 				obj_id:_g.obj_id,
 				access_token:_user.access_token
 			}
@@ -375,12 +377,12 @@
 				d.arrive_count=0;
 			if(!d.evaluate_count)
 				d.evaluate_count=0;
-			dom.dCard.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_'+d.car_brand_id+'_100.png" onerror=\'javascript:this.src="../img/icon_car_moren.png"\'><span name="value">'+d.obj_name+'</span></th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+d.cust_name+'</span></td><td><span class="name">最后到店:</span><span class="value">'+last_arrive+'</span></td></tr><tr><td><span class="name">车型:</span><span class="value">'+d.car_type+'</span></td><td><span class="name">车架号:</span><span class="value">'+d.frame_no+'</span></td></tr><tr><td><span class="name">行驶里程:</span><span class="value">'+d.mileage+'公里</span></td><td><span class="name">保养后里程:</span><span class="value">'+maintain_mileage+'公里</span></td></tr><tr><td><span class="name">到店次数:</span><span class="value">'+d.arrive_count+'</span></td><td><span class="name">评价次数</span><span class="value">'+d.evaluate_count+'</span></td></tr></table>';
+			dom.dCard.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_'+d.car_brand_id+'_100.png" onerror=\'javascript:this.src="../img/icon_car_moren.png"\'><span name="value">'+d.obj_name+'</span></th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+d.cust_name+'</span></td><td><span class="name">最后到店:</span><span class="value">'+last_arrive+'</span></td></tr><tr><td><span class="name">车型:</span><span class="value">'+d.car_type+'</span></td><td><span class="name">车架号:</span><span class="value">'+d.frame_no+'</span></td></tr><tr><td><span class="name">行驶里程:</span><span class="value">'+d.mileage+'公里</span></td><td><span class="name">保养后里程:</span><span class="value">'+maintain_mileage+'公里</span></td></tr><tr><td><span class="name">到店次数:</span><span class="value">'+d.arrive_count+'</span></td><td><span class="name">评价次数:</span><span class="value">'+d.evaluate_count+'</span></td></tr></table>';
 			
 			//设备信息
 			if(d.device_id){
 				var p={
-					seller_id: _user.cust_id,
+					seller_id: _user.seller_id,
 				    access_token:_user.access_token,
 				    device_id:d.device_id
 				}
@@ -396,12 +398,13 @@
 				W.errorCode(res);
 				return;
 			}
-			if(!res.data)return;
+			if(!res.data||!res.data.length)return;
 			var d=res.data[0]||{};
 //			d.active_obd_data={
 //				dpdy:"1",
 //				sw:"80"
 //			}
+			_car.serial=d.serial;
 			if(!d.active_obd_data)return;
 			var data=d.active_obd_data;
 			var table=dom.dCard.querySelector("tbody");
@@ -430,13 +433,13 @@
 				car_brand_id: _car.car_brand_id||0, //品牌ID
 				car_series: _car.car_series||0, //车型
 				car_type: _car.car_type||0, //车款
-				seller_id: _user.cust_id, //商户ID
+				seller_id: _user.seller_id, //商户ID
 				cust_id: _car.cust_id, //客户ID
 				cust_name: _car.cust_name, //客户名称
 				device_id: _car.device_id||0, //设备ID
 				maintain_last_mileage: _car.maintain_last_mileage||"", //最后保养里程
 				mileage: _car.mileage||"", //当前里程
-				last_arrive: _car.last_arrive||"", //最后到店时间
+				last_arrive: _car.last_arrive_time||"", //最后到店时间
 				exp_reason: W("#mark_box textarea").value//异常原因			
 			}
 			Wapi.user.createException(function(res){
@@ -475,7 +478,16 @@
 			var text=["未知","保养","维修","美容","救援"];
 			var content=data.business_content||text[data.business_type];
 			data.mileage=data.mileage||0;
-			this.innerHTML='<ul><li><span style="margin-left:-10%;">'+y+'</span><div class="line"></div><span style="margin-left:10%;">'+d+'</span></li><li><span>里程</span><a href="#">'+data.mileage+'km</a></li><li><span>项目</span><a href="#">'+content+'</a></li><li><span>评价</span><span>'+s+'</span></li></ul>';
+			this.innerHTML='<ul><li><span style="margin-left:-10%;">'+y+'</span><div class="line"></div><span style="margin-left:10%;">'+d+'</span></li><li><span>里程</span><a href="#">'+data.mileage+'km</a></li><li><span>项目</span><a class="content">'+content+'</a></li><li><span>评价</span><span class="evaluate">'+s+'</span></li></ul>';
+			this.querySelector(".content").addEvent("click",rv.alertData).data=content;
+			this.querySelector(".evaluate").addEvent("click",rv.alertData).data=data.evaluate_content;
+		}
+		rv.alertData=function(){
+			var val=this.data;
+			if(val)
+				W.alert(val);
+			else
+				W.alert("无数据");
 		}
 	
 		function makeList(res){
@@ -508,7 +520,7 @@
 					autoLoad=new ui_autoLoad(document,_load);
 				
 				autoLoad.param={
-					parent_cust_id:_user.cust_id,
+					seller_id:_user.seller_id,
 					access_token:_user.access_token,
 					max_id:MAX_ID
 				}
@@ -523,14 +535,17 @@
 		}
 		function _load(){
 			var param={
-				seller_id:_user.cust_id,
+				seller_id:_user.seller_id,
 				obj_id:_g.obj_id,
 				access_token:_user.access_token,
 				arrive_time:_startTime+" 00:00:00@"+_endTime+" 23:59:59"
 			};
 			if(dom.list&&dom.list.max_id)
 				param.max_id=dom.list.max_id;
-			Wapi.vehicle.getBusinessList(makeList,param);
+			var op={
+				fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,evaluate_content,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type'
+			};
+			Wapi.vehicle.getBusinessList(makeList,param,op);
 		}
 	</script>
 		<script for = "车况历史">
@@ -577,7 +592,8 @@
 	            smooth:true,
 	            symbol:'none',
 	            itemStyle: {normal: {areaStyle: {type: 'default',color:"rgba(27,158,208,0.4)"},lineStyle:{width:0}}}
-	        }]
+	        }],
+	        animation:false
 		};
 		function loadChart(){
 			if(!_car.device_id){//如果没有绑定设备
@@ -655,7 +671,7 @@
 		        myChart0.setOption(option); 
 		        
 		        //绘制平均油耗折线
-				option.title.text="平均油耗(km/L)";
+				option.title.text="平均油耗(L/100km)";
 				option.series[0].data=xy.fuel;
 		        var myChart1 = echarts.init(W('#fuel'));
 		        myChart1.setOption(option); 
@@ -678,6 +694,9 @@
 				temD=data[x].rcv_time.slice(5,10);
 				res.sw.push(data[x].obd_data.sw);
 				res.dpdy.push(data[x].obd_data.dpdy);
+//				if(res.x.length&&res.x[res.x.length-1]==temD){
+//					temD=1;
+//				}
 				res.x.push(temD);
 			}
 			return res;

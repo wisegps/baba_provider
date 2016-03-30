@@ -62,11 +62,16 @@ W.dom.Search=W("#search");//缓存
 			}else{
 				device='设备未激活';				
 			}
+			var keyVal='无名客户';
+			if(data.cust_name){
+				keyVal=data.cust_name;
+			}
 			
-			this.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png" onerror=\'javascript:this.src="../img/icon_car_moren.png"\'><span name="value">'+data.obj_name+'</span></th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+data.cust_name+'</span></td><td><span class="name">车型:</span><span class="value">'+data.car_type+'</span></td></tr><tr><td><span class="name">最后一次到店:</span><span class="value">'+slast_maintain+'</span></td><td><span class="name">车架号:</span><span class="value">'+data.frame_no+'</span></td></tr><tr><td><span class="name">行驶里程:</span><span class="value">'+data.mileage+'公里</span></td><td><span class="name">保养后里程:</span><span class="value">'+next_mileage+'</span></td></tr><tr><td><span class="name">到店次数:</span><span class="value">'+arrive_num+'</span></td><td><span class="name">评价次数:</span><span class="value">'+evaluate_num+'</span></td></tr></table><footer><span class="text">'+device+'</span></footer>'
-
-			this.querySelector("footer").appendChild(new ui_checkInBtn(data));//给其中的按钮添加点击事件监听，使用sc.editData来处理点击事件
-			
+			this.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png" onerror=\'javascript:this.src="../img/icon_car_moren.png"\'><span name="value">'+data.obj_name+'</span></th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+keyVal+'</span></td><td><span class="name">车型:</span><span class="value">'+data.car_type+'</span></td></tr><tr><td><span class="name">最后一次到店:</span><span class="value">'+slast_maintain+'</span></td><td><span class="name">车架号:</span><span class="value">'+data.frame_no+'</span></td></tr><tr><td><span class="name">行驶里程:</span><span class="value">'+data.mileage+'公里</span></td><td><span class="name">保养后里程:</span><span class="value">'+next_mileage+'</span></td></tr><tr><td><span class="name">到店次数:</span><span class="value">'+arrive_num+'</span></td><td><span class="name">评价次数:</span><span class="value">'+evaluate_num+'</span></td></tr></table><footer><span class="text">'+device+'</span></footer>'
+			if(data.business_status==3)
+				this.querySelector("footer").appendChild(new ui_checkInBtn(data));//给其中的按钮添加点击事件监听，使用sc.editData来处理点击事件
+			else
+				this.querySelector(".text").style.float='none';
 			if(data.obj_id){
 				this.querySelector("table").addEvent("click",sc.toDetail).obj_id=data.obj_id;
 			}
@@ -83,10 +88,13 @@ W.dom.Search=W("#search");//缓存
 	var MAX_ID=0,noInfo;
 	function creatCar(){
 		var val=W.dom.Search.value;
+		if(val.length<3){
+			return;
+		}
 		MAX_ID=0;
-		data={
+		var data={
 			access_token:_user.access_token,
-			parent_cust_id:_user.cust_id,
+			parent_cust_id:_user.seller_id,
 			max_id:MAX_ID,
 			obj_name:val
 		}
@@ -168,6 +176,12 @@ W.dom.Search=W("#search");//缓存
 			if(cname==null){
 				cname = new Array(); 
 			}
+			for(var i=0;i<cname.length;i++){//如果已经有记录，则删除该记录
+				if(scname==cname[i].scname){
+					cname.splice(i,1);
+					i--;
+				}
+			}
 			if(cname.length>=5){
 				cname.shift();
 			}
@@ -192,7 +206,7 @@ function code(str){
 	W("#search_d").classList.add('mui-active');
 	var data={
 		serial:str,
-		seller_id:_user.cust_id,
+		seller_id:_user.seller_id,
 		access_token:_user.access_token
 	}
 	Wapi.user.getDeviceList(getdeviceId,data);//设备列表接口
@@ -210,7 +224,7 @@ function code(str){
 			var device_id = res.data[0].device_id;
 			var deviceID={
 				access_token:_user.access_token,
-				seller_id:_user.cust_id,
+				seller_id:_user.seller_id,
 				device_id:device_id
 			}
 			Wapi.user.searchCustomerVehicle(carLists,deviceID);//搜索接口		

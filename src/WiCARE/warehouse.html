@@ -1,0 +1,205 @@
+<!--
+	作者：小吴
+	时间：2015-12-30
+	描述：临时试用
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>WiCARE试用发货</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+		<script>link("W.css")</script>
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script src="../../wslib/toolkit/WxSdk.js" defer="defer"></script>
+	</head>
+	<style>
+		.mui-content{
+			padding-left: .5em;
+	    	padding-right: .5em;
+		}
+		#search{
+			background: #fff;
+			height: 40px;
+		}
+		#qr{
+			font-size: 40px;
+		    line-height: 40px;
+		    float: right;
+		    margin: 0 .1em;
+		    text-shadow: 0 0 2px rgba(0,0,0,1);
+		}
+		#qr:active{
+			text-shadow: 0 0 8px rgba(0,0,0,.5);
+		}
+		#search_box{
+			background: #fff;
+			position: absolute;
+			width: 100%;
+			z-index: 1;
+			font-size: 14px;
+			color: #428bca;
+			display: none;
+		}
+		#search_box>div{
+			padding: .5em 1em;
+    		border-bottom: 1px solid #eee;
+		}
+		#search_box>div:nth-child(2n){
+			color: #5cb85c;
+		}
+		#search_box>div:active{
+			background: #eee;
+		}
+		.mobile{
+			display: block;
+    		font-size: 1.3em;
+		}
+		.seller_name{
+			
+		}
+		#devices{margin: 0;}
+		p{padding: 0 2px;}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<h1 class="mui-title">WiCARE试用发货</h1>
+		</header>
+		<div class="mui-content">
+			<span id="qr" class="w_icon icon_scanning"></span>
+			<div style="overflow: hidden;">
+				<input  id="search" type="search" class="mui-input-clear" placeholder="搜索商户手机号">
+				<div id="search_box">
+					
+				</div>
+			</div>
+			<textarea rows="5" cols="20" id="devices"></textarea>
+			<p>扫描二维码输入，也可以手动输入，手动输入如果多台设备请以“|”分隔</p>
+			<button id="submit" type="button" class="mui-btn mui-btn-block w">确定</button>
+		</div>
+	</body>
+	<script>
+		var dom={
+			qr:W("#qr"),
+			search:W("#search"),
+			s_box:W("#search_box"),
+			devices:W("#devices"),
+			submit:W("#submit")
+		}
+		var Params={
+			access_token:_user.access_token,
+			seller_id:0,
+			status:3
+		}
+		
+		window.addEventListener("DOMContentLoaded",function(){
+			listenerEvent();
+		});
+		
+		function listenerEvent(){
+			dom.qr.addEvent("click",QRcode);
+			dom.search.addEvent("keyup",searchMobile);
+			dom.submit.addEvent("click",submitData);
+		}
+		
+		function QRcode(){
+		//调用二维码扫描
+			if(W.native){//判断scanner是否存在
+				W.native.scanner.start(code);	
+			}else{
+				W.toast("等待扫描二维码组件");
+				if(!QRcode.donotAdd){
+					window.addEventListener("nativeSdkReady",QRcode);
+					QRcode.donotAdd=true;
+				}
+			}
+		}
+		function code(res){
+			//扫描到设备的序列号
+			var text=dom.devices.value;
+			if(text){
+				dom.devices.value=text+"|"+res;
+			}else{
+				dom.devices.value=res;
+			}
+		}
+		
+		//输入即开始搜索
+		function searchMobile(){
+			var val=this.value;
+			if(!val||val.length<4){
+				return;
+			}//输入小于4个字符不进行搜索
+			
+			var params={
+				access_token:_user.access_token,
+				mobile:"^"+val,
+				cust_type:2
+			}
+			Wapi.user.list(showSearch,params);
+		}
+		//显示搜索结果
+		function showSearch(res){
+			if (res.status_code){
+				W.errorCode(res);
+				return;
+			}
+			dom.s_box.innerHTML="";
+			var sellers=res.data;
+			if(!sellers||!sellers.length){
+				dom.s_box.style.display="none";
+				return;
+			}
+			var list = document.createDocumentFragment();
+			for(var i=0;i<sellers.length;i++){
+				list.appendChild(new seller(sellers[i]));
+			}
+			dom.s_box.appendChild(list);
+			dom.s_box.style.display="block";
+		}
+		
+		function seller(data){
+			var obj=new WiStormUI("div");//创建一个div组件
+			obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+			obj.innerHTML='<span class="mobile">'+data.mobile+'</span><span class="seller_name">'+data.cust_name+'</span>'
+			obj.cust_id=data.cust_id;
+			obj.data=data;
+			obj.addEvent("click",seller.select);
+			return obj;//最后记得要返回组件
+		}
+		seller.select=function(){
+			dom.search.value=this.data.cust_name;
+			Params.seller_id=this.cust_id;
+			dom.s_box.innerHTML="";
+			dom.s_box.style.display="block";
+		}
+		
+		//提交信息
+		function submitData(){
+			var val=dom.devices.value;
+			if(Params.seller_id==0){
+				Params.status=0;
+			}
+			if(val){
+				val=val.trim();
+				Params._serial=val;
+				Wapi.device.update(function(res){
+					if (res.status_code){
+						W.errorCode(res);
+						return;
+					}
+					W.toast("试用发货成功！");
+					dom.devices.value="";
+					dom.search.value='';
+					Params.seller_id=0;
+				},Params);
+			}
+		}
+	</script>
+</html>

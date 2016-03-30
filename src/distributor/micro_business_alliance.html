@@ -1,0 +1,334 @@
+<!--
+	作者：小刘
+	时间：2016-3-14
+	描述：微商加盟
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>微商加盟</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		<style>
+		body{background-color: #fff;}
+		.mui-input-row{
+			border: 1px solid #E1E1E1;
+			border-radius: 4px;
+			margin-bottom: 1em;
+			box-shadow: 0 0 6px rgba(105, 192, 226, 0);
+			-webkit-transition: box-shadow .3s;
+			transition: box-shadow .3s;
+			line-height: 38px;
+		}
+		.mui-input-row>label{
+			width: auto;
+			background: #F7F7F7;
+			border-right: 1px solid #E0E0E0;
+			position: absolute;
+			left: 0;
+			top: 0;
+		}
+		.mui-input-row>input{
+		    height: 100%;
+		    font-size: 14px;
+		    padding-left: 4.5em;
+		}
+		.mui-input-row.active{
+			border: 1px solid #78D6FB;
+			box-shadow: 0 0 6px rgba(105, 192, 226, 0.61);
+		}
+		.mui-input-group{padding: 1.5em;margin-top: 1em;}
+		.mui-input-group:before{display: none;}
+		.mui-input-group .mui-input-row:after{display: none;}
+		.mui-icon,.w_icon{font-size: 18px;}
+		.text{color: #ccc;text-align: center;font-size: 12px;}
+		.but{background:#ddd;line-height: 2em;text-align: center;border-radius: 4px;color: #fff;padding: 0 .8em;margin: 0 .5em;display: inline-block;}
+		.sms{float: right;margin: 0 0 0 .5em;line-height: 40px;height: 40px;vertical-align: top;}
+		.but.sms.fromSmall{border-radius: 20px;width: 40px;}
+
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<h1 class="mui-title">微商加盟</h1>
+		</header>
+		<div class="mui-content">
+			<form class="mui-input-group" id="business_alliance">
+				<div class="mui-input-row">
+					<input type="text" placeholder="微商名称" name="cust_name" class="cust_name">	
+					<label style="padding: 6px 12px;"><span class="w_icon icon_my" style="font-size: 24px;"></label>
+				</div>
+				<div class="mui-input-row">
+					<input type="text" placeholder="手机号码" name="mobile" class="mobile">	
+					<label><span class="w_icon icon_user"></label>
+				</div>
+				<span class="but sms send" data-type = "2">获取验证码</span>
+				<div class="mui-input-row">
+					<input type="text" placeholder="短信验证码" name="valid_code">	
+					<label><span class="w_icon icon_sms"></label>
+				</div>
+				<div class="mui-input-row">
+					<input type="password" placeholder="密码" name="password">
+					<label><span class="w_icon icon_password"></span></label>
+				</div>
+				<div class="mui-input-row">
+					<input type="password" placeholder="重复密码" name="repwd" class="repwd">
+					<label><span class="w_icon icon_password"></span></label>
+				</div>
+				<div class="mui-input-row">
+					<input type="text" placeholder="邀请手机号" name="valid_tel" class="valid_tel">	
+					<label><span class="w_icon icon_sms"></label>
+				</div>
+				<div class="text">密码长度6~12位、可以是数字、大小写英文字母</div>
+				<button type="button" class="mui-btn mui-btn-block w">加盟</button>
+			</form>			
+			<div class="text">欢迎加入WiCARE联盟</div>
+		</div>
+	</body>
+	<script>
+/*		if (!_g.sso_login) {
+			W.wxLogin();			
+		}
+*/		var com = {
+			name:W(".cust_name"),
+			tel:W(".mobile"),
+			pwd:W(".repwd"),
+			code:W(".valid_tel")
+		};
+		var mb= W('#business_alliance');
+		W.dom.cn= mb.querySelector("[name=cust_name]").addEvent("keyup",checkName);
+		W.dom.sms_b=mb.querySelector(".but.sms.send").addEvent("click",getSMS);
+		W.dom.ci=mb.querySelector("[name=valid_code]").addEvent("change",checkCode);
+		W.dom.mi=mb.querySelector("[name=mobile]").addEvent("keyup",checkMobile);
+		W.dom.pwd=mb.querySelector("[name=password]").addEvent("keyup",chenckPwd);;
+		W.dom.rpwd=mb.querySelector("[name=repwd]").addEvent("keyup",chenckPwd);
+		W.dom.tel=mb.querySelector("[name=valid_tel]").addEvent("keyup",chenckTel);
+		W('.mui-btn-block').addEvent('click',submits);
+		function checkName() {
+			var v=W.trim(this.value);
+			if(v!=''){
+				var data={
+					access_token:_user.access_token,				
+					cust_name:v
+				};
+				Wapi.user.list(function(res){
+					if (res && res.status_code) {
+						W.errorCode(res);
+						return;
+					}
+					if(res.data.length>0){
+						checkName.pass=1;
+						addErr(W.dom.cn);					
+					}else{
+						addTally(W.dom.cn);
+						checkName.pass=2;					
+					}
+				},data);	
+			}else{
+					addErr(W.dom.cn);									
+			}
+		}
+		//检测手机是否已注册
+		function checkMobile(){
+			var v=W.trim(this.value);
+			if(v.length!=11||v.match(/\D/)){
+				if(!this._err||!this._err._iserr)
+					addErr(this);
+				return;
+			}
+			W.dom.sms_b.status="checkMobile";
+			Wapi.user.checkExists(function(json){
+				if(json.exist){
+					W.alert("该手机已经注册，您可以直接登录或修改密码");
+					checkMobile.pass=1;
+					addErr(W.dom.mi);
+				}else{
+					addTally(W.dom.mi);
+					checkMobile.pass=2;
+					W.dom.sms_b.status=false;
+					W.dom.sms_b.style.background="#5cb85c";
+				}
+			},{mobile:v});
+		}
+		//发送验证码
+		function getSMS(){
+			if(this.status){
+				if(this.status=="checkMobile")
+					W.toast("请等待手机号码验证");
+				else
+					W.toast("如果没有收到短信，请一分钟后再点击");
+				return;
+			}
+			var type=this.getAttribute("data-type");
+			var mobile=W.trim(this.parentElement.querySelector("[name=mobile]").value);
+			this.status=true;
+			checkCode.mobile=mobile;
+			var but=this;
+			but.innerText="已发送";
+			but.style.background="#ccc";
+			Wapi.comm.sendSMS(function(json){
+				if(json.status_code){
+					W.alert(json.msg+";"+json.err_msg);
+					but.status=false;
+					but.innerText="获取验证码";
+					but.style.background="#5cb85c";
+				}else{
+					but.innerText="已发送";
+					but.style.background="#ccc";
+					but.status=true;
+					
+					but.time=60;
+					var timeFun=function(){
+						but.time--;
+						if(but.time<=0){
+							but.innerText="获取验证码";
+							but.style.background="#5cb85c";
+							but.status=false;
+						}else{
+							but.innerText=but.time;
+							but.id=setTimeout(timeFun,1000);
+						}
+					}
+					but.id=setTimeout(timeFun,1000);
+				}
+			},mobile,type);
+		}
+		//检测验证码是否正确
+		function checkCode(){
+			var v=W.trim(this.value);
+			if(v.length!=4)
+				return;
+			var data={
+				valid_type:1,
+   				valid_code:v,
+   				mobile:checkCode.mobile
+			}
+			var codeInput=this;
+			Wapi.comm.validCode(function(json){
+				if(json.status_code){
+					W.alert(json.msg);
+					addErr(codeInput);
+					codeInput.pass=1;
+				}else{
+					if(json.valid){
+						codeInput.pass=2;
+						addTally(codeInput);
+						checkEverything(true);
+					}else{
+						addErr(codeInput);
+						codeInput.pass=1;
+					}
+				}
+			},data);
+		}
+		//验证密码
+		function chenckPwd(){
+			var f=W.parents(this,2);
+			var P=f.querySelector("[name=password]");
+			var REP=f.querySelector("[name=repwd]");
+			var rep=REP.value;
+			var p=P.value;
+			if(p.length<6||p.length>12){
+				P.pass=1;
+				addErr(P);
+				return;
+			}else if(p.match(/\W/)){
+				P.pass=1;
+				addErr(P);
+				W.toast("密码不应该包含特殊字符");
+				return;
+			}else {
+				P.pass=2;
+				addTally(P);
+			}
+				
+			if(rep==p){
+				REP.pass=2;
+				addTally(REP);
+			}else{
+				REP.pass=1;
+				addErr(REP);
+			}
+		}
+		//验证邀请手机号
+		function chenckTel(){
+				var data={
+					parent_mobile:W.dom.tel.value,
+					parent_open_id:_g.parent_open_id
+				};
+				Wapi.user.distributorCheck(function(res){
+					if(res.status_code==0){
+						chenckTel.pass=2
+						addTally(W.dom.tel);
+					}else{
+						chenckTel.pass=1;
+						addErr(W.dom.tel);	
+					}
+				},data);
+			
+		}
+		//添加错误或者正确span
+		function addErr(dom){
+			addTally(dom,true);
+		}
+		function addTally(dom, b) {
+			var p = dom._err;
+			if (p){
+				if(p._iserr==b)
+					return;
+				else
+					p.parentElement.removeChild(p);
+			}
+			var tem=document.createElement("span");
+			tem.className="but sms fromSmall";
+			if(b){
+				tem.innerHTML="&#10008";
+				tem.style.background="#d9534f";
+				tem._iserr=b;
+			}else{
+				tem.innerHTML="ok";
+				tem.style.background="#5cb85c";
+				tem.style.padding="0";
+			}
+			dom._err=tem;
+			dom.parentElement.parentElement.insertBefore(tem,dom.parentElement);
+		}
+		//加盟按钮
+		function submits(){
+			W.loading("正在加盟...");
+			if(!(W.dom.cn.value && W.dom.mi.value && W.dom.rpwd.value && W.dom.tel.value && W.dom.ci.value)){
+				W.alert('请填写完整的信息');
+				W.loading();
+				return;
+			}
+			var data={
+				login_id:_g.openid,
+				cust_name:W.dom.cn.value,
+				mobile:com.tel.value,
+				parent_mobile:W.dom.tel.value,
+				valid_code:W.dom.ci.value,
+				password:W.dom.rpwd.value,
+				valid_type:1,
+				parent_open_id:_g.parent_open_id			
+			}
+			Wapi.user.distributorRegister(function(res){
+				//cust_type:4,
+					if(!res.status_code){
+						W.alert('加盟成功');						
+						location.href="../home.html";
+					}else{
+						W.alert(res.err_msg);						
+					}
+					W.loading();
+			},data);
+		}
+	</script>
+</html>

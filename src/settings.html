@@ -12,18 +12,22 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 
-		<title>设置中心</title>
+		<title>WiCARE商户版</title>
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<script>
 			link("W.css")
 		</script>
 
 		<script src="../wslib/api/Wapi.js" defer="defer"></script>
 		<script>
-			window.onload = function (){
-				var account=W.getSetting("account");
+			window.addEventListener("load",windowLoad);
+			function windowLoad(){
+				if(_user.cust_type==3&&(!_user.privilege||_user.privilege[8]=="0")){
+					location="home.html";
+				}
 				var user =_user;
+				var account=user.mobile;
 				if(user.tel){
 					W("#phone").innerHTML = user.tel;
 				}else{

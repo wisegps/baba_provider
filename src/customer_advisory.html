@@ -12,10 +12,9 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 			
-		<title>客户咨询</title>
-
+		<title>WiCARE商户版</title>
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<script>link("W.css")</script>
 		
 		<script src="../wslib/api/Wapi.js" defer="defer"></script>
@@ -62,6 +61,9 @@
 			    border-radius: 100%;
 			    font-size: 12px;
 			 }
+			 .show_news p{
+				color:#ccc;margin: 0 3.2em 0 0;overflow: hidden;white-space: nowrap;height: 21px;			 	
+			 }
 			 .ui_auto_load{border-bottom: 1px solid #e5e4e2;text-align: center;padding: 10px;background: #fff;}
 			.op{text-align: center;background-color: white;padding: .5em 0;}
 			.null_tip{text-align: center;}
@@ -70,13 +72,13 @@
 	</head>
 	<body id="body">
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<a id="u_back" class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
 			<h1 class="mui-title">客户咨询</h1>				
 		</header>
 		<div class="mui-content"><div class="null_tip"><h1>NULL</h1><p>您好，您目前还没有客户发起咨询。</p></div></div>
 		<div class="child_view has_nav fromRight" id="Details" style="display: none;">
 			<div class="mui-bar mui-bar-nav">
-				<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+				<a id="f_back" class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
 				<h1 class="mui-title" id="name"></h1>				
 			</div>
 			<div id="news-add">
@@ -110,7 +112,7 @@
 		var uname=data.friend_name.trim().slice(0,1);
 		var newtime = spliceDate(data.send_time);
 		var a=["#428bca",'#5cb85c','#5bc0de','#f0ad4e','#d9534f'];
-		this.innerHTML = '<div class="icon">'+uname+'</div><div class="new_info"><div><span class="fr" style="color:#ccc;font-size: 12px;">'+newtime+'</span><div style="overflow: hidden;"><span style="color: #676767;">'+data.friend_name+'</span></div></div><div class="show_news"><p style="color:#ccc;margin: 0 3.2em 0 0;overflow: hidden;white-space: nowrap;">'+data.content+'</p></div></div>';
+		this.innerHTML = '<div class="icon">'+uname+'</div><div class="new_info"><div><span class="fr" style="color:#ccc;font-size: 12px;">'+newtime+'</span><div style="overflow: hidden;"><span style="color: #676767;">'+data.friend_name+'</span></div></div><div class="show_news"><p>'+data.content+'</p></div></div>';
 		var c=data.friend_id%5;
 		this.querySelector('.icon').style.backgroundColor=a[c];
 		this.id="W"+data.friend_id;
@@ -196,7 +198,7 @@
 		var a=["#428bca",'#5cb85c','#5bc0de','#f0ad4e','#d9534f'];
 		var c=data.sender_id%5;
 		var uname;
-		if(data.sender_id==_user.cust_id){
+		if(data.sender_id==_user.seller_id){
 			uname=_user.cust_name.slice(0,1);
 			this.innerHTML='<div class="time">'+getTime+'</div><div class="icon_img_l fr">'+uname+'</div><div class="new_l"><div class="tran_l"></div><span class="news_l fr">'+data.content+'</span></div>';			
 			this.querySelector('.icon_img_l').style.backgroundColor=a[c];
@@ -214,6 +216,9 @@
  */
 var news_cust_id,dom={},MAX_ID="0",settime,localnews={},MIN_ID;
 	window.addEventListener("W.loginSuccess",function(){//框架的自定义事件，当页面load事件触发并且已经登录成功则会触发该事件,用于某些需要不经过登录页也可以直接访问，但是又需要用户授权登录的页面
+		if(_user.cust_type==3&&(!_user.privilege||_user.privilege[6]=="0")){
+			location="home.html";
+		}
 		dom.newlist=W(".mui-content");
 		dom.newlists=W("#news-add");
 		dom.details=W("#Details");
@@ -222,6 +227,9 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={},MIN_ID;
 		dom.bottom=W(".bottom");
 		dom.bottom.style.display="none";
 		getnews();
+		if(top==window){
+			W("#u_back").style.display='none';
+		}
 	})
 	//监听地址变化，切换view
 		window.addEventListener("popstate",hide);
@@ -248,6 +256,7 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={},MIN_ID;
 				if(top!=window)
 					plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="none";');
 				dom.bottom.style.display="block";
+				setScoll();
 			}
 									
 	
@@ -261,7 +270,6 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={},MIN_ID;
 		if(top!=window)
 			plus.webview.currentWebview().parent().evalJS('W.dom.nav.style.display="block";');
 		dom.bottom.style.display="none";
-
 	}
 /**
  * 接收新消息刷新消息列表
@@ -269,7 +277,7 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={},MIN_ID;
 
 	function getnews(){
 		var data={
-			user_id:_user.cust_id,
+			user_id:_user.seller_id,
 			access_token:_user.access_token,	
 			max_id:MAX_ID				
 		};
@@ -288,14 +296,16 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={},MIN_ID;
 				MAX_ID=res.data[0].chat_id;
 				var t,clObj;
 				for(var i=res.data.length-1;i>=0;i--){
-					t=localnews["W"+res.data[i].friend_id];//前面创建了空的数组  现在用friend_id判断是否存在这个属性
-					if(t){
+					t=localnews["W"+res.data[i].friend_id];//前面创建了空的数组  现在用friend_id判断聊天列表里是否存在这个好友
+					if(t){//如果聊天列表里有这个好友
 						t.push(res.data[i]);
 						clObj=W("#W"+res.data[i].friend_id);//cl组件
 						clObj.setContent(res.data[i]);
-						if(news_cust_id!=res.data[i].friend_id && res.data[i].sender_id!=_user.cust_id){
+						
+						//如果是当前正在聊天的好友，并且不是自己发送的，则添加一条信息
+						if(news_cust_id!=res.data[i].friend_id && res.data[i].sender_id!=_user.seller_id){
 							clObj.setSpan();
-						}else if(res.data[i].sender_id!=_user.cust_id){
+						}else if(res.data[i].sender_id!=_user.seller_id){
 							dom.newlists.appendChild(new cs(res.data[i]));
 							setScoll();
 						}
@@ -315,7 +325,7 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={},MIN_ID;
  */
 	function receives(){
 	var param={
-		user_id:_user.cust_id,
+		user_id:_user.seller_id,
 		access_token:_user.access_token,	
 		friend_id:news_cust_id,
 		max_id:0				
@@ -334,8 +344,8 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={},MIN_ID;
 					list.appendChild(new cs(res[i]));
 				}
 				dom.newlists.appendChild(list);
-				setTimeout(setScoll,500);
 				setScoll();
+				setTimeout(setScoll,500);
 				
 				//window.onscroll=getNextnews;
 				document.body.onscroll=getNextnews;
@@ -347,7 +357,7 @@ var news_cust_id,dom={},MAX_ID="0",settime,localnews={},MIN_ID;
  */
 function getNextnews(){
 		var param={
-			user_id:_user.cust_id,
+			user_id:_user.seller_id,
 			access_token:_user.access_token,	
 			friend_id:news_cust_id,
 			min_id:MIN_ID							
@@ -395,7 +405,7 @@ function getNextnews(){
 		function newlist(){
 			
 			var data={
-				user_id:_user.cust_id,			
+				user_id:_user.seller_id,			
 				access_token:_user.access_token,	
 			};
 			Wapi.user.getRelationList(function (res){
@@ -403,6 +413,7 @@ function getNextnews(){
 					W.errorCode(res);
 					return;
 				}
+
 				if(res.data.length!=0){
 						dom.newlist.firstChild.style.display='none';
 						var list = document.createDocumentFragment();
@@ -420,9 +431,22 @@ function getNextnews(){
 						if(_g.id){
 							//微信直接点击进入聊天
 							show.call(W("#W"+_g.id));
-						}
-					
+						}									
 				}
+				//判断用户与商户是否聊过天
+				if(_g.intent=="seller"){	
+					var s=W("#W"+_user.seller_id);
+					if(!s){
+						if(_user.cust_type==1){//车主身份才执行，如果是商户，则不打开对话窗口
+							W.toast('正在联系商家,请稍等');
+							W('#new_text').value='Hi!';
+							news_cust_id=_user.seller_id;
+							sendnew();
+						}
+					}else
+						show.call(s);				
+				}
+				
 			},data);
 			
 		}
@@ -433,7 +457,7 @@ function getNextnews(){
 		var val= W('#new_text').value;
 		if(val.trim()!=''){
 			var data={
-				user_id:_user.cust_id,
+				user_id:_user.seller_id,
 				access_token:_user.access_token,	
 				cust_name:_user.cust_name,
 				friend_id:news_cust_id,
@@ -455,7 +479,7 @@ function getNextnews(){
 			var t=temD.WtoString().split(" ");
 			var str=t[0]+"T"+t[1]+".000Z";
 			data.create_time=str;//"2015-12-14T09:50:47.162Z"			dom.newlists.appendChild(new cs(data));			
-			data.sender_id=_user.cust_id;
+			data.sender_id=_user.seller_id;
 			dom.newlists.appendChild(new cs(data));
 			var scoll=document.body;
 			scoll.scrollTop=scoll.scrollHeight; //设置每次发送  滚动条离顶部的距离是滚动条的高度				

@@ -7,11 +7,32 @@ var k=e.parentNode.querySelector(".mui-collapse.mui-active");k&&k.classList.remo
  * WiStorm框架的基础文件，要使用框架必须引入本文件；
  * 里面整合了mui.js的代码，还包括了框架一些非常基础的东西，例如WAPI的入口、UI类的基类、基本工具等；
  */
+
+	
+
+function getSearch(){
+    var url=location.search;
+    if(!url)return {};
+    url=url.split("?")[1].split("&");
+    var json={};
+    var n=url.length;
+    for(var i=0;i<n;i++){
+        json[url[i].split("=")[0]]=decodeURIComponent(url[i].split("=")[1]);
+    }
+    return json;
+}
+//获取跳转参数 即 http://127.0.0.1:8020/baba_wx/src/customer_add.html?a=123&b=asd  问号后面部分
+var _g=getSearch();
+
 var	WiStorm_root="http://"+location.host+"/baba_wx/";
+if(location.host=="h5.bibibaba.cn")
+	WiStorm_root="http://h5.bibibaba.cn/baba/wx/";
 var u = navigator.userAgent;
+var _d=false;
+if(_g.debug)_d=true;
 var WiStorm={
-	test_mode:true,
-	debug:true,
+	test_mode:false,
+	debug:_d,
 	config:{
 		"description": "WiStorm框架的配置信息",
 		"app_key": "9410bc1cbfa8f44ee5f8a331ba8dd3fc",
@@ -23,8 +44,7 @@ var WiStorm={
 		"wx_ticket_url":WiStorm_root+"wslib/toolkit/WX.TokenAndTicket.php?action=ticket",
 		"wx_sdk":"http://res.wx.qq.com/open/js/jweixin-1.0.0.js",
 		"wx_login":WiStorm_root+"wslib/toolkit/oauth2.php",
-		"safety_url":WiStorm_root+"wslib/toolkit/Safety.php",
-		"test_code":"bba2204bcd4c1f87a19ef792f1f68404"
+		"safety_url":WiStorm_root+"wslib/toolkit/Safety.php"
 	},
 	setting:{},//用户设置，由W.getSetting(name)和W.setSetting(key,val)操作
 	included:[],//当前页面使用include(url)来包含的文件名
@@ -43,7 +63,8 @@ var WiStorm={
 	    qq: u.match(/\sQQ/i) == " qq" //是否QQ
 	}
 };//包含框架相关
-delete u;
+u=undefined;
+_d=undefined;
 
 //执行错误直接弹出
 onerror=function(msg,url,l){
@@ -52,7 +73,7 @@ onerror=function(msg,url,l){
     url=url.split(/[\\\/.]/);
     url=url[url.length-2];
     var text="错误："+msg+";\n界面："+flieName+";\n文件："+url+";\n行数："+l;
-    if((msg=="ReferenceError: Can't find variable: WeixinJSBridge"&&l==1&&flieName==url)||
+    if((msg.indexOf("WeixinJSBridge")!=-1&&l==1)||
 		(msg=="Uncaught TypeError: Cannot read property 'classList' of null"&&url=="WiStorm"&&l==1))
 		return;
 	if(WiStorm.debug){
@@ -72,7 +93,7 @@ onerror=function(msg,url,l){
 		}
 		account=user.account||"未登录";
 		var errorJson={"bug_report":text,"account":account};
-		if(Wapi){//如果已经加载了api文件，则直接发送错误
+		if(typeof Wapi=="object"){//如果已经加载了api文件，则直接发送错误
 			Wapi.user.createCrash(errorJson,function(res){});
 		}else{//否则存在本地，等Wapi加载完会自动发送
 			var errorLog=localStorage.getItem("errorList");
@@ -92,7 +113,10 @@ onerror=function(msg,url,l){
 		}
 	}
 }
-
+W.debug=function(str){
+	if(WiStorm.debug)
+		alert(str);
+};
 
 /**
  * 日期的toString方法扩展，输出更符合普通格式的字符串
@@ -161,18 +185,24 @@ function NewDate(str) {
     var date = new Date();
     if(!str)
     	return date;
-    var str_before = str.split('T')[0]; //获取年月日
-    var str_after = str.split('T')[1]; //获取时分秒
+    var t=str.split(/[T\s]/);
+    var str_before = t[0]; //获取年月日
+    var str_after = t[1]; //获取时分秒
     var years = str_before.split('-')[0]; //分别截取得到年月日
     var months = str_before.split('-')[1] - 1;
     var days = str_before.split('-')[2];
-    var hours = str_after.split(':')[0];
-    var mins = str_after.split(':')[1];
+    var hours = str_after.split(':')[0]||0;
+    var mins = str_after.split(':')[1]||0;
     var seces = str_after.split(':')[2].replace("Z", "");
-    var secs = seces.split('.')[0];
-    var smsecs = seces.split('.')[1];
-    date.setUTCFullYear(years, months, days);
-    date.setUTCHours(hours, mins, secs, smsecs);
+    var secs = seces.split('.')[0]||0;
+    var smsecs = seces.split('.')[1]||0;
+    if(str.indexOf("T")==-1){
+    	date.setFullYear(years, months, days);
+    	date.setHours(hours, mins, secs, smsecs);
+    }else{
+    	date.setUTCFullYear(years, months, days);
+    	date.setUTCHours(hours, mins, secs, smsecs);
+    }
     return date;
 }
 
@@ -333,6 +363,13 @@ WiStormUI.prototype={
 	},
 	getParentName:function(){
 		return this._parentType;
+	},
+	template:function(dom,data){
+		var htm=dom.innerHTML;
+		this.innerHTML=htm.replace(/(\<|&lt;)\%.*?\%(&gt;|\>)/g,function(word){
+			word=word.replace(/(\<|&lt;|&gt;|\>|%)/g,'');
+  			return data[word]||'';
+		});
 	}
 };
 
@@ -463,7 +500,7 @@ W.ajax=function(url,options) {
 			var result, error = false;
 			if ((xmlhttp.status >= 200 && xmlhttp.status < 300) || xmlhttp.status === 304 ||xmlhttp.status === 0){
 				var dataType=json.dataType;
-				var resultText = xmlhttp.responseText;
+				var resultText = xmlhttp.responseText||'{"status_code":-1,"err_msg":"无返回信息"}';
 				try {
 					if (dataType === 'xml') {
 						result = xmlhttp.responseXML;
@@ -683,7 +720,7 @@ W.alert=function (opt){
 			obj.waiting.push(json);
 		}else{
 			obj.querySelector(".title").innerText=json.title;
-			obj.querySelector(".alert").innerText=json.content;
+			obj.querySelector(".alert").innerHTML=json.content;
 			var ok=obj.querySelector(".alert_but>div");
 			ok.innerText=json.ok;
 			obj.callback=json.callback;
@@ -739,8 +776,8 @@ W.confirm=function(opt){
 			obj.waiting.push(json);
 		}else{
 			obj.querySelector(".title").innerText=json.title;
-			obj.querySelector(".alert").innerText=json.content;
-			obj.querySelector(".alert_but>.but").innerText=json.y;
+			obj.querySelector(".alert").innerHTML=json.content;
+			obj.querySelector(".alert_but>._but").innerText=json.y;
 			obj.querySelector(".alert_but>.no").innerText=json.n;
 			obj.callback=json.callback;
 			obj.show();
@@ -748,14 +785,14 @@ W.confirm=function(opt){
 	}else{
 		obj=new WiStormUI("div");
 		obj.className="cover_paper alert_box fadeIn";
-		obj.innerHTML='<div class="tabel_center"><div class="alert_view content fromTop"><div class="alert_content"><h3 class="title">'+json.title+'</h3><h4 class="alert">'+json.content+'</h4></div><div class="alert_but"><div class="but" style="border-right:1px solid #ccc">'+json.y+'</div><div class="but no">'+json.n+'</div</div></div></div>';
+		obj.innerHTML='<div class="tabel_center"><div class="alert_view content fromTop"><div class="alert_content"><h3 class="title">'+json.title+'</h3><h4 class="alert">'+json.content+'</h4></div><div class="alert_but"><div class="_but" style="border-right:1px solid #ccc">'+json.y+'</div><div class="_but no">'+json.n+'</div</div></div></div>';
 		obj.show=WiStormUI.show;
 		obj.hide=WiStormUI.hide;
 		obj.callback=json.callback;
 		obj.waiting=new Array();
 		obj._show=true;
 
-		obj.querySelector(".alert_but>.but").addEvent("click",function(){
+		obj.querySelector(".alert_but>._but").addEvent("click",function(){
 			W.confirmBox.callback(true);
 			W.confirmBox.hide();
 			if(obj.waiting.length){
@@ -803,8 +840,8 @@ W.prompt=function(opt){
 			obj.waiting.push(json);
 		}else{
 			obj.querySelector(".title").innerText=json.title;
-			obj.querySelector(".alert").innerText=json.content;
-			obj.querySelector(".alert_but>.but").innerText=json.y;
+			obj.querySelector(".alert").innerHTML=json.content;
+			obj.querySelector(".alert_but>._but").innerText=json.y;
 			obj.querySelector(".alert_but>.no").innerText=json.n;
 			obj.callback=json.callback;
 			obj.show();
@@ -812,14 +849,14 @@ W.prompt=function(opt){
 	}else{
 		obj=new WiStormUI("div");
 		obj.className="cover_paper alert_box fadeIn";
-		obj.innerHTML='<div class="tabel_center"><div class="alert_view content fromTop"><div class="alert_content" style="padding-bottom:0"><h3 class="title">'+json.title+'</h3><h4 class="alert">'+json.content+'</h4><input type="text" style="margin-bottom: .5em;"></div><div class="alert_but"><div class="but" style="border-right:1px solid #ccc">'+json.y+'</div><div class="but no">'+json.n+'</div</div></div></div>';
+		obj.innerHTML='<div class="tabel_center"><div class="alert_view content fromTop"><div class="alert_content" style="padding-bottom:0"><h3 class="title">'+json.title+'</h3><h4 class="alert">'+json.content+'</h4><input type="text" style="margin-bottom: .5em;"></div><div class="alert_but"><div class="_but" style="border-right:1px solid #ccc">'+json.y+'</div><div class="_but no">'+json.n+'</div</div></div></div>';
 		obj.show=WiStormUI.show;
 		obj.hide=WiStormUI.hide;
 		obj.callback=json.callback;
 		obj.waiting=new Array();
 		obj._show=true;
 
-		obj.querySelector(".alert_but>.but").addEvent("click",function(){
+		obj.querySelector(".alert_but>._but").addEvent("click",function(){
 			var input=W.promptBox.querySelector("input");
 			W.promptBox.callback(input.value);
 			W.promptBox.hide();
@@ -829,7 +866,7 @@ W.prompt=function(opt){
 			input.value=null;
 		},false);
 		obj.querySelector(".alert_but>.no").addEvent("click",function(){
-			W.promptBox.callback(false);
+			W.promptBox.callback(null);
 			W.promptBox.hide();
 			if(obj.waiting.length){
 				setTimeout("W.prompt(W.promptBox.waiting.shift());",500);
@@ -849,19 +886,15 @@ W.prompt=function(opt){
  */
 W.toast=function(str){
 	var obj=W.toastBox;
-	if(obj){
-		if(obj._show){
-			obj.waiting.push(str);
+	if(obj&&!obj._show){
+		if(W("input:focus")){
+			obj.style.top="20%";
 		}else{
-			if(W("input:focus")){
-				obj.style.top="20%";
-			}else{
-				obj.style.top="70%";
-			}
-			obj.innerText=str;
-			obj.show();
-			setTimeout("W.toastBox.hide()",5000);
+			obj.style.top="70%";
 		}
+		obj.innerText=str;
+		obj.show();
+		setTimeout(function(){obj.hide()},5000);
 	}else{
 		obj=new WiStormUI("div");
 		obj.className="toast alert_box fromDown";
@@ -886,7 +919,7 @@ W.toast=function(str){
 		}
 		document.body.appendChild(obj);
 		W.toastBox=obj;
-		setTimeout("W.toastBox.hide()",5000);
+		setTimeout(function(){obj.hide()},5000);
 	}
 }
 
@@ -1041,17 +1074,8 @@ W.setLS=function(name,val,notJson){
  * var test=W.getSearch();
  * alert(test.w);
  */
-W.getSearch=function(){
-    var url=location.search;
-    if(!url)return {};
-    url=url.split("?")[1].split("&");
-    var json={};
-    var n=url.length;
-    for(var i=0;i<n;i++){
-        json[url[i].split("=")[0]]=decodeURIComponent(url[i].split("=")[1]);
-    }
-    return json;
-}
+W.getSearch=getSearch;
+getSearch=undefined;
 
 /**
  * 设置cookie，expiredays负数代表分钟，正数的单位为“天”（24小时）path为cookie的有效路径
@@ -1165,8 +1189,18 @@ W.wxLogin=function(){
 		top.location = "https://open.weixin.qq.com/connect/oauth2/authorize?appid="+WiStorm.config.wx_app_id+"&redirect_uri=http://h5.bibibaba.cn/jump.html&response_type=code&scope=snsapi_userinfo&state="+url+"#wechat_redirect";
 	}else{
 		W.setCookie("__login_redirect_uri__",location.href,-15);
-		top.location="https://open.weixin.qq.com/connect/oauth2/authorize?appid="+WiStorm.config.wx_app_id+"&redirect_uri="+WiStorm.config.wx_login+"&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
+		var u=encodeURIComponent(WiStorm.config.wx_login);
+		top.location="https://open.weixin.qq.com/connect/oauth2/authorize?appid="+WiStorm.config.wx_app_id+"&redirect_uri="+u+"&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
 	}				
+}
+
+//静默授权获取open_id
+W.getOpenId=function(needweixin,s){
+	if(needweixin||!WiStorm.agent.weixin)return;
+	s=s||"snsapiBase";
+	W.setCookie("__login_redirect_uri__",location.href,-15);
+	var u=encodeURIComponent(WiStorm.config.wx_login);
+	top.location="https://open.weixin.qq.com/connect/oauth2/authorize?appid="+WiStorm.config.wx_app_id+"&redirect_uri="+u+"&response_type=code&scope=snsapi_base&state="+s+"#wechat_redirect";
 }
 
 /**
@@ -1183,9 +1217,33 @@ W.trim=function(str) {
  * @param {Object} code
  */
 W.errorCode=function(json){
-    W.alert("error_code："+json.status_code+";error_msg:"+json.err_msg);
+	if(json.status_code==3){
+		W.confirm("错误码：3；登录凭证已失效，点击确定登录；",function(b){
+			if(b){
+				if(WiStorm.agent.weixin){
+					W.wxLogin();
+				}else{
+					W.setCookie("__login_redirect_uri__",location.href,-15);
+					top.location=WiStorm.root+"index.html";
+				}
+			}
+		});
+	}else{
+		W.alert("error_code："+json.status_code+"；error_msg："+json.err_msg);
+	}
 }
 
+W.fillFriend=function(id,fid,name,fname,c){
+	if(id==fid||!id||!fid||!WiStorm.agent.weixin)return;
+	name=name||"";
+	fname=fname||"";
+	c=c||0;
+	Wapi.friend.update(function(res){
+		if (res && res.status_code) {
+			window.onerror("friend.add错误，错误码："+res.status_code+";错误信息:"+res.err_msg,location.href,1242);
+		}
+	},{_open_id:id,_friend_open_id:fid,click_count:c,'name':name,friend_name:fname});
+}
 
 W.dom={};//专门用于缓存页面元素
 
@@ -1199,11 +1257,8 @@ if(location.protocol=="http:"||location.protocol=="https:"){//浏览器环境
 	WiStorm.root=WiStorm_root;
 	WiStorm.isWeb=true;
 }
-delete tem;
-delete s;
-
-//获取跳转参数 即 http://127.0.0.1:8020/baba_wx/src/customer_add.html?a=123&b=asd  问号后面部分
-_g=W.getSearch();
+tem=undefined;
+s=undefined;
 
 
 //按语言加载文字资源
@@ -1517,52 +1572,67 @@ W.plusReady(function(){
 	});
 });//5+准备好后执行
 
+//当api准备好之后执行
+W.apiready=function(callback){
+	if(typeof Wapi!="undefined")
+		callback();
+	else
+		window.addEventListener("W.apiready",callback);
+}
+
 W.login=function(){
-	if(_g.open_id){
-		W.userApi.sso_login(function(json){//登录
-			if (json.status_code) {//登录不成功
-				if (json.status_code == 1) {//未绑定
-					if(_g.intent!="bind"){
-						W.alert("未绑定帐号，请先绑定",function(){
-							top.location=WiStorm.root+"src/temp_user.html?intent=logout";
-						});
-					}
-					return;
-				}else{//登录失败
-					W.errorCode(json);
-					return;
+	if(_g.sso_login){//已经授权
+		if (!_g.access_token) {//登录不成功
+			if (_g.status_code == 1) {//未绑定
+				if(_g.intent!="bind"){
+					W.alert("未绑定帐号，请先绑定",function(){
+						W.setCookie("__login_redirect_uri__",location.href,-60);
+						top.location=WiStorm.root+"src/temp_user.html?intent=logout";
+					});
 				}
-			} else {
-				//登录成功
-				W.setSetting("openId",_g.open_id);
-				W.setCookie("access_token", json.access_token,1);
-				W.userApi.getUser(function(res) {//获取用户数据
-					if (res.status_code) {
-						W.alert(res.err_msg+"；获取用户信息失败；error_code:"+res.status_code);
-						return;
-					} else {
-						W._login = true;//表示已登录
-						W.setSetting("user",res);
-						_user=res;
-						_user.access_token=W.getSetting("access_token");
-						var evt = document.createEvent("HTMLEvents");
-						evt.initEvent("W.loginSuccess", false, false);//当页面load事件触发并且已经登录成功则会触发该事件,用于某些需要不经过登录页也可以直接访问，但是又需要用户授权登录的页面
-						window.dispatchEvent(evt);
-					}
-				}, {
-					cust_id: json.cust_id,
-					access_token: json.access_token
-				});
+				return;
+			}else{//登录失败
+				W.errorCode(_g);
+				return;
 			}
-		},_g.open_id);
+		} else {
+			//登录成功
+			W.setSetting("openId",_g.openid);
+			W.setCookie("access_token", _g.access_token,1);
+			Wapi.user.get(function(res) {//获取用户数据
+				if (res.status_code) {
+					W.alert(res.err_msg+"；获取用户信息失败；error_code:"+res.status_code);
+					return;
+				} else {
+					W._login = true;//表示已登录
+					_user=res;
+					_user.open_id=res.login_id;
+					_user.access_token=W.getCookie("access_token");
+					//如果是商户登录，seller_id等于他自己的cust_id
+					res.seller_id=(res.cust_type==2)?res.cust_id:res.seller_id;
+					W.setSetting("user",res);
+					var evt = document.createEvent("HTMLEvents");
+					evt.initEvent("W.loginSuccess", false, false);//当页面load事件触发并且已经登录成功则会触发该事件,用于某些需要不经过登录页也可以直接访问，但是又需要用户授权登录的页面
+					window.dispatchEvent(evt);
+				}
+			}, {
+				cust_id: _g.cust_id,
+				access_token: _g.access_token
+			});
+		}
 	}else{
-		W.alert("没有open_id");
+		W.alert("没有sso_login");
 	}
 }
 
+if(_g.needUser&&!_g.openid){
+	W.wxLogin();
+}else if(_g.needOpenId=="true"&&!_g.openid){
+	W.getOpenId();
+}
 if(!W._login&&location.pathname.indexOf("index.html")<0&&_g.intent!="logout"){
 	if(WiStorm.agent.weixin){
-		if(_g.open_id){
+		if(_g.sso_login){
 			window.addEventListener("load",W.login);
 		}else{
 			W.wxLogin();

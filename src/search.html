@@ -12,9 +12,9 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 
-		<title>快速搜索</title>
+		<title>WiCARE商户版</title>
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<!--按皮肤引入css-->
 		<script>link("W.css")</script>
 		<script>link("ui.css")</script>
@@ -35,7 +35,8 @@
 	</style>
 	<script>
 	var con;	
-	window.onload=function (){
+	window.addEventListener("load",windowLoad);
+	function windowLoad(){
 		var bodyW = document.body.clientWidth; //获取屏幕宽度
 		var search_box=document.getElementById("search_d");
 	    search_box.style.width=(bodyW-W("#QRcode").offsetWidth-10)+"px";//搜索层的宽度
@@ -61,18 +62,21 @@
  显示历史记录
  **/
 	function creathis(){
-		W("#his_list").innerHTML='';
+		var his=W("#his_list");
+		his.innerHTML='';
 		/*
 		 取出本地存储的历史记录并且添加清除历史记录和新建客户
 		 * */
 		var cname=W.ls("cname");
 		if(cname!=null){			
-			for(i=0;i<cname.length;i++){
+			for(var i=cname.length-1;i>=0;i--){
 				con=new WiStormUI("div");
 				con.className="ui_car_d";
 				con.classList.add("history");
 	  			con.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_'+cname[i].car_brand_id+'_100.png" onerror=\'javascript:this.src="../img/icon_car_moren.png"\'><span name="value">'+cname[i].scname+'</span></th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+cname[i].suname+'</span></td><td><span class="name">最后一次到店:</span><span class="value">'+cname[i].slast_maintain+'</span></td></tr>';
-				W("#his_list").appendChild(con);
+	  			con.data=cname[i];
+	  			con.addEvent("click",hisSearch);
+				his.appendChild(con);
 			}
 		}else{
 			W("#his_clear").style.display='none';
@@ -93,6 +97,13 @@
 		if(W("#his_list").children.length == 0){
 			W("#his_clear").style.display='none';
 		}
+	}
+	
+	//点击历史记录进行搜索该车辆
+	function hisSearch(){
+		var data=this.data;
+		W.dom.Search.value=data.scname;
+		creatCar();
 	}
 
 	</script>

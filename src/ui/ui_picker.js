@@ -5,15 +5,15 @@ function remind_type_picker(eid) {
 	var element = W("#"+eid);
 	var picker = new mui.PopPicker();
 	picker.setData([{
-		value: '0',
+		value: '1',
 		text: '保养提醒'
 	}, {
-		value: '1',
-		text: '未到店提醒'
-	}, {
 		value: '2',
+		text: '未到店提醒'
+	}/*, {
+		value: '3',
 		text: '故障提醒'
-	}]);
+	}*/]);
 	picker.show(function(items) {
 		element.value = items[0].text;
 		element.data_value= items[0].value;

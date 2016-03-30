@@ -12,10 +12,10 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 			
-		<title>车辆管理</title>
+		<title>WiCARE商户版</title>
 		<!--必须最先引入WiStorm.js文件-->
 		<script src="../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<!--使用link()引入css文件，无需写路径，直接写文件名即可,尽量少引入css，样式如果少（小于10k为少），
 		可以直接写在style元素里，放到body元素后面-->
 		<script>link("W.css")</script>
@@ -30,7 +30,7 @@
 	</head>
 	<body>
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left" href="home.html"></a>
+			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
 			<a class="mui-icon w_icon icon_add mui-pull-right" href="customer_add.html"></a>
 			<h1 class="mui-title">车辆管理</h1>
 		</header>
@@ -39,6 +39,7 @@
 				<input type="search" class="mui-input-clear" id="search_input" placeholder="输入车牌号查询车辆">
 			</div>
 			<div id="search_list"></div>
+			<div><p style="text-align: center;margin: 5px 0;">您当前已建档车辆为<span id="total"></span>台</p></div>
 			<div id="car_list">
 				<div class="null_tip">
 					<h1>NULL</h1>
@@ -72,7 +73,9 @@
 			var last_arrive;
 			if(data.last_arrive_time)
 				last_arrive=NewDate(data.last_arrive_time).WtoString().slice(5,-3);
-			else
+			else if(data.business_status==1){
+				last_arrive=NewDate(data.create_time).WtoString().slice(5,-3);
+			}else
 				last_arrive="未到店";
 			this.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png" onerror=\'javascript:this.src="../img/icon_car_moren.png"\'><span name="value">'+data.obj_name+'</span></th><th name="tip">'+text+'</th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+data.cust_name+'</span></td><td><span class="name">车型:</span><span class="value">'+data.car_type+'</span></td></tr><tr><td><span class="name">最后到店:</span><span class="value">'+last_arrive+'</span></td><td><span class="name">车架号:</span><span class="value">'+data.frame_no+'</span></td></tr></table><footer><button type="button" class="mui-btn mui-btn-warning edit">完善资料</button></footer>';
 			
@@ -106,8 +109,12 @@
 		
 		var dom={};
 		dom.searchList=W("#search_list");
+		dom.total=W("#total");
 		//监听 html加载完成事件
 		window.addEventListener("DOMContentLoaded",function(){
+			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[3]=="0")){
+				location="home.html";
+			}
 			W("#search_input").addEvent("keyup",searchInput).addEvent("blur",function(){
 				if(!this.value){
 					dom.carList.style.display="block";
@@ -116,11 +123,16 @@
 			});
 			
 			var data={
-				parent_cust_id:_user.cust_id,
+				seller_id:_user.seller_id,
 				access_token:_user.access_token
 			}
 			//调用接口，获取用户车辆,并绘制到页面上
-			W.userApi.getVehicleList(makeCarList,data);
+			var op={fields:"maintain_last_mileage,maintain_last_date,nick_name,cust_name,obj_id,cust_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,maintain_last_mileage,mileage,arrive_count,evaluate_count,last_arrive_time,business_status,evaluate_level,create_time"}
+			W.userApi.getVehicleList(makeCarList,data,op);
+			
+			setTimeout(function(){//为了解决在ios下微信中从车辆详情返回本页会直接触发本页的返回按钮的bug
+				W(".mui-icon-left-nav").addEvent("click",function(){location="home.html"});
+			},1000);
 		});
 
 		function makeCarList(res) {
@@ -128,6 +140,7 @@
 				W.errorCode(res);
 				return;
 			}
+			dom.total.innerText=res.total;
 			if (!dom.carList)
 				dom.carList = W("#car_list"); //缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
 			var list = document.createDocumentFragment();
@@ -154,7 +167,7 @@
 					autoLoad=new ui_autoLoad(document,_load);
 				
 				autoLoad.param={
-					parent_cust_id:_user.cust_id,
+					seller_id:_user.seller_id,
 					access_token:_user.access_token,
 					max_id:MAX_ID
 				}
@@ -181,8 +194,11 @@
 				dom.searchList.style.display="none";
 				return;
 			}
+			if(val.length<3){
+				return;
+			}
 			var data={
-				parent_cust_id:_user.cust_id,
+				seller_id:_user.seller_id,
 				max_id:"0",
 				access_token:_user.access_token,
 				obj_name:val
@@ -196,11 +212,13 @@
 			}
 			var cars=res.data;
 			dom.searchList.innerHTML="";
+			dom.carList.style.display="none";
 			if(res.total){
-				dom.carList.style.display="none";
 				dom.searchList.style.display="block";
-			}else
+			}else{
+				dom.searchList.innerHTML='<div class="ui_car_d" style="text-align: center;"><a href="customer_add.html?obj_name='+W("#search_input").value+'"><span class="w_icon icon_add"></span><span>新增客户</span></a></div>';
 				return;
+			}
 			
 			var list=document.createDocumentFragment();
 			

@@ -8,14 +8,34 @@ function DateSelector(){
 	new DateSelectorPicker();
 	
 	obj.addEvent("click",DateSelector.focus);
+	obj.addEvent('focus',DateSelector.focus);
 	obj.type="text";
 	
 	return obj;
 }
 
+//取消焦点，显示日期选择
 DateSelector.focus=function(){
+	this.blur();
 	W.focus(this);
-	DateSelector.picker.show();
+	var picker=DateSelector.picker;
+	var table=picker.querySelector("table");
+	var val=this.value,d;
+	if(val){
+		val=val.trim();
+		var a=val.split(/[-\s]/);
+		d=new Date();
+		d.setFullYear(a[0]);
+		d.setMonth(a[1]-1);
+		d.setDate(a[2]);
+	}else{
+		d=picker.getDate();
+	}
+
+	table.innerHTML="";
+	picker.setDate(d);
+	table.appendChild(DateSelector.makeMonth(d));
+	picker.show();
 }
 
 DateSelector.cancel=function(){
@@ -39,14 +59,16 @@ DateSelector.ok=function(){
 	event.preventDefault();
 }
 
+//传入日期，创建该月的日历
 DateSelector.makeMonth=function(toDay){
 	var table=document.createDocumentFragment();
-	toDay.setDate(1);
-	
+	var now=new Date(toDay.getTime());
+
 	var k=___.date_k;
 	var tr=document.createElement("tr"),td;
 	var tr1=document.createElement("tr"),th;
-	var now=new Date();
+	
+	toDay.setDate(1);
 	for(var i=0;i<7;i++){
 		//创建第一行
 		td=document.createElement("td");
@@ -108,8 +130,9 @@ DateSelector.nextMonth=function(){
 DateSelector.preMonth=function(next){
 	var picker=DateSelector.picker
 	var table=picker.querySelector("table");
+	var preM;
 	table.innerHTML="";
-	var preM=picker.getDate();
+	preM=picker.getDate();
 	if(next=="next")
 		preM.setMonth(preM.getMonth()+1);
 	else
@@ -235,10 +258,12 @@ function TimeSelector(){
 		TimeSelector.picker=new mui.DtPicker({"type":"time"});
 	}
 	obj.addEvent('click',TimeSelector.show,false);
+	obj.addEvent('focus',TimeSelector.show,false);
 	return obj;
 }
 
 TimeSelector.show=function(){
+	this.blur();
 	W.focus(this);
 	TimeSelector.picker.show(TimeSelector.result);
 }
@@ -246,6 +271,10 @@ TimeSelector.show=function(){
 TimeSelector.result=function(rs){
 	var value=rs.text;
 	var input=W.blur();
-	if(input)
+	if(input){
 		input.value=value;
+		var evt = document.createEvent("HTMLEvents");
+		evt.initEvent("change", false, false);
+		input.dispatchEvent(evt);
+	}
 }

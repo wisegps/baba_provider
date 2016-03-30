@@ -28,7 +28,7 @@
 		}
 		.tab{display: table;width: 100%;}
 		.tab_gro{display: table-row;background-color: white;}
-		.tab_gro div{display: table-cell;padding: 10px 0;border-bottom: 1px solid #ccc;}
+		.tab_gro div{display: table-cell;padding: 10px 0;border-bottom: 1px solid #efefef;}
 		.tab_gro div img{vertical-align: text-bottom;}
 		.n_borbot div{border-top: 1px solid #ccc;}
 		.mileage{color: #66C6E9;}
@@ -69,11 +69,31 @@
 		}
 		bg.prototype.setData=function (data){
 			var air;
-			if(!data.avg_air)
-				air='无数据';
+			if(data.avg_air)
+				air= data.avg_air.toFixed(0);
 			else
-				air= data.avg_air;
-			this.innerHTML='<div class="date">'+data.rcv_day.slice(5,10)+'</div><div class="mileage">'+data.total_distance.toFixed(1)+'km</div><div class="consumption">'+data.total_fuel.toFixed(1)+'L</div><div class="average">'+data.avg_fuel.toFixed(1)+'L/100km</div><div class="air">'+air+'</div>';
+				air='无数据';
+				
+			if(data.avg_fuel)
+				data.avg_fuel=data.avg_fuel.toFixed(1);
+			else
+				data.avg_fuel=0;
+				
+			if(data.total_distance)
+				data.total_distance=data.total_distance.toFixed(1);
+			else
+				data.total_distance=0;
+				
+			if(data.total_fuel)
+				data.total_fuel=data.total_fuel.toFixed(1);
+			else 
+				data.total_fuel=0;
+				
+			if(data.rcv_day)
+				data.rcv_day=data.rcv_day.slice(5,10);
+			else
+				data.rcv_day=0;
+			this.innerHTML='<div class="date">'+data.rcv_day+'</div><div class="mileage">'+data.total_distance+'km</div><div class="consumption">'+data.total_fuel+'L</div><div class="average">'+data.avg_fuel+'L/100km</div><div class="air">'+air+'</div>';
 			this.data=data;
 		}
 		function mileageCar(){
@@ -100,34 +120,38 @@
 				W.errorCode(res);
 				return;
 			}
-		 	MIN_ID =res.data[res.data.length-1].day_trip_id;
-			if(!dom.tab)
-				dom.tab=W(".tab");
-			if(!dom.tab.data)
-				dom.tab.data= new Array();
-			var list = document.createDocumentFragment();
-			for (var i=0;i<res.data.length;i++) {
-				list.appendChild(new bg(res.data[i]))
-				dom.tab.data.push(res.data[i]);
-			}
-	
-			if(res.total>dom.tab.data.length){
-					var autoLoad;						//把加载的存起来		
-					if(dom.tab.autoLoad){
-						autoLoad=dom.tab.autoLoad;
-					}else if(WiStorm.agent.ios)
-						autoLoad=new ui_autoLoad(W(".mui-content"),mileageCar);
-					else
-						autoLoad=new ui_autoLoad(document,mileageCar);
-						
-					W(".mui-content").appendChild(autoLoad);
-					dom.tab.autoLoad=autoLoad;
-				}else if(dom.tab.autoLoad){
-					//删除自动加载组件,释放内存
-					dom.tab.autoLoad.remove();
-					delete dom.tab.autoLoad;
+			if(res.data.length!=0){
+			 	MIN_ID =res.data[res.data.length-1].day_trip_id;
+				if(!dom.tab)
+					dom.tab=W(".tab");
+				if(!dom.tab.data)
+					dom.tab.data= new Array();
+				var list = document.createDocumentFragment();
+				for (var i=0;i<res.data.length;i++) {
+					list.appendChild(new bg(res.data[i]))
+					dom.tab.data.push(res.data[i]);
 				}
-				dom.tab.appendChild(list);	
+		
+				if(res.total>dom.tab.data.length){
+						var autoLoad;						//把加载的存起来		
+						if(dom.tab.autoLoad){
+							autoLoad=dom.tab.autoLoad;
+						}else if(WiStorm.agent.ios)
+							autoLoad=new ui_autoLoad(W(".mui-content"),mileageCar);
+						else
+							autoLoad=new ui_autoLoad(document,mileageCar);
+							
+						W(".mui-content").appendChild(autoLoad);
+						dom.tab.autoLoad=autoLoad;
+					}else if(dom.tab.autoLoad){
+						//删除自动加载组件,释放内存
+						dom.tab.autoLoad.remove();
+						delete dom.tab.autoLoad;
+					}
+					dom.tab.appendChild(list);	
+			}else{
+				W.toast('您还没有记录');
+			}
 		}
 
 	</script>
