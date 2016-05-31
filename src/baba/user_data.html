@@ -16,102 +16,10 @@
 		<script src="../../wslib/WiStorm.js"></script>
 		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
 		<script>link("W.css")</script>
-		<script src="../../wslib/api/Wapi.js"></script>
+		<script src="../../wslib/api/newWapi.js"></script>
 	</head>
 	<style>
-		body {
-			background-color: #f0f0f0;
-			font-size: 13px;
-		}
-		.mui-content{line-height: 2.4em;}
-		.mui-pull-left,.mui-pull-right{
-		    color: #000;
-		    font-size: 14px;
-		    padding: 0.8em 10px;			
-		}
-		.nop{padding: 0;}
-		.shop {
-			width: 100%;
-			background: white;
-			margin-bottom: 10px;
-			margin-top: 10px;
-			padding: 10px;
-			
-		}
-		.shop_logo{
-			vertical-align: sub;
-		}
-		.div_account {
-			width: 100%;
-			background: white;
-			margin-bottom: 10px;
-			margin-top: 10px;
-		}
-		
-		.div_others {
-			width: 100%;
-			background: white;
-			margin-bottom: 10px;
-			margin-top: 10px;
-		}
-		
-		.shop_infos {
-			width: 60%;
-			display: inline-block;
-			vertical-align: bottom;
-		}
-		
-		.shop_info {
-		    width: 100%;
-			display: block;
-			padding:0 10px;
-			line-height: 1.5em;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			white-space:nowrap; 
-		}
-		.shop_logo img{
-		    width: 100px;
-		    height: 62px;			
-		}
-		#img_logo {
-			width: 60px;
-			height: 60px;
-			vertical-align: bottom;
-		}
-		
-		#cust_name {
-			font-size: 15px;
-			color: black;
-		}
-		
-		.setting {
-			width: 100%;
-			padding:7px 10px;
-		}
-		
-		label {
-			color: #999999;
-		}
-		
-		hr {
-			color: #eeeeee;
-			opacity: 0.1;
-			background: #000000;
-			margin-left: 10px;
-			margin: 0;
-		}
-		.fr{float: right;}
-		#picture{font-size: 16px;}
-		input[type=text]{margin: 0;height:21px;padding: 0;text-indent: 10px;font-size: 12px;}
-		.hide{display: none;background-color: white;}
-		.mui-input-row:last-child{background-color: white;}
-		#submit{width: 100%;margin-top: 2.8em;}
-		#submit p{width: 85%;background-color:#50B7DE ;color:white;margin: 0 8%;text-align: center;border-radius: .3em;padding:.4em 0;}
-		.mui-radio input[type=radio]:before{font-size:20px;}
-		.nodice{background-color:#f0f0f0 ;width: 100%;height: 10px;}
-		#baba{padding: 7px 10px 2px 10px;}
-		.mui-pull-left{display: none;}
+		body{background-color:#f0f0f0;font-size:13px}.mui-content{line-height:2.4em}.mui-pull-left,.mui-pull-right{color:#000;font-size:14px;padding:.8em 10px}.nop{padding:0}.shop{width:100%;background:white;margin-bottom:10px;margin-top:10px;padding:10px}.shop_logo{vertical-align:sub}.div_account{width:100%;background:white;margin-bottom:10px;margin-top:10px;padding:0 1em}.div_others{width:100%;background:white;margin-bottom:10px;margin-top:10px}.shop_infos{width:60%;display:inline-block;vertical-align:bottom}.shop_info{width:100%;display:block;padding:0 10px;line-height:1.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.shop_logo img{width:100px;height:62px}#img_logo{width:60px;height:60px;vertical-align:bottom}#cust_name{font-size:15px;color:black}.setting{width:100%;padding:7px 0;border-bottom:1px solid #eee}label{color:#999}hr{color:#eee;opacity:.1;background:#000;margin-left:10px;margin:0}.fr{float:right}#picture{font-size:16px}input[type=text]{margin:0;height:21px;padding:0;text-indent:10px;font-size:12px}.hide{display:none;background-color:white}.mui-input-row:last-child{background-color:white}#submit{width:100%;margin-top:2.8em}#submit p{width:85%;background-color:#50b7de;color:white;margin:0 8%;text-align:center;border-radius:.3em;padding:.4em 0}.mui-radio input[type=radio]:before{font-size:20px}.nodice{width:100vw;height:10px;margin-left:-1em}#baba{padding:7px 0 2px}.mui-pull-left{display:none}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav nop">
@@ -144,16 +52,36 @@
 					<label>男</label>
 					<input type="radio" name="man" value="男" checked="checked"/>
 				</div>
-				<div  class="hide mui-input-row mui-radio">
+				<div  class="hide mui-input-row mui-radio" style="border-bottom: solid 1px #eee;">
 					<label>女</label>
 					<input type="radio" name="man"  value="女"/>											
 				</div>
-				<div class="nodice"></div>
+				<div class="setting">
+					<a href="wallet.html?temporary=1" style="width: 100%;display: block;">
+						<label class="label">我的钱包</label>
+					</a>
+				</div>
+				<div class="setting">
+					<a href="order.html?temporary=1" style="width: 100%;display: block;">
+						<label class="label">我的订单</label>
+					</a>
+				</div>
+				<div class="setting">
+					<a href="repair_list.html?temporary=1" style="width: 100%;display: block;">
+						<label class="label">维修记录</label>
+					</a>
+				</div>
+				<div class="setting">
+					<a href="../customer_advisory.html?temporary=1" style="width: 100%;display: block;">
+						<label class="label">商户咨询</label>
+					</a>
+				</div>
+				<!--<div class="nodice"></div>-->
 				<div class="setting" id="baba">
 					<label class="label" style="line-height: 24px;vertical-align: super;">关于叭叭</label>
 					<span class="mui-icon mui-icon-arrowright fr" style="color: #ccc;"></span>
 				</div>
-		</div>
+			</div>
 			<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
 				<ul class="mui-table-view">
 					<li class="mui-table-view-cell">
@@ -245,7 +173,7 @@
             }			
             
 			var data ={
-					cust_id:_user.cust_id,
+					_cust_id:_user.cust_id,
 					access_token:_user.access_token,				
 					cust_name:uName,
 					remark:profile,
@@ -346,7 +274,7 @@
 			}
 			fileUpload.code=2;
 			var data ={
-				cust_id:_user.cust_id,
+				_cust_id:_user.cust_id,
 				access_token:_user.access_token,	
 				logo:res.image_file_url
 			}

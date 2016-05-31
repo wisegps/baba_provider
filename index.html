@@ -18,63 +18,10 @@
 		<script src="wslib/api/newWapi.js"></script>
 	</head>
 	<style>
-		body{background-color: #fff;}
-		.mui-input-row{
-			border: 1px solid #E1E1E1;
-			border-radius: 4px;
-			margin-bottom: 1em;
-			box-shadow: 0 0 6px rgba(105, 192, 226, 0);
-			-webkit-transition: box-shadow .3s;
-			transition: box-shadow .3s;
-			line-height: 38px;
+		body{background-color:#fff}.mui-input-row{border:1px solid #e1e1e1;border-radius:4px;margin-bottom:1em;box-shadow:0 0 6px rgba(105,192,226,0);-webkit-transition:box-shadow .3s;transition:box-shadow .3s;line-height:38px}.mui-input-row>label{width:auto;background:#f7f7f7;border-right:1px solid #e0e0e0;position:absolute;left:0;top:0}.mui-input-row>input{height:100%;font-size:14px;padding-left:4.5em}.mui-input-row.active{border:1px solid #78d6fb;box-shadow:0 0 6px rgba(105,192,226,0.61)}.mui-input-group{padding:1.5em .5em;margin-top:1em}.mui-input-group:before{display:none}.mui-input-group .mui-input-row:after{display:none}.right{text-align:right;font-size:14px}a{color:#61bde1}.mui-content{padding:1em}.has_nav{padding:44px 1em 1em 1em;overflow-y:auto}.child_view{position:fixed}.mui-icon,.w_icon{font-size:18px}.text{color:#ccc;text-align:center;font-size:12px}.but{background:#ddd;line-height:2em;text-align:center;border-radius:4px;color:#fff;padding:0 .8em;margin:0 .5em;display:inline-block}.t_left{text-align:left;padding-left:18px}.sms{float:right;margin:0 0 0 .5em;line-height:40px;height:40px;vertical-align:top}.but.sms.fromSmall{border-radius:20px;width:40px}.w_icon{color:#333}#register_form{padding-top:0}.mui-radio{text-align:center;line-height:40px;margin-bottom:5px}.mui-radio label{display:inline;padding-right:.5em}.mui-radio input[type=radio]{position:static;display:inline}.mui-radio input[type=radio]:before{font-size:20px}
+		.back_login{
+			font-size: 14px;line-height: 24px;display: inline-block;vertical-align: bottom;
 		}
-		.mui-input-row>label{
-			width: auto;
-			background: #F7F7F7;
-			border-right: 1px solid #E0E0E0;
-			position: absolute;
-			left: 0;
-			top: 0;
-		}
-		.mui-input-row>input{
-		    height: 100%;
-		    font-size: 14px;
-		    padding-left: 4.5em;
-		}
-		.mui-input-row.active{
-			border: 1px solid #78D6FB;
-			box-shadow: 0 0 6px rgba(105, 192, 226, 0.61);
-		}
-		.mui-input-group{padding: 1.5em .5em;margin-top: 1em;}
-		.mui-input-group:before{display: none;}
-		.mui-input-group .mui-input-row:after{display: none;}
-		.right{
-			    text-align: right;
-    			font-size: 14px;
-		}
-		a{
-			color: #61BDE1;
-		}
-		.mui-content{
-			    padding: 1em;
-		}
-		.has_nav{
-			padding: 44px 1em 1em 1em;
-			overflow-y: auto;
-		}
-		.child_view{    position: fixed;}
-		.mui-icon,.w_icon{font-size: 18px;}
-		.text{color: #ccc;text-align: center;font-size: 12px;}
-		.but{background:#ddd;line-height: 2em;text-align: center;border-radius: 4px;color: #fff;padding: 0 .8em;margin: 0 .5em;display: inline-block;}
-		.t_left{text-align: left;padding-left: 18px;}
-		.sms{float: right;margin: 0 0 0 .5em;line-height: 40px;height: 40px;vertical-align: top;}
-		.but.sms.fromSmall{border-radius: 20px;width: 40px;}
-		.w_icon{color: #333;}
-		#register_form{padding-top: 0;}
-		.mui-radio{text-align: center;line-height: 40px;margin-bottom: 5px;}
-		.mui-radio label{display: inline;padding-right: .5em;}
-		.mui-radio input[type=radio]{position: static;display: inline;}
-		.mui-radio input[type=radio]:before{font-size: 20px;}
 	</style>
 	<body>
 		<script>
@@ -92,19 +39,21 @@
 				var successUrl="src/home.html";
 				if(user.cust_type==1){
 					successUrl="src/baba/air_home.html";
+				}else if(user.cust_type==4){
+					successUrl="src/distributor/home.html";
 				}
 				top.location=login_url||successUrl;
 			}
 			
 			function loginSuccess(json) {
-				if (json.status_code) {
+				if (json.status_code&&json.status_code!='0'&&json.status_code!=0) {
 					W.loading();
 					if(json.status_code<3){
 						W.alert("账号不存在或密码错误");
 						return;
 					}else
 						W.errorCode(json);
-				} else {
+				} else if(json.cust_id){
 					if(pwd&&account){
 						W.setSetting("pwd",pwd);
 						W.setSetting("account",account);
@@ -117,19 +66,15 @@
 							W.loading();
 							return;
 						} else {
-							W._login = true;//表示已登录
-							res.open_id=res.login_id;
-							res.access_token=W.getCookie("access_token");
-							
-							//如果是商户登录，seller_id等于他自己的cust_id
-							res.seller_id=(res.cust_type==2)?res.cust_id:res.seller_id;
-							W.setSetting("user",res);
+							W._loginSuccess(res);
 							success(res);
 						}
 					}, {
 						cust_id: json.cust_id,
 						access_token: json.access_token
 					});
+				}else{
+					W.loading();
 				}
 			}
 			
@@ -165,8 +110,8 @@
 							W.alert(_g.err_msg+"第三方登录错误。错误码："+_g.status_code);
 						}
 					} else {
-						//登录成功
-						loginSuccess(_g);
+						if(_g.cust_id)//登录成功
+							loginSuccess(_g);
 					}
 				} else { //微信下跳转授权页面
 					W.wxLogin();	
@@ -188,7 +133,8 @@
 					<label><span class="w_icon icon_password"></span></label>
 				</div>
 				<div class="right">
-					<a data-show="register">注册新账号</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+					<a href="src/temp_user.html?intent=logout&needUser=true">绑定已有帐号</a> |
+					<a data-show="register">注册新账号</a> |
 					<a data-show="forget">忘记密码</a>
 				</div>
 				<button type="button" class="mui-btn mui-btn-block w" id="login_but">登录</button>
@@ -196,7 +142,7 @@
 		</div>
 		<div class="child_view has_nav hide" id="register">
 			<div class="mui-bar mui-bar-nav noshadow">
-				<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+				<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"><span class='back_login'>登录</span></a>
 				<h1 class="mui-title">用户注册</h1>
 			</div>
 			<form class="mui-input-group" id="register_form">
@@ -249,7 +195,7 @@
 				</div>
 				<span class="but sms send" data-type = "2">获取验证码</span>
 				<div class="mui-input-row" style="margin-bottom: 2.5em;">
-					<input type="text" placeholder="短信验证码" name="valid_code">	
+					<input type="text" placeholder="短信验证码" name="valid_code" data-r="forget">	
 					<label><span class="w_icon icon_sms"></label>
 				</div>
 				<button type="button" class="mui-btn mui-btn-block w" disabled="disabled">下一步</button>
@@ -538,7 +484,11 @@
 					if(json.valid){
 						codeInput.pass=2;
 						addTally(codeInput);
-						checkEverything(true);
+						
+						if(codeInput.dataset.r=='forget')
+							W.dom.fb.disabled=false;
+						else
+							checkEverything(true);
 					}else{
 						addErr(codeInput);
 						codeInput.pass=1;
@@ -655,6 +605,9 @@
 				password:W.dom.rp.value,
 				valid_type:1
 			}
+			if(openId&&_g.access_token&&!_g.cust_id){//说明是游戏用户但是没有正式注册
+				reg_data.login_id=openId;
+			}
 			if(cust_type==3){//员工注册，并不马上注册
 				reg_data.cust_type=3;
 				reg_data.cust_name=W.dom.ni.value;
@@ -671,6 +624,10 @@
 					link:account_url
 				}
 				Wapi.comm.sendWeixin(function(res){
+					if(res.errcode){
+						W.alert('发送推送错误，请重试；错误码：'+res.errcode);
+						return;
+					}
 					W.alert("当前请求已经推送给了您的商户，请等待商户确认之后重新进入商户入口");
 					W.dom.rb.setAttribute("disabled","disabled");
 				},params);
@@ -686,9 +643,9 @@
 					return;
 				}else{
 					Wapi.user.login(function(res){//先调用登录接口获取到access_token才能更新其他信息
-						if(json.status_code){
+						if(res.status_code){
 							W.loading();
-							W.errorCode(json);
+							W.errorCode(res);
 							return;
 						}
 						var data={
@@ -698,9 +655,15 @@
 							'cust_type':cust_type,
 							seller_id:0
 						}
+						if(cust_type==1&&_g.seller_id){
+							data.seller_id=_g.seller_id;
+						}
 						if(openId){
 							data.login_id=openId;
 							data.logo=_g.headimgurl;
+							data.sex=_g.sex;
+							data.province=_g.province;
+							data.city=_g.city;
 						}
 						Wapi.user.update(registerSuccess,data);//更新用户名等资料
 					},{account: account,password: pwd});

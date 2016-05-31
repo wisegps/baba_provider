@@ -1,0 +1,473 @@
+<!--
+	作者：小刘
+	时间：2016-05-09
+	描述：用户注册
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>我的WiCARE</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		<script src="../ui/ui.js"></script>
+		<script>link("ui.css")</script>
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script src="../../wslib/toolkit/WxSdk.js" defer="defer"></script>
+		<style>
+		body{background-color:#fff}.mui-input-row{border:1px solid #e1e1e1;border-radius:4px;margin-bottom:1em;box-shadow:0 0 6px rgba(105,192,226,0);-webkit-transition:box-shadow .3s;transition:box-shadow .3s;line-height:38px}.mui-input-row>label{width:auto;background:#f7f7f7;border-right:1px solid #e0e0e0;position:absolute;left:0;top:0}.mui-input-row>input{height:100%;font-size:14px;padding-left:4.5em}.mui-input-row.active{border:1px solid #78d6fb;box-shadow:0 0 6px rgba(105,192,226,0.61)}.mui-input-group{padding:1.5em;margin-top:1em}.mui-input-group:before{display:none}.mui-input-group .mui-input-row:after{display:none}.mui-icon,.w_icon{font-size:18px}.text{color:#ccc;text-align:center;font-size:12px}.but{background:#ddd;line-height:2em;text-align:center;border-radius:4px;color:#fff;padding:0 .8em;margin:0 .5em;display:inline-block}.sms{float:right;margin:0 0 0 .5em;line-height:40px;height:40px;vertical-align:top}.but.sms.fromSmall{border-radius:20px;width:40px}#submit{margin-top:3em}#province{position:absolute;left:2.9em;padding:0 .5em;top:0;border-right:1px solid #ccc}
+		.user>*{
+			display: none;
+		}
+		.user>.show_in_user{
+			display: block;
+		}
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<h1 class="mui-title">用户注册</h1>	
+		</header>
+		<div class="mui-content">
+			<form class="mui-input-group" id="business_alliance">
+				<div class="mui-input-row">
+					<input type="text" placeholder="昵称" name="nike_name" class="nike_name">	
+					<label><span class="w_icon icon_merchant"></label>
+				</div>
+				<div class="mui-input-row">
+					<input type="text" maxlength="11" placeholder="手机号码" name="mobile" class="mobile">	
+					<label><span class="w_icon icon_user"></label>
+				</div>
+				<span class="but sms send" data-type = "4">获取验证码</span>
+				<div class="mui-input-row">
+					<input type="text" placeholder="短信验证码" name="valid_code">	
+					<label><span class="w_icon icon_sms"></label>
+				</div>
+				<div class="mui-input-row show_in_user">
+					<input style="text-indent: 2.5em;" maxlength="6" type="text" placeholder="车牌号" name="cust_name" class="cust_name">
+					<span id="province">粤</span>
+					<label style="padding: 6px 12px;"><span class="w_icon icon_vehicle" style="font-size: 24px;"></label>
+				</div>
+				<button id='submit' type="button" class="mui-btn mui-btn-block w">注册</button>
+				<div class="show_in_user">
+					<ul class="mui-table-view mui-table-view-chevron" id="obj_list"></ul>
+					<button id='sendWeixin' type="button" class="mui-btn mui-btn-block w show_in_user">确定</button>
+				</div>
+			</form>
+			<div class="text">欢迎加入WiCARE</div>
+		</div>
+<script>
+	var open_id=_g.openid;//获取open_id 如果没有,授权登录获取		
+	if (WiStorm.agent.weixin) {
+		if (_g.sso_login) {
+			if (_g.access_token) {
+				if(!_g.cust_id){//判断游戏用户
+					submits.login_id=_g.open_id;							
+				}else{
+					
+//					if(_g.cust_type==1)
+//						location.href='air_home.html';
+//					else if(_g.cust_type==2 || _g.cust_type==3)
+//						location.href='../home.html';
+				}
+			}
+		} else { //微信下跳转授权页面
+			W.wxLogin();	
+		}
+	}
+	var mb= W('#business_alliance');
+	W.dom.pro=W("#province");
+	W.dom.name=mb.querySelector("[name=cust_name]");//车牌号
+	W.dom.nk=mb.querySelector("[name=nike_name]");//昵称
+	W.dom.nk.addEvent('keyup',getCustName);
+	W.dom.name.addEvent('keyup',carName);
+	W.dom.pro.addEvent("click", ui_areaBox);//绑定ui省份组件
+	W.dom.sms_b=mb.querySelector(".but.sms.send").addEvent("click",getSMS);//发送验证码
+	W.dom.mi=mb.querySelector("[name=mobile]").addEvent("keyup",checkMobile);
+	W.dom.ci=mb.querySelector("[name=valid_code]").addEvent("change",checkCode);
+	W('#submit').addEvent('click',submits);
+	
+	window.onload=function (){
+		if((_g.access_token&&_g.cust_id)||(_user&&_user.cust_id)){
+			getUserCar();
+		}else{
+			W.dom.nk.value=_g.nickname;
+			getCustName();//校验默认的用户名
+		}
+	}
+	//校验昵称
+	function getCustName(){
+		var v=W.trim(W.dom.nk.value);
+		if(!v){
+			addErr(W.dom.nk);
+			return;
+		}
+		Wapi.user.checkExists(function(json){
+			if(json.exist){
+				W.toast("该名称已经被注册");
+				W.dom.nk.pass=1;
+				addErr(W.dom.nk);
+			}else{
+				addTally(W.dom.nk);
+				W.dom.nk.pass=2;
+			}
+		},{cust_name:v});				
+	}
+	//发送验证码
+	function getSMS(){
+		if(this.status){
+			if(this.status=="checkMobile")
+				W.toast("请等待手机号码验证");
+			else
+				W.toast("如果没有收到短信，请一分钟后再点击");
+			return;
+		}
+		var type=this.getAttribute("data-type");
+		var mobile=W.trim(this.parentElement.querySelector("[name=mobile]").value);
+		this.status=true;
+		checkCode.mobile=mobile;
+		var but=this;
+		but.innerText="已发送";
+		but.style.background="#ccc";
+		Wapi.comm.sendSMS(function(json){
+			if(json.status_code){
+				W.alert(json.msg+";"+json.err_msg);
+				but.status=false;
+				but.innerText="获取验证码";
+				but.style.background="#5cb85c";
+			}else{
+				but.innerText="已发送";
+				but.style.background="#ccc";
+				but.status=true;
+				
+				but.time=60;
+				var timeFun=function(){
+					but.time--;
+					if(but.time<=0){
+						but.innerText="获取验证码";
+						but.style.background="#5cb85c";
+						but.status=false;
+					}else{
+						but.innerText=but.time;
+						but.id=setTimeout(timeFun,1000);
+					}
+				}
+				but.id=setTimeout(timeFun,1000);
+			}
+		},mobile,type);
+	}		//检测手机是否已注册
+	function checkMobile(){
+		var v=W.trim(this.value);
+		if(v.length!=11||v.match(/\D/)){
+			if(!this._err||!this._err._iserr)
+				addErr(this);
+			return;
+		}
+		W.dom.sms_b.status="checkMobile";
+		Wapi.user.checkExists(function(json){
+			if(json.exist){
+				W.alert("该手机已经注册，您可以直接登录或修改密码");
+				checkMobile.pass=1;
+				addErr(W.dom.mi);
+			}else{
+				addTally(W.dom.mi);
+				checkMobile.pass=2;
+				W.dom.sms_b.status=false;
+				W.dom.sms_b.style.background="#5cb85c";
+			}
+		},{mobile:v});
+	}
+	//检测验证码是否正确
+	function checkCode(){
+		var v=W.trim(this.value);
+		if(v.length!=4)
+			return;
+		var data={
+			valid_type:1,
+			valid_code:v,
+			mobile:checkCode.mobile
+		}
+		var codeInput=this;
+		Wapi.comm.validCode(function(json){
+			if(json.status_code){
+				W.alert(json.msg);
+				addErr(codeInput);
+				codeInput.pass=1;
+			}else{
+				if(json.valid){
+					codeInput.pass=2;
+					addTally(codeInput);
+				}else{
+					addErr(codeInput);
+					codeInput.pass=1;
+				}
+			}
+		},data);
+	}
+	//添加错误或者正确span
+	function addErr(dom){
+		addTally(dom,true);
+	}
+	function addTally(dom, b) {
+		var p = dom._err;
+		if (p){
+			if(p._iserr==b)
+				return;
+			else
+				p.parentElement.removeChild(p);
+		}
+		var tem=document.createElement("span");
+		tem.className="but sms fromSmall";
+		if(b){
+			tem.innerHTML="&#10008";
+			tem.style.background="#d9534f";
+			tem._iserr=b;
+		}else{
+			tem.innerHTML="ok";
+			tem.style.background="#5cb85c";
+			tem.style.padding="0";
+		}
+		dom._err=tem;
+		dom.parentElement.parentElement.insertBefore(tem,dom.parentElement);
+	}
+	//判断车牌号格式
+	function carName(){
+		var regu = "^[a-zA-Z]{1}[0-9a-zA-Z\_]+$";
+		var re = new RegExp(regu);
+		if (re.test(W.dom.name.value)) {
+			W.dom.name.pass=2;
+			addTally(this);
+			return true;
+		} else {
+			addErr(this);
+			W.dom.name.pass=1;
+			return false;
+		}			
+	}
+	//注册按钮
+	function submits(){
+		W.loading("正在注册...");
+		if(!(W.dom.mi.value && W.dom.name.value && W.dom.ci.value && W.dom.nk.value)){
+			W.alert('请填写完整的信息');
+			W.loading();
+			return;
+		}
+		if((W.dom.ci.pass && checkMobile.pass && W.dom.name.pass && W.dom.nk.pass)==2){
+			var pwd=W.dom.mi.value.slice(5,11);
+			var data={
+				mobile:W.dom.mi.value,
+				valid_code:W.dom.ci.value,
+				password:pwd
+			};
+			if(submits.login_id)
+				data.login_id=submits.login_id;
+			Wapi.user.register(function(json){//注册接口
+				if(json.status_code){
+					W.loading();
+					W.errorCode(json);
+					return;
+				}else{
+					var user={
+						cust_id:json.cust_id
+					}
+					Wapi.user.login(function(res){//先调用登录接口获取到access_token才能更新其他信息
+						if(res.status_code){
+							W.loading();
+							W.errorCode(res);
+							return;
+						}
+						var token=res.access_token;
+						var custid=res.cust_id;
+						var sin={
+							_cust_id:res.cust_id,
+							login_id:open_id,
+							access_token:token,
+							cust_name:W.dom.nk.value,
+							cust_type:1,
+							logo:_g.headimgurl,
+							sex:_g.sex,
+							seller_id:_g.seller_id,
+							province:_g.province,
+							city:_g.city
+						};
+						Wapi.user.update(function(events){//更新其他资料
+							if (events && events.status_code) {
+								W.loading();
+								W.errorCode(events);
+								return;
+							}		
+							addCar(custid,token);//添加车辆
+						},sin);
+					},{account:W.dom.mi.value,password: pwd});
+					
+				}
+			},data);
+		}else{
+			W.loading();
+			W.alert('填写信息有误,请重新填写');
+		}
+	}
+	
+	//发送推送给商户
+	function sendToSeller(user,token){
+		Wapi.user.get(function(res){//获取商户的login_id用于后面的推送接口
+			if (res.status_code) {
+				W.loading();
+				W.errorCode(res);
+				return;
+			}	
+			var account_url=WiStorm.root+"src/car_manage.html?newCar="+encodeURIComponent(JSON.stringify(user));
+			var params={
+				from:"您有新客户加入",
+				content:"车牌号："+user.obj_name+"，已成为您的客户车辆，是否马上到店？",
+				remark:"进入确认到店。",
+				open_id:res.login_id,
+				link:account_url
+			}
+			Wapi.comm.sendWeixin(function(d){//推送给商户
+				W.loading();
+				if(d.errcode){
+					W.alert('发送推送错误，请重试；错误码：'+d.errcode);
+					return;
+				}
+				W.alert("到店信息已经推送给商户,您可以关闭当前页面了。",function(){
+					if(W.native)
+						W.native.close();
+				});
+			},params);
+		},{
+			cust_id:_g.seller_id,
+			access_token:token
+		},{fields:'login_id'});
+	}
+	
+	//把车辆和用户纳入商户
+	function addToSeller(user,token){
+		W.loading("正在推送至商户");
+		Wapi.user.addSeller(function(res){//用户纳入商户客户列表
+			if (res.status_code) {
+				W.loading();
+				W.errorCode(res);
+				return;
+			}
+			Wapi.vehicle.addSeller(function(res){//车辆归到商户客户列表
+				if (res.status_code) {
+					W.loading();
+					W.errorCode(res);
+					return;
+				}
+				sendToSeller(user,token);//发送微信推送给商户
+			},{
+				obj_id:user.obj_id,
+				seller_id:_g.seller_id,
+				access_token:token
+			});
+		},{
+			cust_id:user.cust_id,
+			seller_id:_g.seller_id,
+			access_token:token
+		});
+	}
+	
+	//处理已经注册的用户，根据是否有车辆来进行处理
+	function getUserCar(){
+		var token=_g.access_token||_user.access_token;
+		var cust_id=_g.cust_id||_user.cust_id;
+		W.loading("请稍等");
+		//隐藏所有输入项
+		mb.classList.add('user');
+		var title=W(".mui-title");
+		var send=W("#sendWeixin");
+		title.innerHTML='选择车辆到店';
+
+		sendDataToSeller._user={
+			cust_id:cust_id
+		}
+		sendDataToSeller._token=token;
+		Wapi.vehicle.list(function(res){
+			W.loading();
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			
+			if(!res.data||!res.data.length){//没有车辆
+				title.innerHTML='填写车牌号';
+				send.addEvent('click',addCar);
+			}else{
+				send.addEvent('click',sendDataToSeller);
+				var car=res.data[0];
+				sendDataToSeller._user.obj_id=car.obj_id;
+				sendDataToSeller._user.obj_name=car.obj_name;
+				if(res.data.length==1){
+					addToSeller(sendDataToSeller._user,token);
+				}else{//有车辆
+					var ul=W("#obj_list");
+					var list='';
+					for(var i=0;i<res.data.length;i++){
+						list+='<li class="mui-table-view-cell" data-objid="'+res.data[i].obj_id+'">'+res.data[i].obj_name+'</li>';
+					}
+					ul.innerHTML=list;
+					setObjName(car.obj_name);
+					ul.addEvent('click',setData);
+				}
+			} 
+		},{
+			access_token:token,
+			cust_id:cust_id
+		});
+	}
+	//选择车辆到店
+	function setData(){
+		var objid=event.target.dataset.objid;
+		var objname=event.target.innerHTML;
+		setObjName(objname);
+		sendDataToSeller._user.obj_id=objid;
+		sendDataToSeller._user.obj_name=objname;
+	}
+	//设置车牌
+	function setObjName(obj_name){
+		W.dom.pro.innerHTML=obj_name[0];
+		W.dom.name.value=obj_name.slice(1);
+	}
+	//点击确定发送推送给商户
+	function sendDataToSeller(){
+		//收集好必要信息推送给商户
+		addToSeller(sendDataToSeller._user,sendDataToSeller._token);
+	}
+	//给用户添加一辆车，并推送给商户
+	function addCar(custid,token){
+		if(typeof custid=='object'){//有用户，但是没有车辆的情况
+			custid=sendDataToSeller._user.cust_id;
+			token=sendDataToSeller._token;
+		}
+		var name=W.dom.pro.innerText+W.dom.name.value;
+		var cardata={
+			cust_id:custid,
+			seller_id:_g.seller_id,
+			access_token:token,
+			obj_name:name
+		};
+		Wapi.vehicle.add(function(res){//添加车辆接口
+			if (par && par.status_code) {
+				W.loading();
+				W.errorCode(res);
+				return;
+			}
+			var user={
+				cust_id:custid,
+				obj_id:res.obj_id,
+				obj_name:name
+			}
+			addToSeller(user,token);
+		},cardata);
+	}
+</script>
+	</body>
+</html>

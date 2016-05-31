@@ -66,6 +66,37 @@ WiStormAPI.prototype.postApi=function(getData,callback,data){
 	this.ajax(url,ajaxSetting);
 }
 
+/**
+ * 调用安全api
+ * @param {Object} data
+ * @param {Object} callback
+ * @param {Object} op
+ */
+WiStormAPI.prototype.safetyGet=function(data,callback,op){
+	var reg=new RegExp("(^\\s*)|(\\s*$)", "g");
+	var val;
+	for(key in data){
+		if(typeof data[key]=='object')
+			val=JSON.stringify(data[key]);
+		else if(typeof data[key]=='undefined')
+			continue;
+		else
+			val=data[key].toString();
+		data[key]=encodeURI(val.replace(reg,""));
+	}
+	var ajaxSetting={
+		'data':data,
+		dataType:'json',//服务器返回json格式数据
+		type:'get',//HTTP请求类型
+		timeout:10000,//超时时间设置为10秒；
+		success:callback,
+		error:function(xhr,type,errorThrown){//异常处理；
+			throw ("apiError:"+type);
+		}
+	}
+	this.ajax(this.safetyUrl,ajaxSetting);
+}
+
 WiStormAPI.prototype.makeUrl=function(json){
 	var sign="";
 	var URL="";
@@ -83,11 +114,13 @@ WiStormAPI.prototype.makeUrl=function(json){
 		key=keyArr[i];
 		val=json[key];
 		if(val===null||val===undefined)
-			val="";
+			continue;
 		else if(typeof val=="object"){
 			val=JSON.stringify(val);			
 		}else
 			val=val.toString();
+		val=val.replace(/\+/g,'%2B');
+		val=val.replace(/\&/g,'%26');
 		val=encodeURI(val.replace(reg,""));
 		signText+=key+val;
 		getData+="&"+key+"="+val;
@@ -245,10 +278,10 @@ function WUserApi(){
 	this.tableName="user";
 	this.apiName+="."+this.tableName;
 	this._get_op={
-		fields:'cust_id,cust_name,cust_type,saler_id,car_brand,car_series,seller_id,logo,remark,create_time,update_time,photo,address,tel,mobile'//默认返回的字段
+		fields:'cust_id,login_id,cust_name,cust_type,privilege,saler_id,car_brand,car_series,seller_id,seller_ids,logo,remark,create_time,update_time,photo,address,tel,mobile'//默认返回的字段
 	}
 	this._list_op={
-		fields:'cust_id,cust_name,cust_type,car_brand,car_series,seller_id,logo,remark,create_time,update_time,photo,address,tel,mobile',
+		fields:this._get_op.fields,
 		sorts:"cust_id",
 		page:"cust_id",
 		limit:"20"
@@ -377,7 +410,7 @@ WUserApi.prototype.createCrash=function(data,callback,op){
 		fields:'status_code,exception_id'
 	};
 	this.jsonConcat(OP,op);
-	OP.method=this.apiName+'.crash.create';
+	OP.method='wicare.crash.create';
 	
 	this.getApi(data,callback,OP);
 }
@@ -390,17 +423,7 @@ WUserApi.prototype.createCrash=function(data,callback,op){
  */
 WUserApi.prototype.distributorRegister=function(callback,data){
 	data.method=this.apiName+'.distributor.register';
-	var ajaxSetting={
-		'data':data,
-		dataType:'json',//服务器返回json格式数据
-		type:'get',//HTTP请求类型
-		timeout:10000,//超时时间设置为10秒；
-		success:callback,
-		error:function(xhr,type,errorThrown){//异常处理；
-			throw ("apiError:"+type);
-		}
-	}
-	this.ajax(this.safetyUrl,ajaxSetting);
+	this.safetyGet(data,callback);
 }
 
 /**
@@ -411,19 +434,90 @@ WUserApi.prototype.distributorRegister=function(callback,data){
  */
 WUserApi.prototype.distributorCheck=function(callback,data){
 	data.method=this.apiName+'.distributor.checkParent';
-	var ajaxSetting={
-		'data':data,
-		dataType:'json',//服务器返回json格式数据
-		type:'get',//HTTP请求类型
-		timeout:10000,//超时时间设置为10秒；
-		success:callback,
-		error:function(xhr,type,errorThrown){//异常处理；
-			throw ("apiError:"+type);
-		}
-	}
-	this.ajax(this.safetyUrl,ajaxSetting);
+	this.safetyGet(data,callback);
 }
 
+/**
+ * 客户签到
+ * @param {Function} callback
+ * @param {json} data,open_id
+ * @param {OP} op
+ */
+WUserApi.prototype.checkin=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);				//把用户传入的配置覆盖默认配置
+	OP.method=this.apiName+".checkin"; 		//接口名称
+	
+	this.getApi(data,callback,OP);
+}
+
+/**
+ * 客户分享
+ * @param {Function} callback
+ * @param {json} data，open_id
+ * @param {OP} op
+ */
+WUserApi.prototype.share=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);				//把用户传入的配置覆盖默认配置
+	OP.method=this.apiName+".share"; 		//接口名称
+	
+	this.getApi(data,callback,OP);
+}
+
+WUserApi.prototype.add=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+".create"; //接口名称
+	if(data.obj_name)
+		data.obj_name=data.obj_name.toUpperCase();
+	this.getApi(data,callback,OP);
+}
+
+WUserApi.prototype.getQrcode=function(callback,data,op){
+	data.method=this.apiName+'.getQrcode';
+	this.safetyGet(data,callback);
+}
+/**
+ * 添加绑定商户
+ * 参数:
+ *     cust_id: 用户ID
+ *     seller_id: 商户ID
+ * @param {Object} callback
+ * @param {Object} data 				
+ * @param {Object} op
+ */
+WUserApi.prototype.addSeller=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+".addSeller"; //接口名称
+	this.getApi(data,callback,OP);
+}
+/**
+ * 删除绑定商户
+ * 参数:
+ *     cust_id: 用户ID
+ *     seller_id: 商户ID
+ * @param {Object} callback
+ * @param {Object} data 				
+ * @param {Object} op
+ */
+WUserApi.prototype.deleteSeller=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+".deleteSeller"; //接口名称
+	this.getApi(data,callback,OP);
+}
 
 
 
@@ -438,7 +532,7 @@ function WBusinessApi(){
 		fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type',//默认返回的字段
 	}
 	this._list_op={
-		fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type',//默认返回的字段
+		fields:this._get_op.fields,
 		sorts:"business_id",
 		page:"business_id",
 		limit:"20"
@@ -490,20 +584,20 @@ WBusinessApi.prototype.list=function(callback,data,op){
  * 异常车况表api类
  * @constructor
  */
-function WExceptionsApi(){
+function WExceptionApi(){
 	this.tableName="exception";
 	this.apiName+="."+this.tableName;
 	this._get_op={
 		fields:'exception_id,msg_template,obj_id,cust_id,obj_name,cust_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,maintain_last_mileage,mileage,last_arrive,exp_type,exp_reason,pushed,push_time,create_time,update_time'
 	};
 	this._list_op={
-		fields:'exception_id,msg_template,obj_id,cust_id,obj_name,cust_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,maintain_last_mileage,mileage,last_arrive,exp_type,exp_reason,pushed,push_time,create_time,update_time',
+		fields:this._get_op.fields,
 		sorts: 'exception_id',
 	    page: 'exception_id',
     	limit: "20"
 	};
 }
-WExceptionsApi.prototype=new WiStormAPI();//继承父类WiStormAPI
+WExceptionApi.prototype=new WiStormAPI();//继承父类WiStormAPI
 
 
 
@@ -518,7 +612,7 @@ function WExcOptionApi(){
 		fields:'option_id,option_type,option_name,cust_id,mileage,duration,object,object_type,object_name,msg_template,create_time,update_time'
 	};
 	this._list_op={
-		fields:'option_id,option_type,option_name,cust_id,mileage,duration,object,object_type,object_name,msg_template,create_time,update_time',
+		fields:this._get_op.fields,
 		sorts: 'option_id',
 	    page: 'option_id',
     	limit: "20"
@@ -539,7 +633,7 @@ function WChatApi(){
 		fields:'chat_id,user_id,friend_id,type,url,content,voice_len,lon,lat,address,create_time,read_time,sender_id,receiver_id'
 	};
 	this._list_op={
-		fields:'chat_id,user_id,friend_id,type,url,content,voice_len,lon,lat,address,create_time,read_time,sender_id,receiver_id',
+		fields:this._get_op.fields,
 		sorts: 'chat_id',
 	    page: 'chat_id',
     	limit: "20"
@@ -559,7 +653,7 @@ function WRelationApi(){
 		fields:'relat_id,user_id,friend_id,friend_type,friend_name,sex,logo,content,send_time,create_time,unread_count,status'
 	};
 	this._list_op={
-		fields:'relat_id,user_id,friend_id,friend_type,friend_name,sex,logo,content,send_time,create_time,unread_count,status',
+		fields:this._get_op.fields,
 		sorts: '-create_time',
 	    page: 'create_time',
     	limit: "20"
@@ -620,12 +714,17 @@ WBaseApi.prototype.getAQI=function(callback,data,op){
  * @param {Function} callback
  * @param {json} op，接口配置，可选
  */
-WBaseApi.prototype.getBrands=function(callback,op){
-	var OP={};
-	this.jsonConcat(OP,op)
+WBaseApi.prototype.getBrands=function(callback,data,op){
+	var OP={
+		fields:'pid,name,url_icon,t_spell',
+		sorts: 't_spell',
+	    page: 't_spell',
+    	limit: "-1"
+	};
+	this.jsonConcat(OP,data);
 	OP.method=this.apiName+'.car_brands.list';//接口名称
 	
-	this.getApi(OP,callback);		//调用新接口
+	this.getApi(OP,callback,op);
 }
 
 /**
@@ -634,14 +733,17 @@ WBaseApi.prototype.getBrands=function(callback,op){
  * @param {String} id，品牌id
  * @param {options} op，接口配置，可选
  */
-WBaseApi.prototype.getSeriess=function(callback,id,op){
+WBaseApi.prototype.getSeriess=function(callback,data,op){
 	var OP={
-		pid:id
+		fields:'pid,name,show_name,go_id,go_name',
+		sorts: 'go_name,name',
+	    page: 'go_name',
+    	limit: "-1"
 	};
-	this.jsonConcat(OP,op);
+	this.jsonConcat(OP,data);
 	OP.method=this.apiName+'.car_series.list';//接口名称
 	
-	this.getApi(OP,callback);		//调用新接口（这里因为新接口还没有做好，所以先注释，使用下面的旧接口）
+	this.getApi(OP,callback,op);
 }
 
 /**
@@ -650,30 +752,23 @@ WBaseApi.prototype.getSeriess=function(callback,id,op){
  * @param {String} id，车系id
  * @param {options} op，接口配置，可选
  */
-WBaseApi.prototype.getTypes=function(callback,id,op){
+WBaseApi.prototype.getTypes=function(callback,data,op){
 	var OP={
-		pid:id
+		fields:'pid,name,show_name,go_id,go_name',
+		sorts: 'go_name,name',
+	    page: 'go_name',
+    	limit: "-1"
 	};
-	this.jsonConcat(OP,op);
+	this.jsonConcat(OP,data);
 	OP.method=this.apiName+'.car_types.list';//接口名称
 	
-	this.getApi(OP,callback);		//调用新接口
+	this.getApi(OP,callback,op);		//调用新接口
 }
 
 //经纬度转地址
 WBaseApi.prototype.geocoder=function(callback,data){
 	data.method=this.apiName+'.geocoder';
-	var ajaxSetting={
-		'data':data,
-		dataType:'json',//服务器返回json格式数据
-		type:'get',//HTTP请求类型
-		timeout:10000,//超时时间设置为10秒；
-		success:callback,
-		error:function(xhr,type,errorThrown){//异常处理；
-			throw ("apiError:"+type);
-		}
-	}
-	this.ajax(this.safetyUrl,ajaxSetting);
+	this.safetyGet(data,callback);
 }
 
 
@@ -795,10 +890,10 @@ function WDeviceApi(){
 	this.tableName="device";
 	this.apiName+="."+this.tableName;
 	this._get_op={
-		fields:'device_id,serial,cust_id,cust_name,device_type,sim,status,active_time'//默认返回的字段
+		fields:'device_id,serial,cust_id,cust_name,device_type,sim,status,seller_id,active_time'//默认返回的字段
 	}
 	this._list_op={
-		fields:'device_id,serial,cust_id,cust_name,device_type,sim,status,active_time',
+		fields:this._get_op.fields,
 		sorts:"device_id",
 		page:"device_id",
 		limit:"20"
@@ -912,7 +1007,7 @@ WDeviceApi.prototype.sendCommand=function(callback,data,op){
 }
 
 /**
- * 更新日行程汇总数据表
+ * 点赞
  * @param {Object} callback
  * @param {Object} data
  * @param {Object} op
@@ -1053,7 +1148,7 @@ function WOrderApi(){
 		fields:'order_id,cust_id,seller_id,saler_id,order_type,status,product_name,unit_price,quantity,remark,create_time'//默认返回的字段
 	}
 	this._list_op={
-		fields:'order_id,cust_id,seller_id,saler_id,order_type,status,product_name,unit_price,quantity,remark,create_time',
+		fields:this._get_op.fields,
 		sorts:"order_id",
 		page:"order_id",
 		limit:"20"
@@ -1091,19 +1186,65 @@ WPayApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
  *	total_price: 总价;
  */
 WPayApi.prototype.pay=function(callback,data){
+	data.method=this.apiName+'.buy';
+	if(data._return==true){
+		this.getApi(data,callback);
+	}else
+		this.getApi(data,function(res){
+			if(res.status_code){
+				//后台下单不成功
+				callback(res);
+			}else{
+				if(res.act_pay===0){
+					res.err_msg='get_brand_wcpay_request:ok';
+					callback(res);
+				}
+				//下单成功跳转确认订单页面
+				localStorage.setItem("_temp_order_id",res.order_id);
+				localStorage.setItem("_weixin_pay_args",JSON.stringify(res.pay_args));
+				localStorage.setItem("_weixin_pay_callback",callback.name)
+				top.location="http://h5.bibibaba.cn/baba/wx/src/activation.html?title="+data.product_name+"&detail="+data.remark+"&price="+(res.act_pay||res.total_price);
+			}
+		});
+}
+window.addEventListener("load",function(){
+	var callback=localStorage.getItem("_weixin_pay_callback");
+	var res=localStorage.getItem("_weixin_pay_res");	
+	localStorage.removeItem("_weixin_pay_callback");
+	localStorage.removeItem("_weixin_pay_res");
+	if(callback&&res){
+		eval(callback+"("+res+")");
+	}
+})
+
+/**
+ * 根据订单获取微信支付参数,
+ * callback会在页面跳回到时候调用，所以不支持匿名函数和局部函数
+ * 下单成功会自动跳转到确认订单页面，在确认订单页面支付，支付完成会返回当前url;
+ * 参数:
+ *	open_id: 微信用户OpenID;
+ *   order_id: 订单编号
+ *    product_name: 产品名称;
+ *    remark: 产品描述;
+ *    total_price: 总价;
+ */
+WPayApi.prototype.orderPay=function(callback,data){
 	data.method=this.apiName+'.weixin';
-	this.getApi(data,function(res){
-		if(res.status_code){
-			//后台下单不成功
-			callback(res);
-		}else{
-			//下单成功跳转确认订单页面
-			localStorage.setItem("_temp_order_id",res.order_id);
-			localStorage.setItem("_weixin_pay_args",JSON.stringify(res.pay_args));
-			localStorage.setItem("_weixin_pay_callback",callback.name)
-			top.location="http://h5.bibibaba.cn/baba/wx/src/activation.html?title="+data.product_name+"&detail="+data.remark+"&price="+data.total_price;
-		}
-	});
+	if(data._return==true){
+		this.getApi(data,callback);
+	}else
+		this.getApi(data,function(res){
+			if(res.status_code){
+				//后台下单不成功
+				callback(res);
+			}else{
+				//下单成功跳转确认订单页面
+				localStorage.setItem("_temp_order_id",res.order_id);
+				localStorage.setItem("_weixin_pay_args",JSON.stringify(res.pay_args));
+				localStorage.setItem("_weixin_pay_callback",callback.name)
+				top.location="http://h5.bibibaba.cn/baba/wx/src/activation.html?title="+data.product_name+"&detail="+data.remark+"&price="+(res.act_pay||res.total_price);
+			}
+		});
 }
 window.addEventListener("load",function(){
 	var callback=localStorage.getItem("_weixin_pay_callback");
@@ -1118,7 +1259,6 @@ window.addEventListener("load",function(){
 
 
 
-
 /**
  * 车辆接口api类
  * @constructor
@@ -1127,16 +1267,73 @@ function WVehicleApi(){
 	this.tableName="vehicle";
 	this.apiName+="."+this.tableName;
 	this._get_op={
-		fields:'nick_name,cust_name,obj_id,cust_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,maintain_last_mileage,mileage,arrive_count,evaluate_count,last_arrive_time,business_status,evaluate_level'
+		fields:'nick_name,cust_name,obj_id,cust_id,seller_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,maintain_last_mileage,mileage,arrive_count,evaluate_count,last_arrive_time,business_status,evaluate_level'
 	}
 	this._list_op={
-		fields:'nick_name,cust_name,obj_id,cust_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,maintain_last_mileage,mileage,arrive_count,evaluate_count,last_arrive_time,business_status,evaluate_level',	//默认返回的字段
+		fields:this._get_op.fields,
 		sorts:"obj_id",
 		page:"obj_id",
 		limit:"20"
 	};
 }
 WVehicleApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+WVehicleApi.prototype.add=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+".create"; //接口名称
+	
+	data.obj_name=data.obj_name.toUpperCase();
+	this.getApi(data,callback,OP);
+}
+
+WVehicleApi.prototype.update=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+".update"; //接口名称
+	if(data.obj_name)
+		data.obj_name=data.obj_name.toUpperCase();
+	this.getApi(data,callback,OP);
+}
+/**
+ * 添加绑定商户
+ * 参数:
+ *     obj_id: 车辆ID
+ *     seller_id: 商户ID
+ * @param {Object} callback
+ * @param {Object} data 				
+ * @param {Object} op
+ */
+WVehicleApi.prototype.addSeller=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+".addSeller"; //接口名称
+	this.getApi(data,callback,OP);
+}
+
+/**
+ * 删除绑定商户
+ * 参数:
+ *     obj_id: 车辆ID
+ *     seller_id: 商户ID
+ * @param {Object} callback
+ * @param {Object} data 				
+ * @param {Object} op
+ */
+WVehicleApi.prototype.deleteSeller=function(callback,data,op){
+	var OP={
+		fields:'status_code'
+	};
+	this.jsonConcat(OP,op);
+	OP.method=this.apiName+".deleteSeller"; //接口名称
+	this.getApi(data,callback,OP);
+}
 
 
 
@@ -1151,7 +1348,7 @@ function WDictApi(){
 		fields:'dict_value'
 	}
 	this._list_op={
-		fields:'dict_value',	//默认返回的字段
+		fields:this._get_op.fields,
 		sorts:"dict_value",
 		page:"dict_value",
 		limit:"20"
@@ -1197,7 +1394,7 @@ function WFriendApi(){
 		fields:'open_id,name,friend_open_id,friend_name,click_count'
 	}
 	this._list_op={
-		fields:'open_id,name,friend_open_id,friend_name,click_count',	//默认返回的字段
+		fields:this._get_op.fields,
 		sorts:"click_count",
 		page:"click_count",
 		limit:"100"
@@ -1216,7 +1413,7 @@ function WLogApi(){
 		fields:'cust_id,open_id,type,content,create_time'
 	}
 	this._list_op={
-		fields:'cust_id,open_id,type,content,create_time',	//默认返回的字段
+		fields:this._get_op.fields,
 		sorts:"create_time",
 		page:"create_time",
 		limit:"100"
@@ -1232,10 +1429,10 @@ function WBillApi(){
 	this.tableName="bill";
 	this.apiName+="."+this.tableName;
 	this._get_op={
-		fields:'cust_id,open_id,source,type,m_type,sum,partner_trade_no,payment_no,payment_time'
+		fields:'order_id,source,type,remark,m_type,sum,is_delay_pay,create_time'
 	}
 	this._list_op={
-		fields:'cust_id,open_id,source,type,m_type,sum,partner_trade_no,payment_no,payment_time',	//默认返回的字段
+		fields:this._get_op.fields,	//默认返回的字段
 		sorts:"create_time",
 		page:"create_time",
 		limit:"100"
@@ -1256,7 +1453,7 @@ function WLocationApi(){
 		fields:'name,address,tel,lon,lat,distance'
 	}
 	this._list_op={
-		fields:'name,address,tel,lon,lat,distance',	//默认返回的字段
+		fields:this._get_op.fields,
 		sorts:"-create_time",
 		page:"create_time",
 		limit:"20"
@@ -1275,7 +1472,7 @@ function WProductApi(){
 		fields:'product_id,product_type,status,product_name,photo,sku_info,unit_price,stock,remark,url'
 	}
 	this._list_op={
-		fields:'product_id,product_type,status,product_name,photo,sku_info,unit_price,stock,remark,url',
+		fields:this._get_op.fields,
 		sorts:"product_id",
 		page:"product_id",
 		limit:"20"
@@ -1294,7 +1491,7 @@ function WLotteryApi(){
 		fields:'lottery_id,name,type,sum,time_start,time_end,msg'
 	}
 	this._list_op={
-		fields:'lottery_id,name,type,sum,time_start,time_end,msg',	//默认返回的字段
+		fields:this._get_op.fields,
 		sorts:"lottery_id",
 		page:"lottery_id",
 		limit:"20"
@@ -1314,7 +1511,7 @@ WLotteryApi.prototype.draw=function(callback,data,op){
 }
 
 //领奖
-WLocationApi.prototype.receive=function(callback,data,op){
+WLotteryApi.prototype.receive=function(callback,data,op){
 	var OP={
 		fields:'status_code'	//默认返回的字段
 	};
@@ -1335,7 +1532,7 @@ function WGameApi(){
 		fields:'game_id,open_id,type,material_url,create_time'
 	}
 	this._list_op={
-		fields:'game_id,open_id,type,material_url,create_time',	//默认返回的字段
+		fields:this._get_op.fields,
 		sorts:"create_time",
 		page:"create_time",
 		limit:"20"
@@ -1350,12 +1547,12 @@ function WGamelogApi(){
 	this.tableName="game_log";
 	this.apiName+="."+this.tableName;
 	this._get_op={
-		fields:'log_id,game_id,open_id,completion,create_time,update_time'
+		fields:'log_id,game_id,open_id,completion,create_time,update_time,duration,name,logo'
 	}
 	this._list_op={
-		fields:'log_id,game_id,open_id,completion,create_time,update_time',	//默认返回的字段
-		sorts:"lottery_id",
-		page:"lottery_id",
+		fields:this._get_op.fields,
+		sorts:"duration",
+		page:"duration",
 		limit:"20"
 	};
 }
@@ -1368,10 +1565,10 @@ function WAdApi(){
 	this.tableName="ad";
 	this.apiName+="."+this.tableName;
 	this._get_op={
-		fields:'ad_id,city,image,content,url'
+		fields:'ad_id,city,image,content,url,probability'
 	}
 	this._list_op={
-		fields:'ad_id,city,image,content,url',	//默认返回的字段
+		fields:this._get_op.fields,	//默认返回的字段
 		sorts:"ad_id",
 		page:"ad_id",
 		limit:"20"
@@ -1379,6 +1576,60 @@ function WAdApi(){
 }
 WAdApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
 
+/**
+ * 广告日志表
+ */
+function WAdlogApi(){
+	this.tableName="ad_log";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'ad_id,open_id,type'
+	}
+	this._list_op={
+		fields:this._get_op.fields,
+		sorts:"ad_id",
+		page:"ad_id",
+		limit:"20"
+	};
+}
+WAdlogApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+/**
+ * 优惠券表
+ */
+function WVoucherApi(){
+	this.tableName="voucher";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'voucher_id,cust_id,open_id,code,type,remark,sum,valid_time,is_used'
+	}
+	this._list_op={
+		fields:this._get_op.fields,	//默认返回的字段
+		sorts:"voucher_id",
+		page:"voucher_id",
+		limit:"20"
+	};
+}
+WVoucherApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
+
+
+/**
+ * 故障码表
+ */
+function WObderrApi(){
+	this.tableName="obd_err";
+	this.apiName+="."+this.tableName;
+	this._get_op={
+		fields:'err_id,code,brand,c_define,e_define,category,content,level'
+	}
+	this._list_op={
+		fields:this._get_op.fields,
+		sorts:"err_id",
+		page:"err_id",
+		limit:"20"
+	};
+}
+WObderrApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
 
 Wapi.vehicle=new WVehicleApi();//车辆
 Wapi.pay=new WPayApi();//支付
@@ -1391,7 +1642,7 @@ Wapi.base=new WBaseApi();//基本
 Wapi.comm=new WCommApi();//通信
 Wapi.business=new WBusinessApi();//业务
 Wapi.exc_opt=new WExcOptionApi();//提醒设置
-Wapi.exceptions=new WExceptionsApi();//异常车况
+Wapi.exception=new WExceptionApi();//异常车况
 Wapi.chat=new WChatApi();//聊天
 Wapi.relation=new WRelationApi();//关系表
 Wapi.dict=new WDictApi();//字典表
@@ -1404,7 +1655,10 @@ Wapi.product=new WProductApi();//产品表
 Wapi.lottery=new WLotteryApi();//奖品表
 Wapi.game=new WGameApi();//游戏表
 Wapi.gamelog=new WGamelogApi();//游戏操作表
-Wapi.ad=new WAdApi();//游戏操作表
+Wapi.ad=new WAdApi();//广告表
+Wapi.adLog=new WAdlogApi();//广告日志表
+Wapi.voucher=new WVoucherApi();//广告日志表
+Wapi.obderr=new WObderrApi();//故障码表
 
 
 //处理记录在本地的错误日志

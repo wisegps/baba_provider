@@ -22,347 +22,30 @@
 		<script src="../../wslib/toolkit/WxSdk.js" defer="defer"></script>
 	</head>
 	<style>
-		@font-face{
-			font-family: fantasy;
-			src: url('img/impact.ttf')
-		}
-		.mui-content{
-			overflow-x: hidden;
-		}
-		.control{
-			display: table;
-			margin: auto;
-			text-align: center;
-			width: 100%;
-			margin-top: .5em;
-		}
-		.control>div{
-			display: table-cell;
-		}
-		.control img{
-			width: 3em;    
-			border-radius: 50%;
-    		box-shadow: 1px 2px 15px rgba(0,0,0,.4);
-    	}
-    	.control img:active{
-    		box-shadow: 1px 2px 5px rgba(0,0,0,.5);
-    	}
-		#logo{
-		    text-align: center;
-		    height: 0;
-		    padding: 0;
-		    border: none;
-		    position: relative;
-    		z-index: 1;
-		}
-		#logo_img{
-			width: 80px;
-		    height: 80px;
-		    border-radius: 50%;
-		    box-shadow: 0 0 0 3px #fff;
-		    position: relative;
-		    top: -40px;
-		    background: #ccc;
-		}
-
-		#set_card{background: #efefef;position: fixed;padding-top:44px}
-		.mui-table-view-cell{padding: 1em;list-style: none;}
-		.mui-table-view-cell>*{vertical-align:middle}
-		.mui-table-view-cell>.timeSelector{
-			width: 6em;
-			height: auto;
-		    padding: 0;
-		    border: none;
-		    margin: 0;
-		    color: #268FF9;
-		    vertical-align: bottom;
-		    font-size: 30px;
-		    background: rgba(0,0,0,0);
-		}
-		.mui-table-view{
-			z-index: 1;
-		}
-		#timing{
-			-webkit-transition: -webkit-transform .5s;
-			transition: transform .5s;
-			-webkit-transform:translate3d(0,-100%,0);
-			transform:translate3d(0,-100%,0);
-			background: #fff;
-			position: relative;
-		}
-		#timing.show{
-			-webkit-transform:translate3d(0,0,0);
-			transform:translate3d(0,0,0);
-		}
-		#addTime{
-			text-align: center;
-			color: #007AFF;
-		}
-		#addTime>.w_icon.icon_add{font-size: 50px;}
-		.mui-icon.mui-icon-minus{
-			line-height: 30px;
-		    vertical-align: top;
-		    color: red;
-		    margin-right: .5em;
-		}
-		.new_air{
-			background: #fff;
-			margin-bottom: 40px;
-			text-align: center;
-		}
-		.mui-slider .mui-slider-group .mui-slider-item .title>img{
-			width: 30px;
-		    vertical-align: middle;
-		}
-		.air_content>div{
-			display: inline-block;
-			width: 50%;
-			text-align: center;
-			height: 40vw;
-		}
-		.air_img{
-			background-size: 100%;
-		}
-		.air_text{
-			color: #aaa;
-			vertical-align: top;
-			white-space: nowrap;
-			padding: 0 1.5em;
-		}
-		.air_text h3{
-			font-weight: 100;
-			display: inline;
-			font-size: 20px;
-			margin-right: .5em;
-		}
-		.small{
-			font-size: .75em;
-			color: #999;
-		}
-		.avg_air{
-			line-height: 16vw;
-		    color: #2DBDEA;
-		    font-size: 3.8em;
-		    font-family: fantasy;
-		    font-weight: 100;
-		    margin: 0;
-		}
-		
-		.indoor{
-			height: 70%;
-			padding-top: 5vw;
-		}
-		.outdoor{
-			padding: 0 .5em;
-			height: 30%;
-			font-size: 14px;
-			border-top: 1px solid #eee;
-			line-height: 10vw;
-		}
-		.outdoor>span{
-			width: 50%;
-    		display: inline-block;
-		}
-		[name='air_desc']{
-			font-size: 19px;
-    		font-family: "微软雅黑";
-		}
-		[name='outdoor']{
-			text-align: right;
-		}
-		[name='city']{
-			text-align: left;
-		}
-		
-		.title{
-		    border-bottom: 1px solid #eee;
-		    padding: 8px 1em;
-		    text-align: left;
-		}
-		.title>span{
-			font-size: 16px;
-		    vertical-align: middle;
-		    margin-left: .5em;
-		}
-		.mui-icon-help{
-			line-height: 30px;
-			font-size:16px;
-			color: #007AFF;
-		}
-		.mui-icon-help:before{
-			vertical-align: middle;
-			font-size: 20px;
-		}
-.loader {
-    width: 30vw;
-    height: 30vw;
-    border-radius: 50%;
-    perspective: 800px;
-    -webkit-perspective:800px;
-    color: #5bc0de;
-    margin: 5vw auto;
-    transition: color .5s;
-	-webkit-transition: color .5s;
-}
-.inner {
-    position: absolute;
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-}
-.inner.one {
-    left: 0%;
-    top: 0%;
-    animation: rotate-one 10s linear infinite;
-    -webkit-animation: rotate-one 10s linear infinite;
-    border-bottom: 6px solid;
-}
-.inner.two {
-    right: 0%;
-    top: 0%;
-    animation: rotate-two 10s linear infinite;
-    -webkit-animation: rotate-two 10s linear infinite;
-    border-right: 6px solid;
-}
-.inner.three {
-    right: 0%;
-    bottom: 0%;
-    animation: rotate-three 10s linear infinite;
-    -webkit-animation: rotate-three 10s linear infinite;
-    border-top: 6px solid;
-}
-
-.speed0>.inner{
-    animation-play-state:paused;
-	-webkit-animation-play-state:paused;
-}
-.speed1>.inner{
-	animation-duration:6s;
-    -webkit-animation-duration:6s
-}
-.speed2>.inner{
-	animation-duration:1.5s;
-    -webkit-animation-duration:1.5s
-}
-.speed3>.inner{
-	animation-duration:.8s;
-    -webkit-animation-duration:.8s
-}
-@keyframes rotate-one {
-    0% {transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg);}
-    100% {transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg);}
-}
-@keyframes rotate-two {
-    0% {transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg);}
-    100% {transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg);}
-}
-@keyframes rotate-three {
-    0% {transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg);}
-    100% {transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg);}
-}
-
-
-@-webkit-keyframes rotate-one {
-    0% {-webkit-transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg);}
-    100% {-webkit-transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg);}
-}
-@-webkit-keyframes rotate-two {
-    0% {-webkit-transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg);}
-    100% {-webkit-transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg);}
-}
-@-webkit-keyframes rotate-three {
-    0% {-webkit-transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg);}
-    100% {-webkit-transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg);}
-}
-
-
-#air_history{
-	height: 200px;
-}
-.air_title{
-	padding: .8em .5em;
-	line-height: 1em;
-}
-.air_title>span{
-	width: 1em;
-	height: 1em;
-	display: inline-block;
-	border-radius: 2px;
-	vertical-align:bottom;
-}
-#history_title{
-	line-height: 40px;
-    display: table;
-    width: 100%;
-    text-align: center;
-    background: #A7CDF1;
-    color: #fff;
-    margin-bottom: .5em;
-}
-#history_title>div{display: table-cell;}
-#history_title>.active{background: #4891D5;}
-
-#ddd{
-	left: 27px;
-	text-align: right;
-	z-index: 2;
-	top: 82px;
-	display: none;
-}
-#ddd>div{
-	overflow: hidden;
-	height: 25%;
-	border-left: 4px solid;
-}
-#a{color: #5cb85c;background: rgba(92,184,92,0.05);}
-#b{color: #5bc0de;background: rgba(91,192,222,0.05);}
-#c{color: #f0ad4e;background: rgba(240,173,78,0.05);}
-#d{color: #d9534f;background: rgba(217,83,79,0.05);}
-
-.d{
+@font-face{font-family:fantasy;src:url('img/impact.ttf')}.mui-content{overflow-x:hidden}.control{display:table;margin:auto;text-align:center;width:100%;margin-top:.5em}.control>div{display:table-cell}.control img{width:3em;border-radius:50%;box-shadow:1px 1px 5px rgba(0,0,0,.4)}.control img:active{box-shadow:0 0 1px rgba(0,0,0,.5)}#logo{text-align:center;height:0;padding:0;border:0;position:relative;z-index:1}#logo_img{width:80px;height:80px;border-radius:50%;box-shadow:0 0 0 3px #fff;position:relative;top:-40px;background:#ccc}.child_view{background:#efefef;position:fixed;padding-top:44px}.mui-table-view-cell{padding:1em;list-style:none}.mui-table-view-cell>*{vertical-align:middle}.mui-table-view-cell>.timeSelector{width:6em;height:auto;padding:0;border:0;margin:0;color:#268ff9;vertical-align:bottom;font-size:30px;background:rgba(0,0,0,0)}.mui-table-view{z-index:1}#timing,#days{-webkit-transition:-webkit-transform .5s;transition:transform .5s;-webkit-transform:translate3d(0,-100%,0);transform:translate3d(0,-100%,0);background:#fff;position:relative}#timing.show,#days.show{-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}#addTime{text-align:center;color:#007aff}#addTime>.w_icon.icon_add{font-size:50px}.mui-icon.mui-icon-minus{line-height:30px;vertical-align:top;color:red;margin-right:.5em}.new_air{background:#fff;margin-bottom:40px;text-align:center}.mui-slider .mui-slider-group .mui-slider-item .title>img{width:30px;vertical-align:middle}.air_content>div{display:inline-block;width:50%;text-align:center;height:40vw;position:relative}.air_img{background-size:100%}.air_text{color:#aaa;vertical-align:top;white-space:nowrap;padding:0 1.5em}.air_text h3{font-weight:100;display:inline;font-size:20px;margin-right:.5em}.small{font-size:.75em;color:#999}.avg_air{color:#2dbdea;font-size:3.8em;font-family:fantasy;font-weight:100;margin:0}.indoor{height:70%;}.outdoor{padding:0 .5em;height:30%;font-size:14px;border-top:1px solid #eee;line-height:10vw}.outdoor>span{width:50%;display:inline-block}[name='air_desc']{font-size:19px;font-family:"微软雅黑"}[name='outdoor']{text-align:right}[name='city']{text-align:left}.title{border-bottom:1px solid #eee;padding:8px 1em;text-align:left}.title>span{font-size:16px;vertical-align:middle;}.mui-icon-help{line-height:30px;font-size:16px;color:#007aff}.mui-icon-help:before{vertical-align:middle;font-size:20px}.loader{width:30vw;height:30vw;border-radius:50%;perspective:800px;-webkit-perspective:800px;color:#5bc0de;margin:5vw auto;transition:color .5s;-webkit-transition:color .5s;position:absolute;margin:auto;left:0;right:0;top:0;bottom:0}.inner{position:absolute;box-sizing:border-box;width:100%;height:100%;border-radius:50%}.inner.one{left:0;top:0;animation:rotate-one 10s linear infinite;-webkit-animation:rotate-one 10s linear infinite;border-bottom:6px solid}.inner.two{right:0;top:0;animation:rotate-two 10s linear infinite;-webkit-animation:rotate-two 10s linear infinite;border-right:6px solid}.inner.three{right:0;bottom:0;animation:rotate-three linear infinite;-webkit-animation:rotate-three linear infinite;border-top:6px solid}.speed0>.inner{animation-play-state:paused;-webkit-animation-play-state:paused}.speed1>.inner{animation-duration:6s;-webkit-animation-duration:6s}.speed2>.inner{animation-duration:1.5s;-webkit-animation-duration:1.5s}.speed3>.inner{animation-duration:.8s;-webkit-animation-duration:.8s}@keyframes rotate-one{0%{transform:rotateX(35deg) rotateY(-45deg) rotateZ(0deg)}100%{transform:rotateX(35deg) rotateY(-45deg) rotateZ(360deg)}}@keyframes rotate-two{0%{transform:rotateX(50deg) rotateY(10deg) rotateZ(0deg)}100%{transform:rotateX(50deg) rotateY(10deg) rotateZ(360deg)}}@keyframes rotate-three{0%{transform:rotateX(35deg) rotateY(55deg) rotateZ(0deg)}100%{transform:rotateX(35deg) rotateY(55deg) rotateZ(360deg)}}@-webkit-keyframes rotate-one{0%{-webkit-transform:rotateX(35deg) rotateY(-45deg) rotateZ(0deg)}100%{-webkit-transform:rotateX(35deg) rotateY(-45deg) rotateZ(360deg)}}@-webkit-keyframes rotate-two{0%{-webkit-transform:rotateX(50deg) rotateY(10deg) rotateZ(0deg)}100%{-webkit-transform:rotateX(50deg) rotateY(10deg) rotateZ(360deg)}}@-webkit-keyframes rotate-three{0%{-webkit-transform:rotateX(35deg) rotateY(55deg) rotateZ(0deg)}100%{-webkit-transform:rotateX(35deg) rotateY(55deg) rotateZ(360deg)}}#air_history{height:200px}.air_title{padding:.8em .5em;line-height:1em}.air_title>span{width:1em;height:1em;display:inline-block;border-radius:2px;vertical-align:bottom}#history_title{line-height:40px;display:table;width:100%;text-align:center;background:#a7cdf1;color:#fff;margin-bottom:.5em}#history_title>div{display:table-cell}#history_title>.active{background:#4891d5}#ddd{left:27px;text-align:right;z-index:2;top:82px;display:none}#ddd>div{overflow:hidden;height:25%;border-left:4px solid}#a{color:#5cb85c;background:rgba(92,184,92,0.05)}
+#b{color:#5bc0de;background:rgba(91,192,222,0.05)}#c{color:#f0ad4e;background:rgba(240,173,78,0.05)}#d{color:#d9534f;background:rgba(217,83,79,0.05)}.d{position:absolute;top:75px;bottom:30px;left:30px;right:25px}.ddd{background:#fff;animation:ddd 3s;-webkit-animation:ddd 3s;animation-fill-mode:forwards;-webkit-animation-fill-mode:forwards}@keyframes ddd{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(100%,0,0)}}@-webkit-keyframes ddd{0%{-webkit-transform:translate3d(0,0,0)}100%{-webkit-transform:translate3d(100%,0,0)}}#ratio{position:absolute;height:26px;top:48px;width:40%;right:25px;font-size:12px;text-align:center}#ratio>div{display:inline-block;width:25%;height:26px;border-top:5px solid}#ratio_a{color:#5cb85c}#ratio_b{color:#5bc0de}#ratio_c{color:#f0ad4e}#ratio_d{color:#d9534f}.fromDown{animation:none;-webkit-animation:none}
+.noDevice{color: #007aff;}
+.like{
 	position: absolute;
-    top: 75px;
-    bottom: 30px;
-    left: 30px;
-    right: 25px;
+    top: 30%;
+    left: 50%;
+    color: #E2322D;
+    font-weight: 700;
+    font-size: 30px;
 }
-.ddd{
-    background: #fff;
-    animation: ddd 3s;
-    -webkit-animation: ddd 3s;
-    animation-fill-mode: forwards;
-    -webkit-animation-fill-mode: forwards;
+#timing>.mui-table-view-cell{color: #aaa;}
+#time_card .mui-table-view-cell{padding: 16px;}
+#time_card .mui-table-view-cell>input{font-size: 30px;text-align: center;height: auto;border: none;margin: 0;width: 4em;}
+.info{
+	font-size: 14px;
+	color: #aaa;
+	float: right;
 }
+.time{font-size:24px;line-height: 30px;}
+.mui-active .time{color: #268ff9;}
 
-@keyframes ddd {
-    0% {transform: translate3d(0,0,0);}
-    100% {transform: translate3d(100%,0,0);}
-}
-@-webkit-keyframes ddd {
-    0% {-webkit-transform: translate3d(0,0,0);}
-    100% {-webkit-transform: translate3d(100%,0,0);}
-}
-
-#ratio{
-	position: absolute;
-    height: 26px;
-    top: 48px;
-    width: 40%;
-    right: 25px;
-    font-size: 12px;
-    text-align: center;
-}
-#ratio>div{
-	display: inline-block;
-    width: 25%;
-    height: 26px;
-    border-top: 5px solid;
-}
-#ratio_a{color: #5cb85c;}
-#ratio_b{color: #5bc0de;}
-#ratio_c{color: #f0ad4e;}
-#ratio_d{color: #d9534f;}
+.mui-icon-info{line-height:30px;font-size:16px;color:#007aff}
+.mui-icon-info:before{vertical-align:middle;font-size:20px}
 	</style>
 	<body>
 		<div class="mui-content">
@@ -380,19 +63,19 @@
 				<div class="control">
 					<div id="switch">
 		              	<img src="img/1_r5_c1.png">
-		              	<h5>启动/关闭</h5>
+		              	<h5>开关</h5>
 		            </div>
 		            <div id="auto">
 		              	<img src="img/1_r5_c5.png">
-		              	<h5>智能变频</h5>
+		              	<h5>自动</h5>
 		            </div>
 		            <div id="speed_but">
 		              	<img src="img/1_r5_c13.png">
-		              	<h5>风量调节</h5>
+		              	<h5>换挡</h5>
 		            </div>
 		            <div id="setting">
 		              	<img src="img/1_r5_c11.png">
-		              	<h5>参数设置</h5>
+		              	<h5>设置</h5>
 		            </div>
 				</div>
 			</div>
@@ -435,7 +118,7 @@
 						</div>
 					</li>
 					<li class="mui-table-view-cell">
-						<span>定时模式</span>
+						<span>自定义模式</span>
 						<div class="mui-switch" id="mode_timing" data-val="2">
 							<div class="mui-switch-handle"></div>
 						</div>
@@ -448,6 +131,121 @@
 				</div>
 			</div>
 		</div>
+		<div id="time_card" class="child_view hide">
+			<div class="mui-bar mui-bar-nav onshadow">
+				<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+				<h1 class="mui-title">自定义设置</h1>
+			</div>
+			<div>
+				<ul class="mui-table-view" style="font-size: 18px;">
+					<li class="mui-table-view-cell" style="text-align:center;font-size: 30px;">
+						<script value='15:32' id="begin_time">echo(new TimeSelector())</script>
+						<span>-</span>
+						<script value='15:45' id="end_time">echo(new TimeSelector())</script>
+					</li>
+					<li class="mui-table-view-cell" id="set_day">
+						<a class="mui-navigate-right">
+							<span>重复</span>
+							<span class="info" style="margin-right: 18px;">周一，周二，周三，周四，周五</span>
+						</a>
+					</li>
+					<li class="mui-table-view-cell" id="set_mode">
+						<span>模式</span>
+						<span class="info">低速</span>
+					</li>
+					<li class="mui-table-view-cell" id="set_remark">
+						<span>备注</span>
+						<span class="info">上班</span>
+					</li>
+				</ul>
+				<button class="mui-btn mui-btn-block w" id="time_set" style="width: 80%;margin: 1em auto;">完成</button>
+				<div class="mui-input-group" id="days" style="font-size: 16px;width: 100%;position: absolute;top: 44px;z-index: 1;">
+					<div class="mui-input-row mui-checkbox mui-left">
+						<label>周一</label>
+						<input name="checkbox" value="1" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox mui-left">
+						<label>周二</label>
+						<input name="checkbox" value="2" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox mui-left">
+						<label>周三</label>
+						<input name="checkbox" value="3" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox mui-left">
+						<label>周四</label>
+						<input name="checkbox" value="4" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox mui-left">
+						<label>周五</label>
+						<input name="checkbox" value="5" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox mui-left">
+						<label>周六</label>
+						<input name="checkbox" value="6" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox mui-left">
+						<label>周日</label>
+						<input name="checkbox" value="0" type="checkbox">
+					</div>
+					<div class="mui-input-row mui-checkbox" style="text-align: center;">
+						<button style="margin-top: 4px;width: 6em;">完成</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<template id='airTemp'>
+			<div class="title">
+				<img src="http://img.wisegps.cn/logo/m_<%car_brand_id%>_100.png" onerror="ierror()">
+				<span><%obj_name%></span><%noDevice%>
+				<a href="common_problem.html?intent=logout" class="mui-pull-right mui-icon mui-icon-help"></a>
+				<!--<a href="car_condition.html?intent=logout" class="mui-pull-right mui-icon mui-icon-info"></a>-->
+				<a href="car_condition.html?obj_id=<%obj_id%>" class="mui-pull-right" style="width:16px; line-height: 30px; margin-right:10px;">
+					<img src="img/ico_nav_health.png" width="16px" height="16px" style="vertical-align:middle"/>
+				</a>
+			</div>
+			<div class="air_content">
+				<div class="air_text">
+					<div class="indoor" style="display: table;width: 100%;">
+						<div style="display: table-cell;vertical-align: middle;">
+							<div>
+								<span style="font-size: 16px;">WiCARE</span>
+								<span style="font-size: 15px;margin-left: .5em;">空气指数</span>
+								<h1 class="avg_air" style="color: <%color%>;"><span name="air"><%a%></span><span name="air_desc">/<%air_desc%></span></h1>
+								<div style="font-size: 12px;">滤芯还剩<span style="color:<%filter_color%>"><%filter%>%</span></div>
+							</div>
+							
+						</div>
+					</div>
+					<div class="outdoor">
+						<span name="city">获取城市中</span>
+						<span name="outdoor">良</span>
+					</div>
+					
+				</div><div class="air_img">
+					<div class="loader fadeIn speed<%speed%> <%closed%>" style="color:<%color%>">
+						<div class="inner one"></div>
+						<div class="inner two"></div>
+						<div class="inner three"></div>
+					</div>
+				</div>
+			</div>
+		</template>
+		<template id="timeSet">
+			<div class="<%open%>">
+				<span class="mui-icon mui-icon-minus" data-click="delete"></span>
+				<span class="time"><%begin_time%></span>
+				<span class="time">- <%end_time%></span>
+				<div class="mui-switch <%open%>" style="float: right;" data-click="open">
+					<div class="mui-switch-handle" data-click="open"></div>
+				</div>
+			</div>
+			<div style="font-size: 12px;">
+				<span style="margin-right: .5em;"><%remark%></span>
+				<span style="margin-right: .5em;"><%mode%></span>
+				<span><%day%></span>
+			</div>
+		</template>
 	</body>
 	<script for="获取数据">
 		var a_a=W.getCookie("air_a")
@@ -455,8 +253,9 @@
 			,a_c=W.getCookie("air_c");//空气的优良中的最大阀值，大于a_c为差
 		var device_list;//用户的设备数组
 		var device_i=0;//当前正在显示的设备在device_list中的索引
+		var time_out=5000;
 		var get_device_data,get_device_op={
-			fields:'device_id,serial,cust_id,cust_name,device_type,sim,status,active_time,params,active_gps_data.lon,active_gps_data.lat,active_gps_data.air,active_obd_data.dpdy,active_gps_data.uni_status'
+			fields:'device_id,serial,cust_id,cust_name,device_type,sim,status,is_online,active_time,params,active_gps_data.lon,active_gps_data.lat,active_gps_data.air,active_obd_data.dpdy,active_gps_data.uni_status,filter_life_time,filter_life_used'
 		}
 		var mui_slider;//轮播组件
 		var dom={
@@ -483,14 +282,19 @@
 			d:W("#d"),
 			ddd:W("#ddd"),
 			ratio:W("#ratio"),
+			airTemp:W("#airTemp"),
+			timeSet:W("#timeSet"),
+			time_card:W('#time_card'),
+			set_day:W("#set_day"),
+			set_mode:W("#set_mode"),
+			set_remark:W("#set_remark"),
+			begin_time:W("#begin_time"),
+			end_time:W("#end_time"),
+			days:W("#days")
 		}
 		window.addEventListener("W.loginSuccess",loginSuccess);
 		function loginSuccess(){
 			//获取设备
-			get_device_data={
-				cust_id:_user.cust_id,
-				access_token:_user.access_token
-			}
 			getDevices();
 			addEvent();//给相关元素添加事件监听
 			W("#logo_img").src=_user.logo;
@@ -501,85 +305,124 @@
 						return;
 					}
 					a_a=res.dict_value.limit1;
-					W.setCookie("air_a",a_a,7);
+					W.setCookie("air_a",a_a,1);
 					a_b=res.dict_value.limit2;
-					W.setCookie("air_b",a_b,7);
+					W.setCookie("air_b",a_b,1);
 					a_c=res.dict_value.limit3;
-					W.setCookie("air_c",a_c,7);
+					W.setCookie("air_c",a_c,1);
 				},{dict_type: 'air_limit'})
 			}
+			Checkin()//签到
+			dom.set_mode.userPicker = new mui.PopPicker();
+			dom.set_mode.userPicker.setData([{
+				value: '0',
+				text: '关闭'
+			},{
+				value: '1',
+				text: '低速'
+			},{
+				value: '2',
+				text: '高速'
+			},{
+				value: '3',
+				text: '自动'
+			}]);
 		}
-		window.addEventListener("popstate",function(){
-			dom.set.hide();
-		});
 		
+		function Checkin(){
+			var dd=W.ls('checkinTime'+_user.cust_id+_user.login_id,true);
+			var d=new Date().WtoString().split(' ')[0];
+			if(d==dd)return;
+			Wapi.user.checkin(function(res){
+				if(res.status_code){
+					return;
+				}
+				W('body').appendChild(like(res.add_wi_dou+'签到'));
+				
+				W.setLS('checkinTime'+_user.cust_id+_user.login_id,d,true);
+			},{
+				access_token:_user.access_token,
+				cust_id: _user.cust_id,
+     			open_id: _user.login_id
+			})
+		}
 		
 		//获取并展示用户设备
 		function getDevices(){
-			Wapi.device.list(function(res){
-				if (res && res.status_code) {
+			get_device_data={
+				cust_id:_user.cust_id,
+				access_token:_user.access_token
+			}
+			Wapi.vehicle.list(function(res){
+				if (res.status_code) {
 					if(res.status_code!=-1)
 						W.errorCode(res);
-					setTimeout(getDevices,5000);
+					setTimeout(getDevices,time_out);
 					return;
 				}
 				if(!res.data.length){
-					dom.list.innerHTML='<div class="mui-slider-item" id="id_test"><a href="my_car.html"><div class="title"><img src="../../img/icon_car_moren.png"><span>当前无设备</span></div></a></div>';
+					dom.list.innerHTML='<div class="mui-slider-item" id="id_test"><a href="my_car.html"><div class="title"><img src="../../img/icon_car_moren.png"><span>开启智能净化</span></div></a></div>';
 					return;//如果没有设备则不执行下面
 				}
 				res.data.reverse();//颠倒顺序
-				
-				if(getDevices.first){
-					var list = document.createDocumentFragment();
-					for(var i=0;i<res.data.length;i++){
-						if(res.data[i].params){
-							list.appendChild(new newAir(res.data[i]));
-						}else{
-							res.data.splice(i,1);
-							i--;
-						}
-					}
-					device_list=res.data;
-					getDevices.first=false;
-					dom.list.innerHTML="";
-					dom.list.appendChild(list);
-					mui_slider=mui('#slider').slider();
-					getWeather();//获取定位和室外空气
-					getAirHistory();//获取空气日曲线
-					setDeviceStatus(true);
-				}else{
-					var taget;
-					for(var i=0;i<res.data.length;i++){
-						if(res.data[i].params){
-							taget=dom.list.childNodes[i];
-							if(taget){
-								taget.setData(res.data[i]);
-								if(taget.canChange){
-									device_list[i]=res.data[i];
-								}
-								taget=null;
-							}else{
-								dom.list.appendChild(new newAir(res.data[i]));
-							}
-						}else{
-							res.data.splice(i,1);
-							i--;
-						}
-						
-					}
-					setDeviceStatus();
+				var list = document.createDocumentFragment();
+				for(var i=0;i<res.data.length;i++){
+					list.appendChild(new newAir(res.data[i]));
 				}
+				device_list=res.data;
+				dom.list.innerHTML="";
+				dom.list.appendChild(list);
+				mui_slider=mui('#slider').slider();
 				if(res.data.length>0){//把html缓存下来，下次打开时使用
-					W.setLS("dom_list_childNodes",dom.list.childNodes[0].outerHTML,true);
+					W.setLS("dom_list_childNodes",dom.list.children[0].outerHTML,true);
 				}
-				setTimeout(getDevices,5000);
-			},get_device_data,get_device_op);
+				getOneDevice('slide');
+			},get_device_data,{
+				fields:"obj_id,obj_name,nick_name,device_id,car_brand_id"
+			});
 		}
-		getDevices.first=true;
+		
+		//刷新单台设备数据
+		function getOneDevice(str){
+			var dev_id=device_list[device_i].device_id;
+			if(!dev_id){
+				setDeviceStatus(true);
+				getAirHistory();
+				return;
+			}
+			var params={
+				device_id:dev_id,
+				access_token:_user.access_token
+			}
+			Wapi.device.get(function(res){
+				if(res.status_code){
+					W.errorCode(res);
+					getOneDevice.time_id=setTimeout(getOneDevice,time_out);
+					return;
+				}
+				var taget=dom.list.children[device_i];
+				if(taget&&res.params&&device_list[device_i].device_id==res.device_id){
+					var data=device_list[device_i];
+					if(taget.canChange){
+						data.device=res;
+						taget.setData(data);
+						W.setLS("dom_list_childNodes",dom.list.children[0].outerHTML,true);
+					}
+				}
+				setDeviceStatus(true);
+				if(str=='slide'){
+					getAirHistory();//获取空气曲线
+					getWeather();
+				}
+				getOneDevice.time_id=setTimeout(getOneDevice,time_out);
+			},params,get_device_op);
+		}
 		
 		function getWeather(){
 			//获取定位和室外空气
-			var data=device_list[device_i];//当前显示设备的数据
+			var data=device_list[device_i].device;//当前显示设备的数据
+			if(!data||!data.active_gps_data.lat||!data.active_gps_data.lon)
+				return;
 			var d={
 				lat:data.active_gps_data.lat,
 				lon:data.active_gps_data.lon
@@ -593,17 +436,18 @@
 				W.alert("获取位置信息出错；错误码："+res.status);
 				return;
 			}
-			var thisView=dom.list.childNodes[device_i];
+			var thisView=dom.list.children[device_i];
 			var city=res.result.addressComponent.city.slice(0,-1);
 			thisView.querySelector("[name='city']").innerText=city;
 			var city_data={
 				"city":city
 			}
 			Wapi.base.getAQI(function(res){
-				if (res && res.status_code) {
+				if (res.status_code) {
 					W.errorCode(res);
 					return;
 				}
+				if(!res.quality)return;
 				var outdoor=thisView.querySelector("[name='outdoor']");
 				var colors={"优":"#5cb85c","良":"#5bc0de","中":"#f0ad4e","差":"#d9534f"};
 				outdoor.style.color=colors[res.quality];
@@ -617,15 +461,6 @@
 			dom.setting.addEvent("click",showSetting);//打开设置页
 			dom.speed_but.addEvent("click",setSpeed);//设置速度
 			dom.auto.addEvent("click",setMode);
-			dom.set.show=function(){//设置页打开方法
-				this.classList.add("fromRight");
-				this.classList.remove("hide");
-				this.classList.remove("toRight");
-			}
-			dom.set.hide=function(){//隐藏页的方法
-				this.classList.remove("fromRight");
-				this.classList.add("toRight");
-			};
 			
 			dom.mode_timing.addEvent("click",settingMode);
 			dom.mode_auto.addEvent("click",settingMode);
@@ -634,13 +469,61 @@
 			
 			W('#slider').addEvent('slide', function(event) {
 				device_i=event.detail.slideNumber;//滑动切换车辆
-				setDeviceStatus(true);//更改设置状态（参数为true，说明需要把设置页的定时时间和时长也做更改）
-				getWeather();//获取定位和室外空气
-				getAirHistory();//获取空气日曲线
+				clearTimeout(getOneDevice.time_id);
+				getOneDevice('slide');
 			}).addEvent("touchstart",slideS).addEvent("touchmove",slideM).addEvent("touchend",slideE);
 			
 			dom.history_title.addEvent("click",getHistory);
 			dom.ddd.addEvent("touchstart",doubleClick);
+			dom.set_day.addEvent('click',function(){
+				dom.days.classList.add("show");
+			});
+			dom.days.querySelector('button').addEvent('click',function(){
+				var c=dom.days.querySelectorAll("input:checked");
+				if(!c.length){
+					W.alert('请至少选择一天');
+					return;
+				}
+				var val='';
+				for(var i=0;i<c.length;i++){
+					val+=c[i].value+',';
+				}
+				val=val.slice(0,-1);
+				dom.set_day.dataset.value=val;
+				dom.set_day.querySelector('.info').innerText=getDay(val);
+				dom.days.classList.remove("show");
+			})
+			dom.set_mode.addEvent('click',function(){
+				var that=this;
+				this.userPicker.show(function(items) {
+					that.querySelector('.info').innerText=items[0].text;
+					that.dataset.value=items[0].value;
+				});
+			}, false);
+			dom.set_remark.addEvent('click',function(){
+				var that=this;
+				W.prompt('请输入备注',function(res){
+					that.dataset.value=res;
+					that.querySelector('.info').innerText=res;
+				});
+			});
+			W("#time_set").addEvent('click',submitTime);
+			window.addEventListener("popstate",hidePage);
+		}
+		function showPage(){//设置页打开方法
+			var u="air_home.html#"+this.id;
+			history.pushState(null,u,u);
+			this.classList.add("fromRight");
+			this.classList.remove("hide");
+			this.classList.remove("toRight");
+			if(!hidePage._ps)hidePage._ps=[];
+			hidePage._ps.push(this);
+		}
+		function hidePage(){//隐藏页的方法
+			if(!hidePage._ps)return;
+			var that=hidePage._ps.pop();
+			that.classList.remove("fromRight");
+			that.classList.add("toRight");
 		}
 		function slideS(){
 			this._ts=event.changedTouches[0].clientX;
@@ -698,8 +581,10 @@
 				}
 			}
 			if(device_list&&device_list.length){
+				var device=device_list[0].device;
+				if(!device||!device.active_gps_data||!device.active_gps_data.air)return;
 				var re={};
-				re.avg_air=device_list[0].active_gps_data.air;
+				re.avg_air=device.active_gps_data.air;
 				re.rank="20+";
 				re.logo=_user.logo;
 				setShare(re);
@@ -722,7 +607,20 @@
 			    desc: 'WiCARE空气净化器', // 分享描述
 			    link: 'http://h5.bibibaba.cn/baba/wx/src/baba/air_share.html?intent=logout&data='+data+'&option='+option_txt, // 分享链接
 			    imgUrl:_user.logo, // 分享图标
-			    success: function(){},
+			    success: function(){
+			    	if(!_user)return;
+			    	Wapi.user.share(function(res){
+			    		if(res.status_code){
+							return;
+						}
+			    		W('body').appendChild(like(res.add_wi_dou));
+			    	},{
+			    		cust_id: _user.cust_id,
+					    open_id: _user.login_id,
+					    fun_id: 0,
+					    url:location.href.split('?')[0]
+			    	});
+			    },
 			    cancel: function(){}
 			}
 			if(res.rank=="20+"){
@@ -738,11 +636,21 @@
 			wx.onMenuShareTimeline(op);
 			wx.onMenuShareAppMessage(op);
 		}
+		//显示加了多少微豆
+		function like(num){
+			var p=document.createElement("span");
+			p.className="like";
+			p.innerHTML='+'+num+'微豆';
+			setTimeout(function(){
+				p.parentNode.removeChild(p);
+			},2000);
+			return p;
+		}
 		
 		function settingMode(){//设置页里的模式更改
 			var val=this.dataset.val;
-			if(!this.classList.contains("timeSelector")&&!this.classList.contains("mui-active")){
-				val=0;
+			if(!this.classList.contains("mui-active")){
+				val=1;
 			}
 			setDevice("air_mode",val);
 		}
@@ -752,16 +660,28 @@
 			if(device_i<0){
 				return;
 			}
-			var data=device_list[device_i];//当前显示设备的数据
-			var air_view=dom.list.childNodes[device_i];//当前显示设备的卡片
+			var data,temD=device_list[device_i].device;//当前显示设备的数据
+			var air_view=dom.list.children[device_i];//当前显示设备的卡片
 			if(!air_view.canChange){
 				return;
 			}
+			if(!temD){//没有绑定设备
+				data={
+					params:{
+						switch:0,
+						air_mode:1,
+						air_speed:1
+					}
+				}
+			}else{
+				data=temD;
+			}
 						
 			var simg=dom.switch.querySelector("img");
-			if(data.params.switch){//开关
+			if(data.params.switch==1){//开关
 				simg.src="img/1_r3_c1.png";
 			}else{
+				data.params.air_speed=0;
 				simg.src="img/1_r5_c1.png";
 			}
 			
@@ -773,7 +693,7 @@
 				dom.mode_auto.classList.remove("mui-active");
 				dom.timing.classList.add("show");
 				aimg.src="img/1_r5_c5.png";
-			}else if(data.params.air_mode==1){//自动模式
+			}else if(data.params.air_mode==0){//自动模式
 				dom.mode_timing.classList.remove("mui-active");
 				dom.mode_auto.classList.add("mui-active");
 				dom.timing.classList.remove("show");
@@ -784,6 +704,8 @@
 				dom.timing.classList.remove("show");
 				aimg.src="img/1_r5_c5.png";
 			}
+			var speeds=['停止','低速','中速','高速'];
+			dom.speed_but.querySelector('h5').innerText=speeds[data.params.air_speed]
 			
 			var tem1=dom.mode_timing.querySelector("div");
 			var tem2=dom.mode_auto.querySelector("div");
@@ -791,20 +713,26 @@
 			tem1.style.webkitTransform=tem2.style.webkitTransform='';
 			
 			if(first){
-				dom.timing.innerHTML="";
 				var timeArr=data.params.air_time;
+				var ts=dom.timing.children;
 				if(!timeArr){
 					dom.timing.appendChild(dom.addTime);
 					return;
 				}
-				if(typeof timeArr=="string"){
-					timeArr=[{"time":timeArr,"open":(data.params.air_mode==2)}];
-				}
-				
 				for(var i=0;i<timeArr.length;i++){
-					dom.timing.appendChild(new timeSet(timeArr[i]));
+					if(ts[i]&&ts[i]._type=='timeSet'){
+						ts[i].setData(timeArr[i]);
+					}else{
+						if(!dom.addTime.parentElement){
+							dom.timing.appendChild(new timeSet(timeArr[i]));
+						}else{
+							dom.timing.insertBefore(new timeSet(timeArr[i]),dom.addTime);
+						}
+					}
 				}
-				if(timeArr.length<5){
+				if(timeArr.length>=5){
+					dom.timing.removeChild(dom.addTime);
+				}else if(!dom.addTime.parentElement){
 					dom.timing.appendChild(dom.addTime);
 				}
 			}
@@ -825,26 +753,30 @@
 				},
 				'air_mode':{
 					type:0x4044,
-					m:3,
+					m:2,
 					os:0
 				}
 			};//
 			var a=define[str];
 			if(!a||!device_list||device_list.length<1)return;
-			
-			var data=device_list[device_i];//当前显示设备的数据
-			var air_view=dom.list.childNodes[device_i];//当前显示设备的卡片
+			var D=device_list[device_i];//车辆数据
+			var data=D.device;//当前显示设备的数据
+			var air_view=dom.list.children[device_i];//当前显示设备的卡片
+			if(!data||!air_view)return;
 			var nowParams={};//记录当前设备参数，发送失败回滚时用
 			jsonConcat(nowParams,data.params);
 			if(!data){
 				W.toast("当前无设备数据");
+				return;
+			}else if(!data.is_online){
+				W.toast('设备暂时无法联通，请稍后重试');
 				return;
 			}else if(str=='air_speed'){
 				if(data.params.switch==0){
 					W.toast("请先开启净化器");
 					return;
 				}
-				if(data.params.air_mode==1){
+				if(data.params.air_mode==0){
 					W.toast("自动模式下无法调节速度,请先关闭自动模式");
 					return;
 				}
@@ -852,7 +784,8 @@
 					W.toast("启动2分钟内为预热阶段，将以低速预热，暂时不能调速");
 					return;
 				}
-			}else if(str!='air_mode'){
+			}
+			if(str!='air_mode'){
 				var status=data.active_gps_data.uni_status;
 				for(var i=0;i<status.length;i++){
 					if(status[i]==8196){
@@ -860,6 +793,10 @@
 						return;
 					}
 				}
+			}
+			if(data.params.switch==2){
+				W.toast("温馨信息：电瓶电压较低, 为保证电瓶安全, 设备已被锁定, 请启动车辆以解锁设备");
+				return;
 			}
 			
 			
@@ -878,15 +815,15 @@
 			if(str=='switch'&&val==1){//开启时
 				data.params.air_speed=1;//默认最低速
 				W.toast("启动2分钟内为预热阶段，将以低速预热，2分钟后智能调速，也可手动调速。");
-				air_view.setData(data);
+				air_view.setData(D);
 				air_view.speedCanChange=false;
 			}else{
 				if(str=="air_mode"&&val==2){
 					d.params.air_time=getTime();
 				}
-				air_view.setData(data);
-				setDeviceStatus();//设置开关，模式，速度
+				air_view.setData(D);
 			}
+			setDeviceStatus();//设置开关，模式，速度
 			air_view.canChange=false;
 			clearTimeout(air_view.timeOut);//重新设置定时
 			air_view.timeOut=setTimeout(function(){//10秒之后才能被刷新更改
@@ -901,7 +838,9 @@
 					jsonConcat(data.params,nowParams);//回滚
 					air_view.speedCanChange=true;
 					setDeviceStatus(true);//设置开关，模式，速度
-					air_view.setData(data);
+					air_view.setData(D);
+					if(res.status_code==15)
+						W.toast('发送指令超时，请重试。');
 					return;
 				}else if(str=="switch"&&data.params.switch==1){
 					setTimeout(function(){
@@ -918,7 +857,7 @@
 		function setMode(){
 			//设置模式
 			if(this.dataset.val==1)
-				setDevice("air_mode",2);
+				setDevice("air_mode",0);
 			else
 				setDevice("air_mode",1);
 		}
@@ -928,40 +867,94 @@
 		}
 		function showSetting(){
 			//展示设置页
-			history.pushState(null,"air_home.html","air_home.html");
-			dom.set.show();
+			showPage.call(dom.set);
 		}
 		
 		//新增一个定时
 		function addTime(){
 			var temd={
-				open:0,
-				time:"00:00"
+				"begin_time":'00:00',
+               	"end_time":'00:30',
+               	"mode":3,
+               	"day":"0,1,2,3,4,5,6",
+               	"remark":"新增",
+				"open":0
 			}
-			dom.timing.insertBefore(new timeSet(temd),this);
-			if(dom.timing.childNodes.length>5){
+			var t=new timeSet(temd);
+			dom.timing.insertBefore(t,this);
+			timeSet.click.call(t);
+			if(dom.timing.children.length>5){
 				dom.timing.removeChild(this);
 			}
 		}
 		//获取定时数组
 		function getTime(){
-			var timeList=dom.timing.childNodes;//定时列表
+			var timeList=dom.timing.children;//定时列表
 			var t=new Array(),j,o;
 			for(var i=0;i<timeList.length;i++){
-				j={};
-				if(timeList[i].id=="addTime"){
-					continue;
+				if(timeList[i]._type=="timeSet"){
+					t.push(timeList[i].data);
 				}
-				j.time=timeList[i].querySelector(".timeSelector").value;
-				o=timeList[i].querySelector(".mui-switch").classList.contains("mui-active");
-				if(o){
-					j.open=1;
-				}else{
-					j.open=0;
-				}
-				t.push(j);
 			}
 			return t;
+		}
+		
+		//预设定时
+		function setTime(data){
+			var ms=['关闭','低速','高速','自动'];
+			dom.begin_time.value=data.begin_time;
+			dom.end_time.value=data.end_time;
+			dom.set_day.querySelector('.info').innerText=getDay(data.day);
+			dom.set_mode.querySelector('.info').innerText=ms[data.mode];
+			dom.set_remark.querySelector('.info').innerText=data.remark;
+			
+			dom.set_day.dataset.value=data.day;
+			dom.set_mode.dataset.value=data.mode;
+			dom.set_remark.dataset.value=data.remark;
+			
+			data.day=data.day.toString();
+			var w=data.day.split(','),c;
+			for(var i=0;i<w.length;i++){
+				c=dom.days.querySelector('[value="'+w[i]+'"]')
+				if(c)
+					c.checked=true;
+			}
+			setTime.data=data;
+		}
+		
+		//返回星期字符串
+		function getDay(day){
+			day=day.toString();
+			var d='';
+			if(day=='1,2,3,4,5,6,0'||day=='0,1,2,3,4,5,6'){
+				d='每天';
+			}else if(day=='1,2,3,4,5'){
+				d='工作日';
+			}else if(day=='6,0'||day=='0,6'){
+				d='周末';
+			}else{
+				var days=day.split(',');
+				var w=['日','一','二','三','四','五','六'];
+				for(var i=0;i<days.length;i++){
+					d+='周'+(w[parseInt(days[i])]||'')+'，';
+				}
+				d=d.slice(0,-1);
+			}
+			return d;
+		}
+		
+		//保存定时设置
+		function submitTime(){
+			var that=submitTime._focus;
+			var d=setTime.data;
+			d.begin_time=dom.begin_time.value;
+			d.end_time=dom.end_time.value;
+			d.day=dom.set_day.dataset.value;
+			d.mode=dom.set_mode.dataset.value;
+			d.remark=dom.set_remark.dataset.value;
+			that.update();
+			timeSet.setTime();
+			W.back();
 		}
 	</script>
 	<script for="空气组件定义">
@@ -981,13 +974,31 @@
 			if(!this.canChange){
 				return;
 			}
-			var speed=data.params.air_speed||1,closed=" speed0";
-			if(data.params.switch){
+			if(!data.device_id||!data.device){//没有绑定设备的车辆
+				var d={
+					'car_brand_id':data.car_brand_id,
+					'obj_name':data.obj_name,
+					'a':'00',
+					'air_desc':'良',
+					'speed':'1',
+					'closed':' speed0',
+					'filter':'0',
+					'obj_id':data.obj_id
+				}
+				if(!data.device_id)d.noDevice='<span class="noDevice">开启智能净化</span>';
+				this.template(dom.airTemp,d);
+				var t=this.querySelector('.noDevice');
+				if(t)t.addEvent('click',newAir.bind);
+				this.data=data;
+				return;
+			}
+			var speed=data.device.params.air_speed||1,closed=" speed0";
+			if(data.device.params.switch==1&&data.device.is_online){
 				closed="";
 			}
 					
 			var air_desc="优",color="#5cb85c";
-			var a=data.active_gps_data.air||0;
+			var a=data.device.active_gps_data.air||0;
 			if(a<=a_a){
 			    air_desc="优";
 			    color="#5cb85c"
@@ -1001,27 +1012,166 @@
 			    air_desc="差";
 			    color="#d9534f"
 			}
-			if(this.innerHTML){
+			
+			if(this.data._speed){
+				//更新空气指数
 				this.querySelector("[name='air_desc']").innerText="/"+air_desc;
 				this.querySelector("[name='air']").innerText=a;
+				this.querySelector(".avg_air").style.color=color;
 				var lo=this.querySelector(".loader");
-				
 				lo.style.color=color;
+				//如果速度更改了则新生成一个转动div
 				if(this.speedCanChange&&this.data._speed!=speed||(!lo.classList.contains("speed0")&&closed)){//如果速度改变了，重新构造一个旋转组件
 					var newLo=document.createElement("div");
-					newLo.className="loader speed"+speed+closed;
+					newLo.className="loader fadeIn speed"+speed+closed;
 					newLo.style.color=color;
 					newLo.innerHTML='<div class="inner one"></div><div class="inner two"></div><div class="inner three"></div>';
-					lo.parentElement.replaceChild(newLo,lo);
-				}else if(!closed){
+					lo.classList.remove('fadeIn');
+					lo.classList.add('fadeOut');
+					setTimeout(function(){lo.parentElement.removeChild(lo)},500);
+					lo.parentElement.appendChild(newLo);
+				}else if(!closed){//如果关闭了，则停止动画
 					lo.classList.remove("speed0");
 				}
 			}else{
-				this.innerHTML='<div class="title"><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png" onerror=\'javascript:this.src="../../img/icon_car_moren.png"\'><span>'+data.obj_name+'</span><a class="mui-pull-right mui-icon mui-icon-help"></a></div><div class="air_content"><div class="air_text"><div class="indoor"><span style="font-size: 16px;">WiCARE</span><span style="font-size: 15px;margin-left: .5em;">空气指数</span><h1 class="avg_air"><span name="air">'+a+'</span><span name="air_desc">/'+air_desc+'</span></h1></div><div class="outdoor"><span name="city">获取城市中</span><span name="outdoor">良</span></div></div><div class="air_img"><div class="loader speed'+speed+closed+'" style="color:'+color+'"><div class="inner one"></div><div class="inner two"></div><div class="inner three"></div></div></div></div>';
+				var filter=parseInt((1-data.device.filter_life_used/data.device.filter_life_time)*100);
+				var filter_color='';
+				if(filter<20)
+					filter_color='#d9534f';
+				var d={
+					'car_brand_id':data.car_brand_id,
+					'obj_name':data.obj_name,
+					'a':a,
+					'air_desc':air_desc,
+					'speed':speed,
+					'color':color,
+					'closed':closed,
+					'filter':filter,
+					'filter_color':filter_color,
+					'obj_id':data.obj_id
+				}
+				this.template(dom.airTemp,d);
 			}
-			this.querySelector(".avg_air").style.color=color;
 			data._speed=speed;
 			this.data=data;
+		}
+		newAir.bind=function(){
+			var thisCar=W.parents(this,2);
+			W.focus(thisCar);//设置为伪焦点,扫描返回后找到伪焦点元素处理
+			event.stopPropagation(); //阻止冒泡
+			event.preventDefault();
+			var pot={
+				"title":'提示消息',
+				"content":"请准备好包装背面的终端二维码，点击下方确认开始扫描，如果还没有设备，请点击购买。",
+				"y":'确认',
+				"n":'购买',
+				"callback":function(b){
+					if(b)bind();
+					else location=WiStorm.root+'src/air_cleaner_details.html?intet=logout&needOpenId=true';
+				}
+			}
+			W.confirm(pot);
+		}
+		function bind(){
+			//调用二维码扫描
+			if(W.native){
+				W.native.scanner.start(receive);
+			}else{
+				W.toast("请稍等，正在准备扫描");
+				if(bind.addEvent){
+					window.addEventListener("nativeSdkReady",bind);
+					bind.addEvent=true;
+				}
+			}
+		}
+		//二维码扫描返回，获取所扫描的设备信息
+		function receive(res){
+			W.loading("绑定中……");
+			var param={
+				serial:res,
+				access_token:_user.access_token
+			}
+			Wapi.device.get(receiveBack,param,get_device_op);
+		}
+		//获取所扫描的设备信息返回,开始绑定设备
+		function receiveBack(res){
+			if (res.status_code) {
+				W.loading();
+				W.errorCode(res);
+				return;
+			}
+			if(res.cust_id){
+				W.toast("该设备已经绑定了车辆，请先解除绑定。");
+				W.loading();
+				return;
+			}
+			if(res.status!=3){
+				W.toast("该设备未激活，不能进行绑定。");
+				W.loading();
+				return;
+			}
+			var target=W.getFocus();
+			var carData=target.data;
+			var device_id=carData.device_id=res.device_id;
+			carData.device=res;
+			var data={
+				_obj_id:carData.obj_id,
+				access_token:_user.access_token,
+				device_id:device_id,
+				seller_id:res.seller_id
+			}
+			Wapi.vehicle.update(function(res){//修改车辆绑定信息
+				if (res && res.status_code) {
+					W.loading();
+					W.errorCode(res);
+					return;
+				}
+				
+				//修改设备绑定信息
+				var data={
+					access_token:_user.access_token,
+					_device_id:device_id,
+					cust_id: _user.cust_id,//归属用户，默认0，公司仓库，如果用户购买并支付，则变成用户id
+				    cust_name:_user.cust_name,
+				    mobile:_user.mobile||"",
+				    email:_user.email||"",
+				}
+				Wapi.device.update(function(res){
+					W.loading();
+					if (res && res.status_code) {
+						W.errorCode(res);
+						W.alert("修改设备失败，请重试绑定");
+						delete carData.device;
+						return;
+					}
+					W.toast("绑定新设备成功");
+					clearTimeout(getOneDevice.time_id);
+					getOneDevice('slide');
+				},data);
+			},data);
+			
+			//修改用户的seller_id
+			if(!_user.seller_id||_user.seller_id==0){
+				_user.seller_id=res.seller_id;
+				var uData={
+					_cust_id:_user.cust_id,
+					access_token:_user.access_token,
+					seller_id:res.seller_id
+				}
+				Wapi.user.update(function(res){
+					if (res && res.status_code) {
+						W.errorCode(res);
+						W.alert("修改用户资料错误，请重试绑定");
+						return;
+					}
+				},uData);
+			}
+		}
+		//加载车标图片错误
+		function ierror(){
+			event.target.src="../../img/icon_car_moren.png";
+			event.target.onerror=null;
+			console.log('ierror');
 		}
 		
 		//定时组件
@@ -1032,56 +1182,86 @@
 			obj.className="mui-table-view-cell";
 			
 			obj.setData(data);//设置obj的内容,setData()在下面cv.prototype中定义
+			obj.addEvent('click',timeSet.click);
 			return obj;//最后记得要返回组件
 		}
-		timeSet.prototype.setData=function(data){
-			var timeS=new TimeSelector();
-			timeS.value=data.time;
-			timeS.className="timeSelector";
-			timeS.dataset.val=2;
-			timeS.addEvent("change",timeSet.setTime);
-			var open="mui-switch";
+		timeSet.prototype.update=function(){
+			var ms=['关闭','低速','高速','自动'];
+			data=this.data;
+			var d={
+				open:'',
+				day:'',
+				end_time:data.end_time,
+				begin_time:data.begin_time,
+				mode:ms[data.mode]
+			};
 			if(data.open){
-				open+=" mui-active";
-			}else{
-				timeS.style.color="#ccc";
+				d.open="mui-active";
 			}
-			var swi=document.createElement("div");
-			swi.className=open;
-			swi.addEvent("click",timeSet.openTime);
-			swi.innerHTML='<div class="mui-switch-handle"></div>';
+			d.day=getDay(data.day);
+			d.remark=data.remark;
 			
-			var del=document.createElement("span");
-			del.className="mui-icon mui-icon-minus";
-			del.addEvent("click",timeSet.deleteTime);
-			
-			this.appendChild(del);
-			this.appendChild(timeS);
-			this.appendChild(swi);
+			this.template(dom.timeSet,d);
 		}
-		timeSet.deleteTime=function(){
-			dom.timing.removeChild(this.parentElement);
+		timeSet.prototype.setData=function(data){
+			if(this.data){//如果没有更改，不刷新
+				var _a=true;
+				for (key in data){
+					if(this.data[key]!=data[key]){
+						_a=false;
+						break;
+					}
+			    }
+				if(_a)return;
+			}
+			
+			if(!data.begin_time&&data.time){//旧的定时模式
+				var ti=new Date();
+				var t=data.time.split(':');
+				ti.setHours(t[0]);
+				ti.setMinutes(parseInt(t[1])+30);
+				var da={
+					"begin_time":data.time,
+	               	"end_time":ti.WtoString().slice(11,16),
+	               	"mode":3,
+	               	"day":"1,2,3,4,5,6,7",
+	               	"remark":"定时",
+					"open":data.open
+				}
+				data=da;
+			}
+			this.data=data;
+			this.update();
+		}
+		timeSet.click=function(){
+			//事件委托
+			var target=event.target;
+			switch(target.dataset.click){
+				case 'open':
+					var that=this.querySelector('.mui-switch')
+					that.classList.toggle("mui-active");
+					this.querySelector('div').classList.toggle('mui-active');
+					this.data.open=that.classList.contains('mui-active')*1;
+					timeSet.setTime();
+				  	return
+				case 'delete':
+					timeSet.deleteTime(target);
+				  	return;
+			}
+			setTime(this.data);
+			submitTime._focus=this;
+			showPage.call(dom.time_card);
+		}
+		timeSet.deleteTime=function(target){
+			dom.timing.removeChild(W.parents(target,2));
 			if(!dom.addTime.parentElement){
 				dom.timing.appendChild(dom.addTime);
 			}
-			var evt = document.createEvent("HTMLEvents");
-			evt.initEvent("change", false, false);
-			this.nextElementSibling.dispatchEvent(evt);
-		}
-		timeSet.openTime=function(){
-			this.classList.toggle("mui-active");
-			if(this.classList.contains("mui-active")){
-				this.previousElementSibling.style.color="";
-			}else{
-				this.previousElementSibling.style.color="#ccc";
-			}
-			var evt = document.createEvent("HTMLEvents");
-			evt.initEvent("change", false, false);
-			this.previousElementSibling.dispatchEvent(evt);
+			timeSet.setTime();
 		}
 		timeSet.setTime=function(){
-			var data=device_list[device_i];//当前显示设备的数据
-			var air_view=dom.list.childNodes[device_i];//当前显示设备的卡片
+			var data=device_list[device_i].device;//当前显示设备的数据
+			var air_view=dom.list.children[device_i];//当前显示设备的卡片
 			var nowParams={};//记录当前设备参数，发送失败回滚时用
 			jsonConcat(nowParams,data.params);
 			var d={//发送参数
@@ -1104,7 +1284,7 @@
 		//折线图样式
 		var option = {
 			_type:"day",//自定义的参数，与echarts无关，只是用于识别是获取最近7天的还是获取最近24小时的
-			_hours:24,//自定义的参数，与echarts无关，只是用于识别是获取最近1小时的还是获取最近24小时的数据
+			_hours:1,//自定义的参数，与echarts无关，只是用于识别是获取最近1小时的还是获取最近24小时的数据
 		    title : {
 		        x:'left',
 		        textStyle:{
@@ -1157,9 +1337,14 @@
 		function getAirHistory(){//获取最近的数据
 			if(!device_list)//用户无绑定设备
 				return;
-			var car=device_list[device_i];//当前显示设备的数据
-			if(!car)
+			var car=device_list[device_i].device;//当前显示设备的数据
+			if(!car){
+				dom.ddd.style.display="none";
+				dom.ratio.style.display="none";
+				dom.air_history.innerHTML='<div class="null_tip"><h1>NULL</h1><p><label class="tip_text">暂无数据</label></p></div>';
 				return;
+			}
+			var carD=device_list[device_i];
 			var data={
 				access_token:_user.access_token,
 				serial: car.serial
@@ -1170,8 +1355,8 @@
 				if(option._hours==24){
 					option.title.text="24小时空气质量";
 					start.setDate(start.getDate()-1);
-					if(car._day_xAxis&&car._day_series){//如果已经获取过了，就直接用，不重新获取
-						initEcharts(car._day_xAxis,car._day_series);
+					if(carD._day_xAxis&&carD._day_series){//如果已经获取过了，就直接用，不重新获取
+						initEcharts(carD._day_xAxis,carD._day_series);
 						return;
 					}
 				}else{
@@ -1181,21 +1366,22 @@
 				var startTime=start.WtoString();
 				var endTime=end.WtoString();
 				data.rcv_time=startTime+"@"+endTime;
-				var op={limit:-1};
+				var op={limit:-1,fields:'rcv_time,air,serial'};
 				Wapi.device.getDeviceAirDataList(makeLine,data,op);
 			}else{
 				option.title.text="7天空气质量";
-				if(car._week_xAxis&&car._week_series){//如果已经获取过7天的，就直接用，不重新获取
-					initEcharts(car._week_xAxis,car._week_series);
+				if(carD._week_xAxis&&carD._week_series){//如果已经获取过7天的，就直接用，不重新获取
+					initEcharts(carD._week_xAxis,carD._week_series);
 					return;
 				}
 				start.setDate(start.getDate()-7);
 				var startTime=start.WtoString().slice(0,10);
 				var endTime=end.WtoString().slice(0,10);
-				var op={fields:'rcv_day,avg_air'};
+				var op={fields:'rcv_day,avg_air,serial'};
 				data.rcv_day=startTime+"@"+endTime;
 				Wapi.device.getDayTripList(makeLine,data,op);
 			}
+			makeLine._serial=car.serial;
 		}
 		
 		function getHistory(){//点击切换空气日曲线或者周曲线
@@ -1288,18 +1474,27 @@
 				return;
 			}
 			var data=res.data;
+			
 			if(data.length<2){
+				if(option._type=="day"&&option._hours==1){
+					W.toast('最近1小时无数据，将获取最近24小时的空气质量曲线');
+					option._hours=24;
+					getAirHistory();
+					return;
+				}
 				dom.ddd.style.display="none";
 				dom.ratio.style.display="none";
 				dom.air_history.innerHTML='<div class="null_tip"><h1>NULL</h1><p><label class="tip_text">暂无数据</label></p></div>';
 				return;
 			}else{
+				if(makeLine._serial!=res.data[0].serial)return;
 				dom.ratio.style.display="block";
 				dom.ddd.style.display="block";
 			}
 			var x=[];
 			var airList=[],temD="",l=data.length;
-			
+			var nowData=device_list[device_i].device;
+			var carD=device_list[device_i];
 			if(option._type=="day"){
 				if(option._hours==1){
 					var j=1,time_str;
@@ -1344,8 +1539,8 @@
 					var T=NewDate(data[i-1].rcv_time);
 					h=T.getHours();
 					x.push(h+":00");
-					device_list[device_i]._day_xAxis=x;
-					device_list[device_i]._day_series=airList;
+					carD._day_xAxis=x;
+					carD._day_series=airList;
 				}
 			}else{
 				for(var i=0;i<l;i++){
@@ -1354,8 +1549,8 @@
 					x.push(temD);
 					airList.push(data[i].avg_air);
 				}
-				device_list[device_i]._week_xAxis=x;
-				device_list[device_i]._week_series=airList;
+				carD._week_xAxis=x;
+				carD._week_series=airList;
 			}
 			initEcharts(x,airList);
 		}

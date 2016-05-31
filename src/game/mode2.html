@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<title>mode2</title>
+		<script src="../../wslib/WiStorm.js"></script>		
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script>link("W.css")</script>
+		<style>
+		.content{
+			width: 100%;
+		    height: 100%;
+		    left: 0px;
+		    top: 0px;
+		    position: absolute;	
+		    overflow: hidden;			
+		}	
+		.more_box{
+		    position: absolute;
+		    background-color: #385A9A;
+		    width: 323px;
+		    height: 207px;
+		    top: 244px;
+		    left: -181px;
+		    transform: rotate(120deg);	
+		    -moz-transform:rotate(120deg);
+		    -webkit-transform:rotate(120deg);
+		    -o-transform:rotate(120deg);
+		    z-index: 2;			
+		}	
+		.cover_box{
+			background-color:#CBE015;
+		    position: absolute;
+		    width: 335px;
+		    height: 207px;
+		    top: 310px;
+		    left: -137px;
+		    transform: rotate(160deg);
+		    -moz-transform:rotate(160deg);
+		    -webkit-transform:rotate(160deg);
+		    -o-transform:rotate(160deg);
+		    z-index: 3;			
+		}
+		.big_box{
+		    position: absolute;
+		    background-color:#CBE015;
+		    width: 673px;
+		    height: 466px;
+		    top: 294px;
+		    left: -189px;
+		    transform: rotate(210deg);			
+		    -moz-transform:rotate(210deg);
+		    -webkit-transform:rotate(210deg);
+		    -o-transform:rotate(210deg);	
+		    	}	
+		.theme{
+	  		position: absolute;
+		    width: 265px;
+		    top: 300px;
+		    left: 40px;
+		    z-index: 100;
+		}
+		.img_box img{
+		    position: absolute;
+		    width: 100%;
+		    height: 400px;			
+		}
+		#text{
+			font-size: 13px;
+			max-height: 140px;
+			min-height: 100px;
+			overflow: auto;
+			margin-bottom: .7em;
+		}
+	@keyframes mores{from {left:-120%;top:100%;}to {left:-181px;top:244px;}}
+	@-moz-keyframes mores {from {left:-120%;top:100%;}to {left:-181px;top:244px;}}	
+	@-webkit-keyframes mores{from {left:-120%;top:100%;}to {left:-181px;top:244px;}}	
+	@-o-keyframes mores{from {left:-120%;top:100%;}to {left:-181px;top:244px;}}
+	@keyframes covers{from {top:200%;}to {top:310px;}}
+	@-moz-keyframes covers {from {top:200%;}to {top:310px;}}	
+	@-webkit-keyframes covers{from {top:200%;}to {top:310px;}}	
+	@-o-keyframes covers{from {top:200%;}to {top:310px;}}
+	@keyframes bigs{from {top:200%;}to {top:294px;}}
+	@-moz-keyframes bigs {from {top:200%;}to {top:294px;}}	
+	@-webkit-keyframes bigs{from {top:200%;}to {top:294px;}}	
+	@-o-keyframes bigs{from {top:200%;}to {top:294px;}}
+	@keyframes themes{from {left:-100%;}to {left:40px;}}
+	@-moz-keyframes themes {from {left:-100%;}to {left:40px;}}	
+	@-webkit-keyframes themes{from {left:-100%;}to {left:40px;}}	
+	@-o-keyframes themes{from {left:-100%;}to {left:40px;}}
+	@keyframes imgs{from {top:-400px;}to {top: 0;}}
+	@-moz-keyframes imgs {from {top:-400px;}to {top: 0;}}	
+	@-webkit-keyframes imgs{from {top:-400px;}to {top: 0;}}	
+	@-o-keyframes imgs{from {top:-400px;}to {top: 0;}}
+	</style>
+	</head>
+	<body>
+		<div class="content">
+			<div class="img_box">
+				<img id="img" src="" />
+			</div>
+			<div class="more_box"></div>
+			<div class="cover_box"></div>
+			<div class="big_box"></div>
+			<div class="theme">
+				<h1 id="title" style="margin-bottom: .5em;">WICARE</h1>
+				<div id="text">成功者学习别人的经验，一般人学习自己的经验。</div>
+				<p>活动日期: &nbsp;<span style="color: #385A9A;" id="begin_time">2016-5-18</span>&nbsp;—&nbsp;<span style="color: #DD524D;"  id="end_time">2016-6-12</span></p>
+			</div>
+		</div>
+	</body>
+	<script>
+		if(_g.intent=='preview'){
+			var d=JSON.parse(_g.data);
+			if(d.title)
+				W("#title").innerHTML=d.title;
+			if(d.remark)
+				W("#text").innerHTML=d.remark;
+			if(d.start_time)
+				W("#begin_time").innerHTML=d.start_time;
+			if(d.invalid_time)
+				W("#end_time").innerHTML=d.invalid_time;
+			if(d.material_url)
+				W("#img").src=d.material_url;
+		}
+		var dom={
+			mb:W(".more_box"),
+			cb:W(".cover_box"),
+			big:W(".big_box"),
+			theme:W(".theme"),
+			img:W("#img")
+		}
+		window.onload =function (){
+			if(_g.intent=='preview')return;
+			if(_g.game_id)
+				var id=_g.game_id;
+			var data={
+				game_id:id
+			};
+			var op={
+				fields:'title,remark,start_time,invalid_time,material_url'
+			}
+			Wapi.game.get(function (res){
+				W("title").innerHTML=W("#title").innerHTML=res.title;
+				W("#text").innerHTML=res.remark;
+				var begin=NewDate(res.start_time);
+				W("#begin_time").innerHTML=begin.getFullYear()+"-"+(begin.getMonth()+1)+"-"+begin.getDate();
+				var end=NewDate(res.invalid_time);
+				W("#end_time").innerHTML=end.getFullYear()+"-"+(end.getMonth()+1)+"-"+end.getDate();
+				dom.img.src=res.material_url;
+			},data,op);
+			
+			animation(dom.big,"bigs 1000ms");
+			animation(dom.mb,"mores 3s");
+			animation(dom.cb,"covers 1000ms");
+			animation(dom.theme,"themes 4s");
+			animation(dom.img,"imgs 2s linear");
+		}
+	    
+		//animation兼容
+		function animation(obj,time){
+			obj.style.animation=time;
+			obj.style.MozAnimation=time;
+			obj.style.WebkitAnimation=time;
+			obj.style.oAnimation=time;
+			return obj;
+		}		
+	</script>
+</html>

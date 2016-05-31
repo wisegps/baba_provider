@@ -56,7 +56,7 @@
 	<body>
 		
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<a class="mui-icon mui-icon-left-nav" href="home.html"></a>
 			<h1 class="mui-title">店面管理</h1>				
 		</header>
 		<div class="mui-content">
@@ -118,7 +118,7 @@ var img_URL;
 	}
 		window.addEventListener("load",windowLoad);
 		function windowLoad(){
-			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[7]=="0")){
+			if(!(_user.cust_type==2||(_user.cust_type==3&&_user.privilege&&_user.privilege.sm))){
 				location="home.html";
 			}
 			W("#submit").addEvent("click",storeM);
@@ -139,7 +139,6 @@ var img_URL;
 			}
 			W("#show_img").addEvent('click',showPicture);		
 			W("#noActive").addEvent('click',hidePicture);
-			W(".mui-pull-left").addEvent("click",function(){top.location="home.html";});
 	}
 			
 	//在界面上插入一张图片
@@ -199,8 +198,9 @@ var img_URL;
 			W.toast("未选择文件");
 			return;
 		}
-		var type;
-	    type=h.value.slice(-3).toLocaleLowerCase();
+		var type,h_type;
+		h_type=h.value.split(".");
+	    type=h_type[h_type.length-1].toLocaleLowerCase();
 		var file =h.files[0];
 	    if((type!="jpg"&&type!="png"&&type!="jpeg")){
 	        h.value="";

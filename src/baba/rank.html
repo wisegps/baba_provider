@@ -16,7 +16,7 @@
 		<script src="../../wslib/WiStorm.js"></script>
 		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
 		<script>link("W.css")</script>
-		<script src="../../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../../wslib/api/newWapi.js" defer="defer"></script>
 		<script src="../../wslib/toolkit/WxSdk.js" defer="defer"></script>
 		<style>
 		*{
@@ -125,13 +125,13 @@
 				font-size: 1.4em;
 			}
 			
-			@keyframes like
+			@keyframes like1
 			{
 				0%   {transform:scale3d(1,1,1) translate3d(0,0,0);opacity: 1;}
 				100% {transform:scale3d(2,2,1) translate3d(-10px,-10px,0);opacity: 0;}
 			}
 			
-			@-webkit-keyframes like
+			@-webkit-keyframes like1
 			{
 				0%   {-webkit-transform:scale3d(1,1,1) translate3d(0,0,0);opacity: 1;}
 				100% {-webkit-transform:scale3d(2,2,1) translate3d(-10px,-10px,0);opacity: 0;}
@@ -141,13 +141,20 @@
 				position: absolute;
 			    top: 50%;
 			    left: 0;
-				animation: like 1s;
-				-webkit-animation: like 1s;
+				animation: like1 1s;
+				-webkit-animation: like1 1s;
 				animation-fill-mode: forwards;
 				-webkit-animation-fill-mode: forwards;
 			}
 
-			
+			.like_dou{
+				position: absolute;
+			    top: 30%;
+			    left: 50%;
+			    color: #E2322D;
+			    font-weight: 700;
+			    font-size: 30px;
+			}
 		</style>
 	</head>
 	<style>
@@ -280,10 +287,8 @@
 	function makeTop(res){    
 			if(!dom.cusList)
 				dom.cusList=W("#first");
-			var list=document.createDocumentFragment();
-			var cus=res;
-			list.appendChild(new abc(cus));	
-			dom.cusList.appendChild(list);
+			if(res)
+				dom.cusList.appendChild(new abc(res));
 		}
 		var bbb=true;
 		function makeone(res){
@@ -313,11 +318,25 @@
 			    desc: 'WiCARE空气净化器', // 分享描述
 			    link: 'http://h5.bibibaba.cn/baba/wx/src/baba/rank.html?intent=logout', // 分享链接
 			    imgUrl:_user.logo, // 分享图标
-			    success: function(){},
+			    success: function(){
+			    	if(!_user)return;
+			    	Wapi.user.share(function(res){
+			    		if(res.status_code){
+							return;
+						}
+			    		W('body').appendChild(like(res.add_wi_dou));
+			    	},{
+			    		cust_id: _user.cust_id,
+					    open_id: _user.login_id,
+					    fun_id: 0,
+					    url:location.href.split('?')[0]
+			    	});
+			    },
 			    cancel: function(){}
 			}
 			if(res.rank=="20+"){
-				var one=customs[0].avg_air;//排名第一的空气质量，作为参考
+				var one;
+				customs?one=customs[0].avg_air:one=0;//排名第一的空气质量，作为参考
 				var t=45-one;
 				var txt="超越了全国99%的用户";
 				if(t<80){
@@ -329,7 +348,16 @@
 			wx.onMenuShareTimeline(op);
 			wx.onMenuShareAppMessage(op);
 		}
-		
+		//显示加了多少微豆
+		function like(num){
+			var p=document.createElement("span");
+			p.className="like_dou";
+			p.innerHTML='+'+num+'微豆';
+			setTimeout(function(){
+				p.parentNode.removeChild(p);
+			},2000);
+			return p;
+		}
 		/*20名的排行列表*/
 		function makeList(res){
 			if(res&&res.status_code){
@@ -377,7 +405,8 @@
 			var TodayDate=Y+"-"+M+"-"+D;
 			var data={
 				rcv_day:TodayDate,
-				avg_air: ">0"
+				avg_air: ">0",
+				cust_id: ">0"
 			}
 			var op={
 				fields:"brand_id,cust_name,logo,total_distance,avg_air,air_praise,day_trip_id", 

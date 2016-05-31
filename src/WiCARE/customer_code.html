@@ -1,0 +1,125 @@
+<!--
+	作者：小刘
+	时间：2016-05-10
+	描述：扫描商户二维码
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>Wicare扫描二维码</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		<script src="../ui/ui.js"></script>
+		<script>link("ui.css")</script>
+		<script src="../../wslib/api/newWapi.js"></script>
+		<style>
+			.content{padding: 3em 4em;}
+			#code{width: 80%;}
+			#submit{
+			    padding: 5px 20px;
+			    background-color: #50B7DF;
+			    color: #fff;				
+			}		
+			.code_box{
+			    background: #fff;
+			    position: absolute;
+			    width: 80%;
+			    z-index: 1;
+			    font-size: 14px;
+			    color: #428bca;				
+			}
+			.mobile{ 
+				display: block;
+    			font-size: 1.3em;
+    		}
+			.code_box>div{
+				padding: .5em 1em;
+	    		border-bottom: 1px solid #eee;
+			}
+			.code_box>div:nth-child(2n){
+				color: #5cb85c;
+			}
+			.code_box>div:active{
+				background: #eee;
+			}
+			#Qrcode{margin: 0 auto;display: block;}
+		</style>
+	</head>
+	<body>
+		<div class="content">
+			<input id="code" placeholder="输入商户手机号生成二维码" type="text" />
+			<button id="submit">确定</button>
+			<div class="code_box">
+			
+			</div>
+		</div>
+			<img id="Qrcode"/>
+		<script>
+			var dom={
+				code:W("#code"),
+				codebox:W(".code_box")
+				}
+			dom.code.addEvent('keyup',keyupMobile);
+			W("#submit").addEvent('click',getCode);
+			// 按键释放查询结果显示列表
+			function keyupMobile(){
+				var val=this.value;
+				if(!val||val.length<4){
+					return;
+				}//输入小于4个字符不进行搜索
+				
+				var params={
+					access_token:_user.access_token,
+					mobile:"^"+val,
+					cust_type:2
+				}
+				Wapi.user.list(function(json){
+					if (json.status_code){
+						W.errorCode(json);
+						return;
+					}
+					dom.codebox.innerHTML="";
+					var sellers=json.data;
+					if(!sellers||!sellers.length){
+						dom.codebox.style.display="none";
+						return;
+					}
+					var list = document.createDocumentFragment();
+					for(var i=0;i<sellers.length;i++){
+						list.appendChild(new seller(sellers[i]));
+					}
+					dom.codebox.appendChild(list);
+					dom.codebox.style.display="block";					
+				},params);
+			}
+			function seller(data){
+				var obj=new WiStormUI("div");//创建一个div组件
+				obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+				obj.innerHTML='<span class="mobile">'+data.mobile+'</span><span class="seller_name">'+data.cust_name+'</span>'
+				obj.cust_id=data.cust_id;
+				obj.data=data;
+				obj.addEvent("click",seller.select);
+				return obj;//最后记得要返回组件
+			}
+			seller.select=function(){
+				dom.code.value=this.data.cust_name;
+				dom.cut=this.data.cust_id;
+				dom.codebox.innerHTML="";
+				dom.codebox.style.display="block";
+			}		
+			//提交按钮
+			function getCode(){
+				Wapi.user.getQrcode(function(res){
+					W("#Qrcode").src=res.url;
+				},{scene_str:dom.cut});
+			}
+		</script>
+	</body>
+</html>

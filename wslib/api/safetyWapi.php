@@ -26,6 +26,9 @@ switch ($_GET["method"]){
 	case "wicare.file.base64":
 		fileBase64();
 		break;
+	case "wicare.user.getQrcode":
+		getQrcode();
+		break;
 	default:
 		echoExit(0x9004,'INVALID_METHOD');
 		exit;
@@ -36,7 +39,7 @@ function distributorRegister(){
 	$user=checkParent();
 	if(isset($user['cust_id'])){
 		//上层验证成功,开始注册
-		$r=array('mobile' => $_GET['mobile'],'password'=>$_GET['password'],'valid_type'=>$_GET['valid_type'],'valid_code'=>$_GET['valid_code']);
+		$r=array('mobile' => $_GET['mobile'],'password'=>md5($_GET['password']),'valid_type'=>$_GET['valid_type'],'valid_code'=>$_GET['valid_code']);
 		$res=register($r);
 		if(!$res)
 			echoExit('-4','注册失败');
@@ -45,19 +48,21 @@ function distributorRegister(){
 		else{
 			//注册成功,开始更新用户信息
 			//删除无用参数
-			unset($_GET['mobile']);
-			unset($_GET['password']);
-			unset($_GET['valid_code']);
-			unset($_GET['valid_type']);
-			unset($_GET['parent_mobile']);
-			unset($_GET['parent_open_id']);
+			$g=$_GET;
+			unset($g['mobile']);
+			unset($g['password']);
+			unset($g['valid_code']);
+			unset($g['valid_type']);
+			unset($g['parent_mobile']);
+			unset($g['parent_open_id']);
 
-			$_GET['dealer_tree_path']=$user['dealer_tree_path'].','.$res['cust_id'];
-			$_GET['dealer_level']=$user['dealer_level']+1;
-			$_GET['dealer_class']=5;
-			$_GET['parent_dealer_id']=$user['cust_id'];
-			$_GET['_cust_id']=$res['cust_id'];
-			$res1=updateUser($_GET);
+			$g['dealer_tree_path']=$user['dealer_tree_path'].','.$res['cust_id'];
+			$g['dealer_level']=$user['dealer_level']+1;
+			$g['dealer_class']=5;
+			$g['parent_dealer_id']=$user['cust_id'];
+			$g['cust_type']=4;
+			$g['_cust_id']=$res['cust_id'];
+			$res1=updateUser($g);
 			if(!$res1)
 				echoExit('-5','注册失败');
 			else if(isset($res1['status_code'])&&$res1['status_code']!="0")
@@ -82,8 +87,9 @@ function checkParent(){
 		echoExit('-3','无效的邀请上层');
 	}else if($user['mobile']==$_GET['parent_mobile']&$user['login_id']==$_GET['parent_open_id']){
 		return $user;
-	}else
+	}else{
 		echoExit('-6','无效的邀请上层');
+	}
 }
 
 //经纬度转位置
@@ -106,6 +112,14 @@ function fileBase64(){
 	unlink($fileName);
 }
 
+//生成带参数的二维码
+function getQrcode(){
+	include '../toolkit/WX.php';
+	$wx=new WX();
+	$msg='{"action_name":"QR_LIMIT_STR_SCENE","action_info":{"scene":{"scene_str":"sellerId_'.$_GET["scene_str"].'"}}}';
+	$q=$wx->getQrcode($msg);
+	echo json_encode($q);
+}
 
 
 
@@ -135,6 +149,7 @@ function updateUser($p){
 	global $a;
 	$p['method']='wicare.user.update';
 	$p['fields']='cust_id';
+	$u=$a->makeUrl($p);
 	$res=json_decode($a->start($p),true);
 	return $res;
 }
@@ -143,17 +158,17 @@ function updateUser($p){
 /****api类****/
 class api{
 	const api_url="http://o.bibibaba.cn/router/rest";
-	const secret="微信密钥";
+	const secret="21fb644e20c93b72773bf0f8d0905052";
 	protected $params=array(
 		"app_key"=>"9410bc1cbfa8f44ee5f8a331ba8dd3fc",
 	 	"v"=>"1.0",
 	 	"format"=>"json",
 	 	"sign_method"=>"md5",
-	 	"access_token"=>"永久token"
+	 	"access_token"=>"f1b3afaf9bbedfcb0ca3f0465a1d2e7e157c1ea55ad8d2dbcaa7083d125d360c403fe6c7ed1ace5c25682eb77a070c90"
 	);
 
 	function encode($str){
-		$url = rawurlencode(iconv('utf-8','gb2312',$str)); 
+		$url = rawurlencode($str); 
 		$a = array("%3B","%5C","%2F","%3F","%3A","%40","%26","%3D","%2B","%24","%2C","%23"); 
 		$b = array(";","\\","/","?",":","@","&","=","+","$",",","#");
 		$url = str_replace($a, $b, $url); 
@@ -225,7 +240,7 @@ class api{
 /******工具函数******/
 //输出错误信息并退出脚本
 function echoExit($code,$str){
-	echo '{"status_code":'.$code.',"err_msg":"'.iconv('utf-8','gb2312',$str).'"}';
+	echo '{"status_code":'.$code.',"err_msg":"'.$str.'"}';
 	exit;
 }
 

@@ -1,0 +1,282 @@
+<!--
+	作者：江海
+	时间：2016-3-21
+	描述：分销商主页
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>分销商主页</title>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+		<script src="../../wslib/toolkit/WCharts.js" defer="defer"></script>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script src="../ui/ui.js"></script>
+		<script src="../js/string_factory.js"></script>
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+		
+		<style>
+			.header{
+				float: left;
+				width: 100vw;
+				height: 100vw;
+				display: block;
+				text-align: center;
+				background-color: #f46e26;
+				color: white;
+			}
+			.middle_left{
+				float: left;
+				width: 50vw;
+				padding-top: 5vw;
+				padding-left: 1em;
+			}
+			.middle_right{
+				float: left;
+				width: 50vw;
+				padding-top: 5vw;
+				padding-left: 1em;
+			}
+			.curve{
+				float: left;
+				width: 100vw;
+				display: block;
+				margin-top: 1em;
+				margin-bottom: 1em;
+				text-align: center;
+			}
+			.footer{
+				float: left;
+				width: 100vw;
+				display: block;
+				background-color: white;
+				color: #00cccc;
+				padding-left: 5px;
+				font-size: 0.8em;
+				word-wrap:break-word; 
+				word-break:normal;
+			}
+			.footer>a{
+				color: #00cccc;
+			}
+		</style>
+
+	</head>
+	
+	<body>
+		<div class="header">
+			<div style="margin-top: 8vw; font-size: 0.8em;">今日收益(元)</div>
+			<div style="margin-top: 25vw; font-size: 4em;"><span id="profit_today">----</span> </div>
+			<div style="margin-top: 25vw; font-size: 0.5em;">可提取现金(元)</div>
+			<div style="margin-top: 2vw; font-size: 1.5em;"><span id="cash">----</span> </div>
+		</div>
+		<div class="middle_left">
+			<div style="font-size: 0.5em; color: #999999;">累计收益(元)</div>
+			<div style="font-size: 1.5em; color: #f46e26;"><span id="profit_total">----</span> </div>
+		</div>
+		<div class="middle_right">
+			<div style="font-size: 0.5em; color: #999999;">累计销售额(元)</div>
+			<div style="font-size: 1.5em; color: #f46e26;"><span id="sale_total">----</span> </div>
+		</div>
+		
+		<div id="profit_history_curve" class="curve" style="width:98vw; height:60vw;">
+			<div class="null_tip">
+				<h1>NULL</h1>
+				<p><label class="tip_text">暂无数据</label></p>
+			</div>
+		</div>
+		
+		<div class="footer">
+			购买链接：
+			<br />
+			<a id="buyPage" onclick="buyPage();"></a>
+		</div>
+	</body>
+	
+	<script>
+	
+		var open_id=_g.openid;
+		if(!open_id)
+			W.getOpenId();
+		
+		var profit_history;
+		var buy_page="";
+			
+		window.addEventListener("load",function(){
+			if(_user.cust_type!=4) window.location.href=WiStorm_root+'index.html';
+			
+			var profit_today=666;
+			var	cash=9999;
+			var	profit_total=66666;
+			var	sale_total=999999;
+			
+			profit_history=[499,600,406,757,648,703,666];
+			
+			Wapi.user.get(function(res) {
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				} else {
+					var frozen_balance=v(res.frozen_balance);
+					var balance=v(res.balance);
+					cash=balance-frozen_balance;
+					
+					W("#cash").innerHTML=cash;
+					W("#profit_today").innerHTML=res.day_profit;
+					W("#profit_total").innerHTML=res.total_profit;
+					W("#sale_total").innerHTML=res.total_sale;
+				}
+			},{
+				cust_id: _user.cust_id,
+				access_token: _user.access_token
+			},{
+				fields:'frozen_balance,balance,day_profit,total_profit,total_sale'
+			});
+			
+			var x=getDates(7);
+			var y=profit_history;
+			initEcharts(x,y);
+			
+			var name=_user?_user.cust_name:"";
+			var sid="&sid="+_user.cust_id;
+			buy_page=WiStorm_root+'src/buy.html?intent=logout&needOpenId=true&id='+open_id+"&name="+name+sid;
+			W("#buyPage").innerHTML=buy_page;
+			setShare();
+		});
+		
+//		获取过去d天的日期 返回格式为'mm-dd'，长度为d的字符串数组（包含当天）
+		function getDates(d){
+			var arr=[];
+			var strThisDay=new Date();
+			strThisDay-=1000*60*60*24*(d-1);
+			for(var n=0;n<d;n++){
+				var thisDay=new Date(strThisDay);
+				var thisMonth=thisDay.getMonth()+1;
+				var thisDate=thisDay.getDate();
+				arr.push(thisMonth+"-"+thisDate);
+				strThisDay+=1000*60*60*24;
+			}
+			return arr;
+		}
+		
+		/*****设置分享******/
+		function setShare(){
+			var name=_user?_user.cust_name:"";
+			var share_url=WiStorm_root+'src/distributor/micro_business_alliance.html?intent=logout&needOpenId=true&parent_open_id='+open_id+"&name="+name;
+			history.pushState(null,"",share_url);
+			if(!W.fillFriend.fill){
+				W.fillFriend(_g.id,open_id,_g.name,name);
+				W.fillFriend.fill=true;
+			}
+			if(!W.native){
+				window.addEventListener("nativeSdkReady",setShare);
+				return;
+			}
+			W.debug(open_id);
+			var op={
+			    title: '我的收益', // 分享标题
+			    desc: 'WiCARE空气净化器', // 分享描述
+			    link: share_url, // 分享链接
+			    imgUrl:img, // 分享图标
+			    success: function(){},
+			    cancel: function(){}
+			}
+			
+			wx.onMenuShareTimeline(op);
+			wx.onMenuShareAppMessage(op);
+		}
+	</script>
+	
+	<script>
+		var profit_history_curve=W("#profit_history_curve");
+		//折线图样式
+		var option = {
+			_type:"day",//自定义的参数，与echarts无关，只是用于识别是获取最近7天的还是获取最近24小时的
+			_hours:24,//自定义的参数，与echarts无关，只是用于识别是获取最近1小时的还是获取最近24小时的数据
+		    title : {
+		        x:'left',
+		        textStyle:{
+		        	fontFamily:"微软雅黑",
+		        	fontWeight:"normal",
+		        	fontSize:14,
+		        	color:"#339999"
+		        },
+		        text:"七日收益"
+		    },
+		    tooltip : {
+		        trigger: 'item'
+		    },
+		    grid:{
+		    	x:35,
+		    	y:35,
+		    	x2:20,
+		    	y2:30,
+		    	borderWidth:0
+		    },
+		    yAxis : [
+		        {
+		            type : 'value',
+		            min:"34",
+		        	max:"62",
+		        	scale:true,
+		            splitLine:{
+		            	show:true,
+		            	lineStyle:{
+		            		color:"#eee"
+		            	}
+		            }
+		        }
+		    ],
+		    xAxis:[{
+	            type : 'category',
+	            boundaryGap : false,
+	            splitLine:{
+	            	show:false
+	            },
+	        }],
+		    series:[{
+	            type:'line',
+	            smooth:true,
+	            symbol:'none',
+	            itemStyle: {normal: {areaStyle: {type: 'default',color:"rgba(27,158,208,0.4)"},lineStyle:{width:0}}},
+	        }],
+	        animation:false
+		};
+		
+		
+		//画曲线
+		function initEcharts(x,y){
+			option.xAxis[0].data=x;
+			option.series[0].data=y;
+			var min,max;
+			min=max=y[0];
+			for(var i=0;i<y.length;i++){
+				min=(min>y[i])?y[i]:min;
+				max=(max<y[i])?y[i]:max;
+			}
+			option.yAxis[0].min=min=Math.round(min/10)*10-10;
+			option.yAxis[0].max=max=Math.round(max/10)*10+10;
+			var myChart = echarts.init(profit_history_curve);
+			myChart.setOption(option); 
+		}
+		
+		function buyPage(){
+			window.location.href=buy_page;
+		}
+		function v(num){
+			if(num==undefined||num==null){
+				return 0;
+			}else{
+				return num;
+			}
+		}
+	</script>
+</html>

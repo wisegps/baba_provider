@@ -37,10 +37,11 @@
 		</script>
 
 		<script src="js/string_factory.js"></script>
-		<script src="../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../wslib/api/newWapi.js" defer="defer"></script>
 		<style>
 			body {
 				background-color: white;
+				overflow-x: hidden;
 			}
 			
 			.content {
@@ -63,8 +64,8 @@
 				margin: 10px 0;
 				color: #000;
 			}
-			
-			.text_list>.test_val {
+			#car_number{display: inline-block;float: right;}
+			.text_list>.test_val,#car_number{
 				width: 60%;
 				height: 21px;
 				font-size: 13px;
@@ -125,7 +126,7 @@
 			#car_num{
 				padding-top: 44px;
 				background: #efefef;
-				position:absolute;
+				position: fixed;
 				padding-left: .5em;
     			padding-right: .5em;
 			}
@@ -243,7 +244,7 @@
 
 				<div class="text_list">
 					<label class="fr">&nbsp;</label>
-					<input id="car_number" class="test_val fr" type="text" placeholder="输入车牌号" data-obj_id="" />
+					<div id="car_number" data-obj_id="">点击选择车辆</div>
 					<div class="name">车牌号</div>
 				</div>
 
@@ -275,13 +276,15 @@
 			car_number_list:W("#car_number_list"),
 			car_num_search:W("#car_num_search"),
 			number_list:W("#number_list"),
-			del_car_num:W(".m_btn_delete")
+			del_car_num:W(".m_btn_delete"),
+			rmd_type:W("#rmd_type"),
+			car_brand:W("#car_brand")
 		};
 		window.addEventListener("DOMContentLoaded", function() {
 			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[5]=="0")){
 				location="home.html";
 			}
-			W("#rmd_type").addEvent("change", function() {
+			dom.rmd_type.addEvent("change", function() {
 				changeType(this.value)
 			});
 			initEditData();
@@ -292,13 +295,14 @@
 		dom.car_num_box.querySelector(".mui-pull-left").addEvent("click",hideCarNumBox);
 		dom.del_car_num.addEvent("click",carNumDel);
 		
-		W("#rmd_type").addEventListener("click", picker);
+		dom.rmd_type.addEventListener("click", picker);
 		W("#engine_status").addEventListener("click", picker);
 		//W("#duration").addEventListener("click", picker);
 		W("#condition").addEventListener("click", picker);
 		W("#car_picker").addEvent("click", function() {
-			if(dom.car_num.value){
-				dom.car_num.value = "";
+			if(dom.car_num.dataset.value){
+				dom.car_num.dataset.value = "";
+				dom.car_num.innerText = "点击选择车辆";
 				W.toast("车辆品牌和车牌号只能2选1哦！");
 			}
 			ui_carSeries();
@@ -306,21 +310,23 @@
 		function hideCarNumBox(){//隐藏车牌选择框
 			dom.car_num_box.classList.remove("fromRight");
 			dom.car_num_box.classList.add("toRight");
+			dom.car_num_search.value='';
+			dom.car_number_list.innerHTML = "";
 		}
 		function showCarNumBox(){//展示车牌选择框
-			this.blur();
-			if(W("#car_brand").value){
+			if(dom.car_brand.value){
 				W.toast("车辆品牌和车牌号只能2选1哦！");
-				W("#car_brand").value = "";
+				dom.car_brand.value = "";
 			}
-			dom.number_list.innerText=dom.car_num.value;
+			dom.number_list.innerText=dom.car_num.dataset.value||'';
 			dom.number_list.dataset.obj_id=dom.car_num.dataset.obj_id;
 			dom.car_num_box.classList.remove("hide");
 			dom.car_num_box.classList.remove("toRight");
 			dom.car_num_box.classList.add("fromRight");
 		}
 		function carNumBoxOk(){//车牌选择点击完成
-			dom.car_num.value=dom.number_list.innerText;
+			dom.car_num.dataset.value=dom.number_list.innerText;
+			dom.car_num.innerText=dom.number_list.innerText;
 			dom.car_num.dataset.obj_id=dom.number_list.dataset.obj_id;
 			hideCarNumBox();
 		}
@@ -369,8 +375,8 @@
 				}
 				band=band.slice(0,-1);
 				bandId=bandId.slice(0,-1);
-				W("#car_brand").value = band;
-				W("#car_brand").dataset.brand = bandId;
+				dom.car_brand.value = band;
+				dom.car_brand.dataset.brand = bandId;
 			}
 			/**
 			 * 修改提醒，初始化数据
@@ -380,47 +386,58 @@
 			if (option_id == undefined) {
 				return;
 			}
-			var str = sessionStorage.getItem(option_id);
-			if (str == undefined || str == null) {
-				return;
-			}
 			//修改标题
 			W("title").innerText = "更新提醒";
 			W(".mui-title").innerText = "更新提醒";
-			var data = eval("(" + str + ")");
-			submit_data._option_id = data.option_id;
-			submit_data.option_name = data.option_name;
-			submit_data.option_type = data.option_type;
-			submit_data.mileage = data.mileage;
-			submit_data.duration = data.duration;
-			submit_data.object_type = data.object_type;
-			submit_data.object_name = data.object_name;
-			submit_data.object = data.object;
-			submit_data.msg_template = data.msg_template;
-			W("#rmd_name").value = data.option_name;
-			var type = $ReminderType(data.option_type);
-			W("#rmd_type").value = type;
-			changeType(type);
-			W("#mileage").value = data.mileage;
-			W("#rmd_duration").value = data.duration;
-			var object_type = data.object_type;
-			/**
-			 * 判断目标类型
-			 */
-			//object_type: Number,   //目标类型 0:全部  1:品牌  2:车辆
-			dom.car_num.value = "";
-			W("#car_brand").value = "";
-			if (object_type == 0) {
-				dom.car_num.value = "";
-				W("#car_brand").value = "";
-			} else if (object_type == 1) {
-				W("#car_brand").value = data.object_name;
-				W("#car_brand").setAttribute("data-brand", data.object);
-			} else if (object_type == 2) {
-				dom.car_num.value = data.object_name;
-				dom.car_num.setAttribute("data-obj_id", data.object);
+			var par={
+				access_token:_user.access_token,
+				'option_id':option_id
 			}
-			W("#msg_template").value = data.msg_template;
+			Wapi.exc_opt.list(function(res){
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				var data=res.data[0];
+				if(!data){
+					W.alert('无效的option_id');
+					return;
+				}
+				submit_data._option_id = data.option_id;
+				submit_data.option_name = data.option_name;
+				submit_data.option_type = data.option_type;
+				submit_data.mileage = data.mileage;
+				submit_data.duration = data.duration;
+				submit_data.object_type = data.object_type;
+				submit_data.object_name = data.object_name;
+				submit_data.object = data.object;
+				submit_data.msg_template = data.msg_template;
+				W("#rmd_name").value = data.option_name;
+				var type = $ReminderType(data.option_type);
+				dom.rmd_type.value = type;
+				changeType(type);
+				W("#mileage").value = data.mileage;
+				W("#rmd_duration").value = data.duration;
+				var object_type = data.object_type;
+				/**
+				 * 判断目标类型
+				 */
+				//object_type: Number,   //目标类型 0:全部  1:品牌  2:车辆
+				dom.car_num.dataset.value = "";
+				dom.car_num.innerText = "点击选择车辆";
+				dom.car_brand.value = "";
+				if (object_type == 0) {
+					dom.car_brand.value = "";
+				} else if (object_type == 1) {
+					dom.car_brand.value = data.object_name;
+					dom.car_brand.dataset.brand=data.object;
+				} else if (object_type == 2) {
+					dom.car_num.dataset.value = data.object_name;
+					dom.car_num.innerText = data.object_name;
+					dom.car_num.dataset.obj_id=data.object;
+				}
+				W("#msg_template").value = data.msg_template;
+			},par)
 		}
 		
 		function picker() {
@@ -448,12 +465,13 @@
 				seller_id: _user.seller_id,
 				max_id: "0",
 				access_token: _user.access_token,
-				obj_name: val
+				obj_name: "^"+val
 			}
 			var OP = {
-				fields: 'obj_name'
+				fields: 'obj_name',
+				limit:5
 			};
-			W.userApi.searchCustomerVehicle(showSearch, data, OP);
+			Wapi.vehicle.list(showSearch, data, OP);
 		}
 
 		/**
@@ -490,7 +508,7 @@
 				id+=",";
 			}
 			dom.number_list.dataset.obj_id=id+objId;
-			dom.number_list.innerText= val+tvalue;
+			dom.number_list.innerText=(val+tvalue)||'';
 		}
 
 		function changeType(v) {
@@ -500,16 +518,19 @@
 			W("#div_fault").hidden = true;
 			if (v == '保养提醒') {
 				W("#div_maintain").hidden = false;
+				dom.rmd_type.dataset.rmd_type=0;
 			} else if (v == '未到店提醒') {
 				W("#div_arrive").hidden = false;
+				dom.rmd_type.dataset.rmd_type=1;
 			} else if (v == '故障提醒') {
 				W("#div_fault").hidden = false;
+				dom.rmd_type.dataset.rmd_type=2;
 			}
 		}
 
 		function submit() {
 			var rmdName = W("#rmd_name").value;
-			var rmdType = W("#rmd_type").dataset.rmd_type;
+			var rmdType = dom.rmd_type.dataset.rmd_type;
 			var mileage = W("#mileage").value;
 			var duration = W("#rmd_duration").value;
 			var msgTemplate = W("#msg_template").value;
@@ -520,10 +541,10 @@
 			submit_data.option_type = rmdType;
 			submit_data.mileage = mileage;
 			submit_data.duration = duration;
-			var car_brand = W("#car_brand").value.trim(); //品牌
-			var car_brand_id = W("#car_brand").dataset.brand; //品牌id
-			var car_number = dom.car_num.value.trim(); //车牌号
-			var car_number_id = dom.car_num.dataset.obj_id; //车牌号id
+			var car_brand = dom.car_brand.value.trim(); //品牌
+			var car_brand_id = dom.car_brand.dataset.brand||''; //品牌id
+			var car_number = dom.car_num.dataset.value||''; //车牌号
+			var car_number_id = dom.car_num.dataset.obj_id||''; //车牌号id
 			/**
 			 * 去掉最后一个逗号
 			 */
@@ -550,9 +571,9 @@
 			}
 			submit_data.msg_template = msgTemplate;
 			if (submit_data._option_id == undefined) {
-				W.userApi.createSchema(callback, submit_data);
+				Wapi.exc_opt.add(callback, submit_data);
 			} else {
-				W.userApi.updataSchema(callback, submit_data);
+				Wapi.exc_opt.update(callback, submit_data);
 			}
 		}
 
@@ -590,10 +611,9 @@
 
 		function callback(res) {
 			if (res.status_code == 0) {
-				history.pushState(null,"home.html","home.html");
-				location = "reminder_setting.html";
+				W.back();
 			} else {
-				W.alert(res.msg);
+				W.alert(res.err_msg);
 			}
 		}
 	</script>

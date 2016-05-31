@@ -1,0 +1,79 @@
+<!--
+	作者：小吴
+	时间：2016-03-01
+	描述：红包页
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>微车联</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+		<script>link("W.css")</script>
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script src="../ui/hongbao.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../wslib/toolkit/WxSdk.js" type="text/javascript" charset="utf-8" defer="defer"></script>
+	</head>
+    
+	<body style="background: #EBEBEB;">
+		<div style="text-align: center;"><div id='a'>3月9日 下午17:55</div></div>
+		<img style="width: 50px;margin-left: .5em;vertical-align: top;" src="../../img/logo.jpg"/>
+		<img src="../../img/hb.jpg" id="img" style="width: 65%;">
+		<img src="../../img/edit.png" style="width: 100%;position: fixed;bottom: 0;left: 0;">
+		<div id="rule" style="position: relative;">
+			<img style="width: 50px;margin-left: .5em;vertical-align: top;" src="../../img/logo.jpg"/>
+			<div style="position: absolute;top: 8px;left: 67px;background-color: #fff;display: inline-block;width: 10px;height: 10px;transform: rotate(45deg);-webkit-transform:rotate(45deg);-moz-transform: rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);"></div>
+			<div style="display: inline-block;border-radius: .3em;padding: .8em;margin-left: .5em;background-color: #fff;color: #50b7de;">抽奖规则</div>
+		</div>
+		<input style="position: fixed;border: none;background: none;bottom: 10px;left: 15%;z-index: 1;font-size: 20px;">
+	</body>
+	<script>
+	window.addEventListener("load",function(){
+		W("#img").addEvent('click',function(){
+			_ui_hongbao.draw({open_id:_g.openid,cust_id:0});
+		});
+		W("#rule").addEvent('click',function(){
+			location.href='small_bean.html?intent=logout';
+		});
+		var d=new Date();
+		var m=d.getMonth()+1;
+		var day=d.getDate();
+		var h=d.getHours();
+		var mi=d.getMinutes();
+		var a='上午';
+		if(h>12)a='下午';
+		if(h<10)h='0'+h.toString();
+		var t=m+'月'+day+'日 '+a+h+':'+mi;
+		W("#a").innerHTML=t;
+//		if(W.native){
+//			//说明sdk准备好了，可以直接使用
+//			setShare(res);
+//		}else{
+//			//sdk未准备好,监听nativeSdkReady事件
+//			window.addEventListener("nativeSdkReady",function(){
+//				setShare(res);
+//			})
+//		}
+	});
+	
+	//设置分享朋友圈和发送给朋友
+	function setShare(res){
+		var op={
+		    title: '微车联给你发了一个红包，请领取', // 分享标题
+		    desc: 'WiCARE红包', // 分享描述
+		    link: location.href, // 分享链接
+		    imgUrl:_user.logo, // 分享图标
+		    success: function(){},
+		    cancel: function(){}
+		}
+		wx.onMenuShareTimeline(op);
+		wx.onMenuShareAppMessage(op);
+	}
+	</script>
+</html>

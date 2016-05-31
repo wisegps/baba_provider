@@ -65,7 +65,7 @@
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
 			<h1 class="mui-title">后台订单管理</h1>
 		</header>
 		<div class="mui-content" id="mui-content">
@@ -174,14 +174,20 @@
 				dom.box.style.display="block";
 				dom.Rcell.style.backgroundColor="#C7C7C7";
 				dom.Lcell.style.backgroundColor="#fff";
+				showRight.ck=select();
 		}
+		delete showRight.ck;
 		window.addEventListener("DOMContentLoaded",function(){
+			dom.begin=W("#begin_time").value=getBeginToday();
+			dom.end=W("#end_time").value = getFullCurrentTime();				
 			select(0);//默认时间
 			//select(2);//生成未处理订单
 			W("#begin_time").addEvent("change",function(){
+				dom.bn=W("#begin_time").value;
 				select();
 			})
 			W("#end_time").addEvent("change",function(){
+				dom.bn=W("#begin_time").value;
 				select();
 			})
 			W(".Qcode").addEvent('click',QRcode);//扫描绑定事件
@@ -232,9 +238,12 @@
 				oStatus='<span class="load">'+str+'</span>';
 			}
 			var remark='';
+			var time;
+			if(data.create_time)
+				time=data.create_time.slice(0,10);
 			if(data.remark)
 				remark='<tr><td colspan="2"><span style="color: #ccc;">备注:</span>'+data.remark+'</td></tr>'
-			this.innerHTML='<div class="top"><span class="name" style="color:#000000">订单号：</span><span class="value" name="order">'+data.order_id+'</span></div><table class="top"><tr><td><span class="name">产品：</span><span class="value" name="order">'+data.product_name+'</span></td><td><span class="name">日期：</span><span class="value" name="order">'+data.create_time.slice(0,10)+'</span></td></tr><tr><td><span class="name">数量：</span><span class="value" name="order">'+data.quantity+'</span></td><td><span class="name">单价：</span><span class="value" name="order">'+data.unit_price+'</span></td></tr>'+remark+'</table><div class="top"><span class="name">收货地址：</span><span class="value" name="order">'+data.address+'</span></div><div class="orderprice">'+oStatus+'<span class="name" style="color:red">合计：</span><span class="value" name="order" style="color:red">￥'+data.quantity*data.unit_price+'</span></div>';
+			this.innerHTML='<div class="top"><span class="name" style="color:#000000">订单号：</span><span class="value" name="order">'+data.order_id+'</span></div><table class="top"><tr><td><span class="name">产品：</span><span class="value" name="order">'+data.product_name+'</span></td><td><span class="name">日期：</span><span class="value" name="order">'+time+'</span></td></tr><tr><td><span class="name">数量：</span><span class="value" name="order">'+data.quantity+'</span></td><td><span class="name">单价：</span><span class="value" name="order">'+data.unit_price+'</span></td></tr>'+remark+'</table><div class="top"><span class="name">收货地址：</span><span class="value" name="order">'+data.address+'</span></div><div class="orderprice">'+oStatus+'<span class="name" style="color:red">合计：</span><span class="value" name="order" style="color:red">￥'+data.quantity*data.unit_price+'</span></div>';
 			if(this.querySelector('.btn'))
 				this.querySelector('.btn').addEvent('click',show);
 			this.data=data;
@@ -263,141 +272,119 @@
 		function hide(){
 			dom.content.style.display='block';
 			dom.main.style.display='none';
-			
+			dom.arr.length=0;
 		}
+
+
 		/**
 		 * index 0:时间显示为今天0点到现在的时间  1：选择时间以后 显示这个时间段已处理的订单 
 		 * @param {Object} index
 		 */
 		function select(index) {	
-			var begin = W("#begin_time").value + " 00:00:00";
-			var end = W("#end_time").value;
-			var list = document.createDocumentFragment();
-			var lists = document.createDocumentFragment();
+			var begin,end;		
+			begin=dom.bn;
 			var data={
-				cust_id:_user.cust_id,
 				access_token: _user.access_token,
-				max_id:MAX_ID
+				min_id:MAX_ID,
+				order_type:'3|4'
 			}
 			if(!MAX_ID)
-				delete data.max_id;
+				delete data.min_id;
 			var op={
 				fields:'order_id,cust_id,seller_id,saler_id,address,order_type,status,product_name,unit_price,quantity,remark,create_time',
-				sorts:"order_id",
-				page:"order_id",
+				sorts:"-create_time",
+				page:"create_time",
 				limit:"20"						
 			}
 			if(index==0){
-				begin=W("#begin_time").value=getBeginToday();
-				end=W("#end_time").value = getFullCurrentTime();
-				data.create_time = begin + "@" + end;
+				data.status='20480|20488';
 				Wapi.order.list(function(res){
 					if (res && res.status_code) {
 						W.errorCode(res);
 						return;
 					}
-					if(res.data.length>0){
-						MAX_ID=res.data[res.data.length-1].order_id;
+					W("#l_cell>.t_value").innerText=res.total;	
+					if(res.data && res.data.length>0){
+						MAX_ID = NewDate(res.data[res.data.length-1].create_time).WtoString();
 						for(var i=0;i<res.data.length;i++){
 							if(res.data[i].status==20480 || res.data[i].status==20488){
-								list.appendChild(new cv(res.data[i]));
 								dom.left.push(res.data[i]);
-							}else{
-								lists.appendChild(new cv(res.data[i]));
-								dom.right.push(res.data[i]);
 							}
-						}			
-						doms(list,lists,res);
+						}	
+						dom.left.unique();
+						doms(res);
 					}
-				},data,op);
+				},data,op);			
 			}else if(!index){
-					if(dom.box.style.display=="block"){
-						dom.right.unone();
-						if (begin != undefined) {
-							data.create_time = begin + "@" + end;
+						dom.right.length=0;
+						W('#order-list').innerHTML='';
+						if (dom.begin != undefined) {
+							data.create_time = dom.begin + "@" + dom.end;
 						}
+						if(dom.bn){
+							begin = W("#begin_time").value + " 00:00:00";
+							end = W("#end_time").value;
+							data.create_time = begin+ "@" +end;
+						}
+							
+						data.status='20491|20495|20483|20492|20493|20494|20496|20497';
 						Wapi.order.list(function(res){
+							W("#r_cell>.t_value").innerText=res.total;	
 							if (res && res.status_code) {
 								W.errorCode(res);
 								return;
 							}
-							if(res.data.length>0){
-								MAX_ID=res.data[res.data.length-1].order_id;
+							if(res.data &&res.data.length>0){
+								MAX_ID = NewDate(res.data[res.data.length-1].create_time).WtoString();//NewDate自动加上8小时并且返回
 								for(var i=0;i<res.data.length;i++){
-									if(res.data[i].status!=20480 &&res.data[i].status!=20488){
-										lists.appendChild(new cv(res.data[i]));
+									if(res.data[i].status!=20480 &&res.data[i].status!=20488 &&res.data[i].status!=0){									
 										dom.right.push(res.data[i]);
 									}
 								}
-								doms(list,lists,res);
+								dom.right.unique();
+								doms(res);
 							}
 						},data,op);
-					}else{
-						dom.left.unone();//数组去重
-						Wapi.order.list(function(res){
-							if (res && res.status_code) {
-								W.errorCode(res);
-								return;
-							}
-							if(res.data.length>0){
-								MAX_ID=res.data[res.data.length-1].order_id;
-								for(var i=0;i<res.data.length;i++){
-									if(res.data[i].status==20480 || res.data[i].status==20488){
-										list.appendChild(new cv(res.data[i]));
-										dom.left.push(res.data[i]);
-									}
-								}
-								doms(list,lists,res);
-							}
-						},data,op);
-					}
-			}/*else{//测试
-				var data={
-					cust_id:_user.cust_id,
-					access_token: _user.access_token,
-					product_name: "空气净化器",
-					quantity:1,
-					unit_price:200,
-					status: 20488,
-					create_time:'2016-02-06',
-					address: "深圳市宝安区创兴达商务大厦1201号1540室",
-					remark:'how do you konw'
-				};
-				Wapi.order.add(function(res){
-					if (res && res.status_code) {
-						W.errorCode(res);
-						return;
-					}
 					
-				},data);
-			}*/
+			}
 		}
+		//数组去重
+		Array.prototype.unique = function(){
+		 var res = [];
+		 var json = {};
+		 for(var i = 0; i < this.length; i++){
+		  if(!json[this[i]]){
+		   res.push(this[i]);
+		   json[this[i]] = 1;
+		  }
+		 }
+		 return res;
+		}		
 		/**
 		 * 显示订单数量  向下自动加载
 		 */
-		function doms(list,lists,res){
-			if(dom.left){
-				W("#l_cell>.t_value").innerText=dom.left.length;
+		function doms(res){
+			var list = document.createDocumentFragment();
+			var lists = document.createDocumentFragment();
+			for(var i=0;i<dom.right.length;i++){
+				lists.appendChild(new cv(dom.right[i]));
 			}
-			if(dom.right){
-				W("#r_cell>.t_value").innerText=dom.right.length;							
-			}			
+			for(var j=0;j<dom.left.length;j++){
+				list.appendChild(new cv(dom.left[j]));
+			}
+			dom.Porder.appendChild(list);
+			W('#order-list').appendChild(lists);
 			var add =dom.left.length+dom.right.length;
 			if(res.total>add){
 				var autoLoad;						//把加载的存起来		
 				if(dom.autoLoad){
 					autoLoad=dom.autoLoad;
-				}else if(WiStorm.agent.ios){
-					if(dom.box.style.display=="block"){
-						autoLoad=new ui_autoLoad(W('.mui-content'),select);
-						//W('#order-list').appendChild(autoLoad);
-						W('.mui-content').appendChild(autoLoad);
-					}else{
-						autoLoad=new ui_autoLoad(dom.Porder,select);
-						dom.Porder.appendChild(autoLoad);						
-					}
 				}else{
-					autoLoad=new ui_autoLoad(document,select);
+					autoLoad=new ui_autoLoad(document,autoLoads);
+					if(W("#processing-order").style.display='block')
+						dom.Porder.appendChild(autoLoad);
+					else
+						W('#order-list').appendChild(autoLoad);				
 				}	
 				dom.autoLoad=autoLoad;
 			}else if(dom.autoLoad){
@@ -405,23 +392,15 @@
 				dom.autoLoad.remove();
 				delete dom.autoLoad;
 			}
-			dom.Porder.appendChild(list);
-			W('#order-list').appendChild(lists);
 		}
-		/**
-		 * 数组去重
-		 */
-		Array.prototype.unone = function(){
-		 var res = [];
-		 var json = {};
-			for(var i = 0; i < this.length; i++){
-			  	if(!json[this[i]]){
-			     	res.push(this[i]);
-					json[this[i]] = 1;
-				}
-			}
-	 		return res;
+		//加载
+		function autoLoads(){
+			if(W("#box").style.display=='block')
+				select();
+			else	
+				select(0);
 		}
+		
 		/**
 		 * 扫描二维码
 		 */
@@ -431,10 +410,10 @@
 			str=str+c;
 */			if(W(".num").innerHTML>dom.arr.length){
 				dom.arr.push(str);
-				if(dom.arr.length==1){
-					dom.val.value=dom.arr[0];
+				if(dom.val.value){
+					dom.val.value+=" & "+str;
 				}else{			
-					dom.val.value=dom.arr.unone();
+					dom.val.value+=str;
 				}
 			}else{
 				W.alert('扫描不能超过数量');
@@ -449,16 +428,17 @@
 			window.addEventListener("nativeSdkReady",QRcode);
 		}
 	}
-/*	W.native={};//测试
+	W.native={};//测试
 	W.native.scanner={
 		start:function(callback){
 			callback("55621854091");
 		}
-	}*/
+	}
 	/**
 	 * 点击确定 修改当前订单的状态  和  扫描的设备状态
 	 */
 	function updateStatus(){
+		dom.arr.unique();
 		if(dom.arr.length==W(".num").innerText){
 			updateQRcodeStatus();
 			updateOrderStatus();
@@ -499,12 +479,14 @@
 		detData.discount=1;
 		detData.quantity=dom.orderData.quantity;
 		detData.total_price=dom.orderData.unit_price*dom.orderData.quantity;
-		detData.arr=[];
+		detData.serials=[];
 		for (var i=0;i<dom.arr.length;i++) {
 			var j={};
 			j.serial=dom.arr[i];
 			j.status=1;
-			detData.arr.push(j);
+			if(dom.orderData.status==20488)
+				j.status=3;
+			detData.serials.push(j);
 		}
 		det.push(detData);
 		var data={

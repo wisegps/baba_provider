@@ -228,7 +228,10 @@ function include(url,s){
 				return;
 		}
 	}
-	var path=WiStorm.root+url;
+	var path;
+	if(url.search(/(http:\/\/|https:\/\/)/)==-1)
+		path=WiStorm.root+url;
+	else path=url;
 	
 	if(typeof s=="boolean"&&s){
 		var js=W._get({"url":path,"dataType":"text"});
@@ -305,10 +308,7 @@ reEcho.replace=function(match){
 function link(cssName){
 	var skinFolder=W.getSkin();
 	var pathName=WiStorm.root+'skin/'+skinFolder+'/'+cssName;
-	var lin=document.createElement("link");
-	lin.href=pathName;
-	lin.rel="stylesheet";
-	document.head.appendChild(lin);
+	document.write('<link href="'+pathName+'" rel="stylesheet">');
 }
 
 /**
@@ -849,7 +849,7 @@ W.prompt=function(opt){
 	}else{
 		obj=new WiStormUI("div");
 		obj.className="cover_paper alert_box fadeIn";
-		obj.innerHTML='<div class="tabel_center"><div class="alert_view content fromTop"><div class="alert_content" style="padding-bottom:0"><h3 class="title">'+json.title+'</h3><h4 class="alert">'+json.content+'</h4><input type="text" style="margin-bottom: .5em;"></div><div class="alert_but"><div class="_but" style="border-right:1px solid #ccc">'+json.y+'</div><div class="_but no">'+json.n+'</div</div></div></div>';
+		obj.innerHTML='<div class="tabel_center" style="display:block;"><div class="alert_view content fromTop"><div class="alert_content" style="padding-bottom:0"><h3 class="title">'+json.title+'</h3><h4 class="alert">'+json.content+'</h4><input type="text" style="margin-bottom: .5em;"></div><div class="alert_but"><div class="_but" style="border-right:1px solid #ccc">'+json.y+'</div><div class="_but no">'+json.n+'</div</div></div></div>';
 		obj.show=WiStormUI.show;
 		obj.hide=WiStormUI.hide;
 		obj.callback=json.callback;
@@ -899,7 +899,6 @@ W.toast=function(str){
 		obj=new WiStormUI("div");
 		obj.className="toast alert_box fromDown";
 		obj.innerText=str;
-		obj.waiting=new Array();
 		obj.show=function(){
 			this.className=this.className.replace("toTop","fromDown");
 			this._show=true;
@@ -907,9 +906,9 @@ W.toast=function(str){
 		obj.hide=function(){
 			this.className=this.className.replace("fromDown","toTop");
 			this._show=false;
-			if(obj.waiting.length){
-				setTimeout("W.toast(W.toastBox.waiting.shift());",500);
-			}
+			W.toastBox=false;
+			var that=this;
+			setTimeout(function(){that.parentNode.removeChild(that)},500);
 		};
 		obj._show=true;
 		if(W("input:focus")){
@@ -1181,7 +1180,10 @@ W.logout=function(){
 	top.location=WiStorm.root+'index.html?intent=logout';
 }
 
-W.wxLogin=function(){
+W.wxLogin=function(s){
+	W.setCookie("access_token","");
+	W.setSetting("user",null);
+	var state=s||'sso_login';
 	if(WiStorm.test_mode){
 		var url = WiStorm.config.wx_login; //测试使用
 		url = url.replace(/\?\S*/, "");
@@ -1190,14 +1192,14 @@ W.wxLogin=function(){
 	}else{
 		W.setCookie("__login_redirect_uri__",location.href,-15);
 		var u=encodeURIComponent(WiStorm.config.wx_login);
-		top.location="https://open.weixin.qq.com/connect/oauth2/authorize?appid="+WiStorm.config.wx_app_id+"&redirect_uri="+u+"&response_type=code&scope=snsapi_userinfo&state=1#wechat_redirect";
+		top.location="https://open.weixin.qq.com/connect/oauth2/authorize?appid="+WiStorm.config.wx_app_id+"&redirect_uri="+u+"&response_type=code&scope=snsapi_userinfo&state="+state+"#wechat_redirect";
 	}				
 }
 
 //静默授权获取open_id
 W.getOpenId=function(needweixin,s){
 	if(needweixin||!WiStorm.agent.weixin)return;
-	s=s||"snsapiBase";
+	s=s||"getOpenId";
 	W.setCookie("__login_redirect_uri__",location.href,-15);
 	var u=encodeURIComponent(WiStorm.config.wx_login);
 	top.location="https://open.weixin.qq.com/connect/oauth2/authorize?appid="+WiStorm.config.wx_app_id+"&redirect_uri="+u+"&response_type=code&scope=snsapi_base&state="+s+"#wechat_redirect";
@@ -1309,9 +1311,8 @@ if(!WiStorm.isWeb){
  */
 W._getSeting();
 var _user=W.getSetting("user");
-if(_user&&W.getCookie("access_token")){
+if(_user&&_user.access_token){
 	W._login=true;
-	_user.access_token=W.getCookie("access_token");
 }else 
 	W._login=false;
 
@@ -1321,6 +1322,9 @@ if(WiStorm.isWeb){
 	 * 封装好的退后方法，返回上一页
 	 */
 	W.back=function(){
+		if(top==window){
+			history.back();
+		}else{
 			var thisView=plus.webview.currentWebview();
 			window.addEventListener("beforeunload",function(){
 				clearTimeout(W._unloadId);
@@ -1329,6 +1333,7 @@ if(WiStorm.isWeb){
 			W._unloadId=setTimeout(function(){
 				plus.webview.currentWebview().hide();
 			},50);
+		}
 	}
 	
 	if(top==window){
@@ -1584,12 +1589,7 @@ W.login=function(){
 	if(_g.sso_login){//已经授权
 		if (!_g.access_token) {//登录不成功
 			if (_g.status_code == 1) {//未绑定
-				if(_g.intent!="bind"){
-					W.alert("未绑定帐号，请先绑定",function(){
-						W.setCookie("__login_redirect_uri__",location.href,-60);
-						top.location=WiStorm.root+"src/temp_user.html?intent=logout";
-					});
-				}
+				W.toRegister();
 				return;
 			}else{//登录失败
 				W.errorCode(_g);
@@ -1599,36 +1599,75 @@ W.login=function(){
 			//登录成功
 			W.setSetting("openId",_g.openid);
 			W.setCookie("access_token", _g.access_token,1);
+			var gd={
+				access_token: _g.access_token
+			}
+			if(_g.cust_id){
+				gd.cust_id=_g.cust_id;
+			}else if(_g.temporary){//临时页面
+				gd.login_id=_g.openid;
+			}else{
+				W.toRegister();
+				return;
+			}
 			Wapi.user.get(function(res) {//获取用户数据
 				if (res.status_code) {
 					W.alert(res.err_msg+"；获取用户信息失败；error_code:"+res.status_code);
 					return;
 				} else {
-					W._login = true;//表示已登录
-					_user=res;
-					_user.open_id=res.login_id;
-					_user.access_token=W.getCookie("access_token");
-					//如果是商户登录，seller_id等于他自己的cust_id
-					res.seller_id=(res.cust_type==2)?res.cust_id:res.seller_id;
-					W.setSetting("user",res);
+					W._loginSuccess(res);
 					var evt = document.createEvent("HTMLEvents");
 					evt.initEvent("W.loginSuccess", false, false);//当页面load事件触发并且已经登录成功则会触发该事件,用于某些需要不经过登录页也可以直接访问，但是又需要用户授权登录的页面
 					window.dispatchEvent(evt);
 				}
-			}, {
-				cust_id: _g.cust_id,
-				access_token: _g.access_token
-			});
+			},gd);
 		}
 	}else{
 		W.alert("没有sso_login");
 	}
 }
+W._loginSuccess=function(res){
+	W._login = true;//表示已登录
+	_user=res;
+	_user.open_id=res.login_id;
+	_user.access_token=W.getCookie("access_token");
+	//如果是商户登录，seller_id等于他自己的cust_id
+	res.seller_id=(res.cust_type==2)?res.cust_id:res.seller_id;
+	if(res.privilege){
+		try{
+			res.privilege=JSON.parse(res.privilege);
+		}catch(e){
+			//TODO handle the exception
+			delete res.privilege
+		}
+	}
+	W.setSetting("user",res);
+}
+
+W.toRegister=function(){
+	W.alert("没有帐号或者未启用，请先注册",function(){
+		W.setCookie("__login_redirect_uri__",location.href,-60);
+		var reg=/src\/baba\/\S*\.html.*/;
+		var url=location.href;
+		var registerUrl="index.html?intent=register";
+		if(reg.test(url)){
+			registerUrl="index.html?intent=register&type=user";
+		}
+		top.location=WiStorm.root+registerUrl;
+	});
+}
 
 if(_g.needUser&&!_g.openid){
 	W.wxLogin();
-}else if(_g.needOpenId=="true"&&!_g.openid){
-	W.getOpenId();
+}else if(_g.needOpenId=="true"){
+	if(!_g.openid){
+		var pi=W.ls('_useropenid',true);
+		if(!pi)
+			W.getOpenId();
+		else _g.openid=pi;
+	}else{
+		W.setLS('_useropenid',_g.openid,true);
+	}
 }
 if(!W._login&&location.pathname.indexOf("index.html")<0&&_g.intent!="logout"){
 	if(WiStorm.agent.weixin){
@@ -1651,8 +1690,16 @@ if(!W._login&&location.pathname.indexOf("index.html")<0&&_g.intent!="logout"){
 
 window.addEventListener("DOMContentLoaded",function(){
 	var back=W(".W_back",true);
-	for(var i=back.length-1;i>=0;i--){
-		back[i].addEvent("click",W.back);
+	if(WiStorm.isWeb&&top==window){
+		for(var i=back.length-1;i>=0;i--){
+			back[i].addEvent("click",function(){
+				history.back();
+			});
+		}
+	}else{
+		for(var i=back.length-1;i>=0;i--){
+			back[i].addEvent("click",W.back);
+		}
 	}
 	
 	var script=W("script",true);

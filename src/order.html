@@ -22,107 +22,7 @@
 		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 	</head>
 	<style>
-		.mui-icon.mui-pull-right {
-		    font-size: 15px;
-		    line-height: 24px;
-		    font-family: "微软雅黑";
-		    color: #79C6E4;
-		}
-		#tj{
-			text-align: center;
-		}
-		.time_box,#status{margin: 5px 0;background: #fff;color: #52b8e0;}
-		#tj .ctime{margin: 0;}
-		.sub{float: left;float: left;color: #D60B0B;line-height: 30px;}
-		.ui_car_d footer{height: 47px;}
-		.order_id{float: right;color: #aaa;}
-		
-		#status{display: table;width: 100%;padding: 5px .5em;margin-bottom: 0;color: #ccc;}
-		#status>div{display: table-cell;padding: .4em 0;}
-		#status>div.active{color: #52b8e0;border-bottom: 2px solid;}
-		.child_view{position: fixed;padding-top: 44px;overflow: auto;background: #F8F8F8;padding-bottom: 50px;}
-		.border{
-			background: url('data:image/svg+xml;charset=utf-8,<svg width="40" height="2" viewBox="0,0,30,2" version="1.1" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="2" style="fill:#BBE3F7;"/><rect x="10" y="0" width="10" height="2" style="fill:#fff;"/><rect x="20" y="0" width="10" height="2" style="fill:#FAC4C3;"/><rect x="30" y="0" width="10" height="2" style="fill:#fff;"/></svg>');
-			background-repeat: repeat-x;
-			position: absolute;
-			bottom: 0;
-			height: 3px;
-			width: 100%;
-			left: 0;
-		}
-		form>div{
-			padding: .5em;
-			background: #fff;
-			margin: .8em 0;
-		}
-		.address{position: relative;background: #FFFAF3;line-height: 1.5em;}
-		.address input{
-			background: none;
-			border: none;
-			border-bottom: 1px solid #ccc;
-			padding: 0 .5em;
-			width: 11em;
-			margin: 0;
-			height: auto;
-    		padding-top: 10px;
-		}
-		.address label{
-			vertical-align: bottom;
-		}
-		.status{
-			font-size: .9em;
-		    color: #c3c2c2;
-		    vertical-align: sub;
-		    margin-right: 1em;
-		}
-		.price{float: right;color: #f15353;}
-		#count{
-			border: none;background: none;text-align: center;
-			width: 33.333333%;
-			margin: 0;
-		}
-		#buybox{
-			display: table;position: fixed;bottom: 0;width: 100%;color: #fff;
-			background: #333;
-			line-height: 50px;
-			height: 50px;
-		}
-		#buybox>div{
-			display: inline-block;
-			text-align: center;
-		}
-		#buybox span{
-			display: inline-block;
-			width: 33.333333%;
-			background: #444;
-			font-size: 30px;
-    		vertical-align: bottom;
-		}
-		#buybox span:active{
-			background: #333;
-		}
-		#buy{
-			width: 40%;
-			background: #F15353;
-		}
-		#details{
-			display: table;
-			width: 100%;
-		}
-		#details>*{
-			display: table-cell;
-			vertical-align: middle;
-		}
-		#details>.price{text-align: center;float: none;}
-		#confirm_btn{
-			width: 80%;margin: 1em auto;
-		}
-		.icon_star{  
-		   	color: #5cb85c;
-		    float: right;
-		    font-size: 50px;
-		}
-		#status span{font-size: .8em;pointer-events:none;}
+		.mui-icon.mui-pull-right{font-size:15px;line-height:24px;font-family:"微软雅黑";color:#79c6e4}#tj{text-align:center}.time_box,#status{margin:5px 0;background:#fff;color:#52b8e0}#tj .ctime{margin:0}.sub{float:left;float:left;color:#d60b0b;line-height:30px}.ui_car_d footer{height:47px}#status{display:table;width:100%;padding:5px .5em;margin-bottom:0;color:#ccc}#status>div{display:table-cell;padding:.4em 0}#status>div.active{color:#52b8e0;border-bottom:2px solid}.child_view{position:fixed;padding-top:44px;overflow:auto;background:#f8f8f8;padding-bottom:50px}.border{background:url('data:image/svg+xml;charset=utf-8,<svgwidth="40"height="2"viewBox="0,0,30,2"version="1.1"xmlns="http://www.w3.org/2000/svg"><rectwidth="10"height="2"style="fill:#BBE3F7;"/><rectx="10"y="0"width="10"height="2"style="fill:#fff;"/><rectx="20"y="0"width="10"height="2"style="fill:#FAC4C3;"/><rectx="30"y="0"width="10"height="2"style="fill:#fff;"/></svg>');background-repeat:repeat-x;position:absolute;bottom:0;height:3px;width:100%;left:0}form>div{padding:.5em;background:#fff;margin:.8em 0}.address{position:relative;background:#fffaf3;line-height:1.5em}.address input{background:0;border:0;border-bottom:1px solid #ccc;padding:0 .5em;width:11em;margin:0;height:auto;padding-top:10px}.address label{vertical-align:bottom}.status{font-size:.9em;color:#c3c2c2;vertical-align:sub;margin-right:1em}.price{float:right;color:#f15353}#count{border:0;background:0;text-align:center;width:33.333333%;margin:0}#buybox{display:table;position:fixed;bottom:0;width:100%;color:#fff;background:#333;line-height:50px;height:50px}#buybox>div{display:inline-block;text-align:center}#buybox span{display:inline-block;width:33.333333%;background:#444;font-size:30px;vertical-align:bottom}#buybox span:active{background:#333}#buy{width:40%;background:#f15353}#details{display:table;width:100%}#details>*{display:table-cell;vertical-align:middle}#details>.price{text-align:center;float:none}#confirm_btn{width:80%;margin:1em auto}.icon_star{color:#5cb85c;float:right;font-size:50px}#status span{font-size:.8em;pointer-events:none}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav">
@@ -159,32 +59,37 @@
 				</div>
 			</div>
 		</div>
-		<template id="template">
+				<template id="template">
 			<table>
 				<tr>
-					<th colspan="2">
-						<span><%create_time%></span>
-						<span class="order_id">编号:<%order_id%> </span>
+					<th colspan="2"class="order_id">
+						编号：<%order_id%>
 					</th>
 				</tr>
 				<tr>
-					<td colspan="2"><span class="name">产品:</span>
+					<td colspan="2">
+						<span class="name">日期：</span>
+						<span class="value"><%create_time%></span>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2"><span class="name">产品：</span>
 						<span class="value"><%product_name%></span></td>
 				</tr>
 				<tr>
-					<td><span class="name">数量:</span>
+					<td><span class="name">数量：</span>
 						<span class="value"><%quantity%></span></td>
-					<td><span class="name">单价:</span>
+					<td><span class="name">单价：</span>
 						<span class="value"><%unit_price%></span></td>
 				</tr>
 				<tr>
-					<td colspan="2"><span class="name">收货地址:</span>
+					<td colspan="2"><span class="name">收货地址：</span>
 						<span class="value"><%address%></span></td>
 				</tr>
 			</table>
 			<footer>
 				<div class="sub">
-					<span>合计：</span><span><%total_price%></span>
+					<span>合计：</span><span><%act_pay%></span>
 				</div>
 				<span class="status">状态：<%status_text%></span><%button%>
 			</footer>
@@ -281,8 +186,9 @@
 			status:0
 		}
 		var op={
-			fields:'order_id,cust_id,seller_id,saler_id,order_type,status,product_name,unit_price,quantity,total_price,create_time,order_detail,address',
-			sorts:"-order_id",
+			fields:'act_pay,order_id,cust_id,seller_id,saler_id,order_type,status,product_name,unit_price,quantity,total_price,create_time,order_detail,address,remark',
+			sorts:"-create_time",
+			page:"create_time"
 		}
 		window.addEventListener("load",function(){
 			var now=new Date();
@@ -336,7 +242,7 @@
 				list.appendChild(new order(arr[i]));
 			}
 			dom.list.appendChild(list);
-			param.min_id=arr[i-1].order_id
+			param.min_id=arr[i-1][op.page];//这一页的最小id
 			if(dom.list.total)
 				dom.list.total+=arr.length;
 			else
@@ -346,9 +252,7 @@
 				var autoLoad;
 				if(dom.list.autoLoad){
 					autoLoad=dom.list.autoLoad;
-				}else if(WiStorm.agent.ios)
-					autoLoad=new ui_autoLoad(W(".mui-content"),loadOrder);
-				else
+				}else 
 					autoLoad=new ui_autoLoad(document,loadOrder);
 				dom.list.appendChild(autoLoad);
 				dom.list.autoLoad=autoLoad;
@@ -492,7 +396,7 @@
 			var data={
 				cust_id:_user.cust_id,
 				seller_id:_user.seller_id,
-				order_type:1,
+				order_type:4,
 				status:0,
 				product_name:W("#product_name").dataset.val,
 				unit_price:dom.price.dataset.val,

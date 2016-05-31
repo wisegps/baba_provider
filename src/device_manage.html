@@ -254,9 +254,9 @@
 				pay_key:this.serial,
 				product_name:"设备号码："+this.serial,
 				remark:"设备激活订单",
-				unit_price:0.01,
+				unit_price:668,
 				quantity:1,
-				total_price:0.01
+				total_price:668
 			}
 			W.confirm("确认下单激活设备："+this.serial+"吗？点击确认下单并跳转支付页面",
 				function(b){
@@ -284,7 +284,7 @@
 			};
 		window.addEventListener("load",windowLoad);
 		function windowLoad(){
-			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[4]=="0")){
+			if(!(_user.cust_type==2||(_user.cust_type==3&&_user.privilege&&_user.privilege.dm))){
 				location="home.html";
 			}
 			var item=W(".tab_item",true);
@@ -351,9 +351,7 @@
 				var autoLoad;
 				if(target.autoLoad){
 					autoLoad=target.autoLoad;
-				}else if(WiStorm.agent.ios)
-					autoLoad=new ui_autoLoad(W(".mui-content"),_load);
-				else
+				}else 
 					autoLoad=new ui_autoLoad(document,_load);
 				list.appendChild(autoLoad);
 				target.autoLoad=autoLoad;

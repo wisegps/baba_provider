@@ -1,0 +1,343 @@
+<!--
+	作者：小刘
+	时间：2016-3-18
+	描述：分销管理
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+			
+		<title>分销管理</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>	
+		<script src="../ui/ui.js"></script>
+		<script src="../../wslib/api/newWapi.js"></script>
+		<style>
+			body{
+				font-size: 14px;
+				line-height: 21px;
+			}
+			.distrbution_peo{
+				background-color: white;
+			    white-space: nowrap;
+			    text-align: center;		
+			    overflow: hidden;		
+			}
+			.peos{
+				background-color: white;
+			    white-space: nowrap;
+			    border-bottom: 1px solid #efefef;
+			    transform: translate3d(0,0,0);
+			    -webkit-transform: translate3d(0,0,0);
+			    transition: transform .5s;
+			    -webkit-transition: -webkit-transform .5s;
+			    text-align: center;				
+			}
+			.tab_title{
+			    display: inline-block;
+			    width: 100%;				
+			    border-bottom: 1px solid #efefef;				
+			}
+			.sales{
+				display: inline-block;
+				width: 100%;
+			}
+			.peos div div,.tab_title div{
+				padding: .8em   0;
+				display: inline-block;
+				width: 33%;
+			}
+			.peos .sales div{
+				padding: 1em  0;				
+			}
+			.tab_title div span{
+				color: #ccc;
+				font-size: 12px;
+			    vertical-align: super;
+			}
+			.tab_btn{
+			    display: inline-table;
+			    width: 6em;
+			    padding: 0;
+			    height:35px;
+			    vertical-align: middle;				
+			}
+			.ui_btn{
+			    border: 0;
+			    display: table-cell;
+			    vertical-align: middle;
+			    width: 4em;
+			    padding: 11px 0px;
+			    background: #4DB8EF;
+			    color: #fff;
+			    white-space: normal;				
+    			border-radius: 0;
+    			}
+			.ui_btn:last-child{
+			    background: #4DB8EF;
+				border-right:none;
+			}
+			.ui_btn:first-child{
+			    background: #F56D77;
+				border-right: none;
+			}
+			.active,.tab_title div .active{
+				color: #008000;
+			}
+			.ui_btn{width: 4.5em;}
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">分销管理</h1>
+		</header>
+		
+		<div class="mui-content">
+			<div class="distrbution_peo">
+				<div class="tab_title">
+					<div>分销人员</div>
+					<div id="total" class="salesList"><span>&uarr;  </span>累计销量</div>
+					<div id="day" class="salesList"><span>&uarr;  </span>当日销量</div>
+				</div>
+				<!--插入数据-->
+				<div class="tab">
+<!--					<div class="peos">	
+						<div class="sales">
+							<div>王小二</div>
+							<div>120</div>
+							<div>20</div>
+						</div>
+						<div class="tab_btn">
+							<button class="ui_btn">删除</button>
+							<button class="ui_btn">停用</button>
+						</div>
+					</div>
+-->				</div>
+				<!--完毕-->
+			</div>
+		</div>
+	</body>
+	<script for="加载分销列表">
+		if(_user.cust_type!=4){
+			location.href='../../index.html';
+		}			
+		var  dom={
+			tab:W(".tab"),
+			peos:W('.peos'),
+			total:W("#total"),
+			day:W('#day')
+		}
+		window.onload =function (){
+			if(!dom.arr)
+				dom.arr=new Array();
+			user();
+			var lists = W(".salesList",true);
+			for(var i=0;i<lists.length;i++){
+				lists[i].onclick=function (){
+					for(var j=0;j<lists.length;j++){
+						lists[j].className='salesList';
+						lists[j].firstChild.className='';
+					}
+					this.className+=' active';
+					this.firstChild.className="active";
+				}
+			}
+			dom.total.addEvent('click',clickTitle);
+			dom.day.addEvent('click',clickTitle);
+		}
+		function user(){
+			var data={
+				parent_dealer_id:_user.cust_id,
+				access_token: _user.access_token
+			};
+			var op={
+				fields:'cust_id,cust_name,status,day_sale,total_sale,parent_dealer_id,dealer_level,dealer_class,dealer_tree_path'
+			};
+			Wapi.user.list(function (res){
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				if(res.data && res.data.length>0){
+					for(var i=0;i<res.data.length;i++){
+						if(res.data[i].status==0 || res.data[i].status==1){
+							dom.tab.appendChild(new tab(res.data[i]));
+							dom.arr.push(res.data[i]);	
+						}
+					}
+				}
+			},data,op);
+		}
+		//创建分销列表组件
+		function tab(data){
+			var obj=new WiStormUI("div");//创建一个div组件
+			obj.merge(this);
+			obj.className='peos';
+			obj.setData(data);
+			obj.addEvent("touchstart",tab.touchS);
+			obj.addEvent("touchmove",tab.touchM);
+			obj.addEvent("touchend",tab.touchE);//监听触摸事件以分辨手势
+			return obj;
+		}
+		tab.prototype.setData=function (data){
+			var status;
+			if(data.status==1){
+				this.style.backgroundColor='#ccc';
+				status='启用';
+			}else if(data.status==0)
+				status='停用';
+				
+			if(dom.peos)
+				this.template(dom.peos,data);
+			else
+				this.innerHTML='<div class="sales"><div>'+data.cust_name+'</div><div>'+data.total_sale+'</div><div>'+data.day_sale+'</div></div><div class="tab_btn"><button class="ui_btn del">删除</button><button class="ui_btn stop">'+status+'</button></div>';
+			this.querySelector('.del').addEvent('click',tab.deletes);
+			this.querySelector('.stop').addEvent('click',tab.stop);
+			this.data=data;
+		}	
+		tab.touchS=function(){
+			//监听触摸开始事件
+			this.touchStart=event.touches[0].pageX;
+			this.touchY=event.touches[0].pageY;
+		}
+		tab.touchE=function(){
+			var e=event.changedTouches[0].pageX-this.touchStart;
+			if(e<-30){
+				this.showOption();
+			}else if(e>30){
+				this.hideOption();
+			}
+		}
+		tab.touchM=function(){
+			var y=Math.abs(event.changedTouches[0].pageY-this.touchY);
+			var x=Math.abs(event.changedTouches[0].pageX-this.touchStart);
+			if(x>y)
+				event.preventDefault();//阻止浏览器默认的滑动动作
+		}//触摸移动事件的
+		tab.prototype.showOption=function(){//显示操作按钮
+			var w=this.querySelector(".tab_btn").offsetWidth;
+			this.style.transform='translate3d(-'+w+'px,0,0)';
+			this.style.webkitTransform='translate3d(-'+w+'px,0,0)';
+		}
+		
+		tab.prototype.hideOption=function(){//隐藏操作按钮
+			this.style.transform='';
+			this.style.webkitTransform='';
+		}
+		
+		tab.deletes=function (){//删除按钮操作
+			var user =W.parents(this,2);
+			var data={
+				_cust_id:user.data.cust_id,
+				access_token: _user.access_token,
+				status:-1
+			}
+			W.confirm('确定删除此人员？',function (f){
+				if(f){
+					user.parentNode.removeChild(user);
+					Wapi.user.update(function(res){
+						if (res && res.status_code) {
+							W.errorCode(res);
+							return;
+						}				
+					},data);
+				}
+			});
+		}
+		
+		tab.stop=function (){// 停用/启用按钮操作
+			var user =W.parents(this,2);
+			var data={
+				_cust_id:user.data.cust_id,
+				access_token: _user.access_token
+			}
+			if(this.innerText=='停用'){
+				data.status=1;
+				user.data.status=1;
+				user.style.backgroundColor='#ccc';
+				this.innerText='启用';
+				console.log('停用分销人员：'+user.data.cust_name);
+			}else{
+				data.status=0;
+				user.data.status=0;
+				user.style.backgroundColor='#fff';				
+				this.innerText='停用';
+				console.log('启用分销人员：'+user.data.cust_name);
+			}
+			user.style.transform="translate3d(0px, 0px, 0px)";
+			user.style.webkitTransform="translate3d(0px, 0px, 0px)";
+			Wapi.user.update(function(res){
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				if(res.status_code==0)
+					W.alert('修改分销人员：'+user.data.cust_name+" 成功！");
+			},data);
+		}
+		//点击顶部 进行排序
+		function clickTitle(){
+			dom.tab.innerHTML='';
+			var list =document.createDocumentFragment();
+			if(this.id=='total'){
+				sort(1);
+				if(!dom.total.arr){//将排序好的累计销量存起来   
+					dom.total.arr= new Array();
+					if(dom.arr){
+						for(var i=0;i<dom.arr.length;i++) {
+							list.appendChild(new tab(dom.arr[i]));
+							dom.total.arr.push(dom.arr[i]);
+						}
+					}
+				}else{
+					for(var i=0;i<dom.total.arr.length;i++) {
+						list.appendChild(new tab(dom.total.arr[i]));
+					}				
+				}
+			}else if(this.id=='day'){
+				if(!dom.day.arr){//将排序好的累计销量存起来   
+					dom.day.arr= new Array();
+					sort(2);
+					if(dom.arr){
+						for(var i=0;i<dom.arr.length;i++) {
+							list.appendChild(new tab(dom.arr[i]));
+							dom.day.arr.push(dom.arr[i]);
+						}
+					}
+				}else{
+					for(var i=0;i<dom.day.arr.length;i++) {
+						list.appendChild(new tab(dom.day.arr[i]));
+					}				
+				}			
+			}
+			dom.tab.appendChild(list);	
+		}
+		//排序方法
+		function sort(replace){
+			for(var i=0;i<dom.arr.length;i++){
+				for(var j=i+1;j<dom.arr.length;j++){
+					if(replace==1){
+						if(dom.arr[i].total_sale<dom.arr[j].total_sale){
+						var tmp = dom.arr[i];
+			            dom.arr[i] = dom.arr[j];
+			            dom.arr[j] = tmp;
+						}	
+					}else if(replace==2){
+						if(dom.arr[i].day_sale<dom.arr[j].day_sale){
+						var tmp = dom.arr[i];
+			            dom.arr[i] = dom.arr[j];
+			            dom.arr[j] = tmp;
+						}													
+					}
+				}
+			}			
+		}
+	</script>
+</html>

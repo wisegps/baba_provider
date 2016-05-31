@@ -1,0 +1,588 @@
+<!--
+	作者：jianghai
+	时间：2016-5-5
+	描述：车况和故障码
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+			
+		<title>我的WiCARE</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+		
+		<script src="../../wslib/ui/DateTime.js"></script>
+		<script src="../ui/ui.js"></script>
+		<script src="../../wslib/api/newWapi.js" defer="defer"></script>
+		<script src="../../wslib/toolkit/WCharts.js" defer="defer"></script>
+	</head>
+	<style>
+		header.mui-bar{z-index: 202;}
+		.list{
+			background: #fff;
+			display: none;
+		}
+		.mui-icon.mui-pull-right{
+			font-size: 15px;
+		    line-height: 24px;
+		    font-family: "微软雅黑";
+		    color: #79C6E4;
+		}
+		.tab_item>span{
+			width: 5em;
+		}
+		#details{
+		    padding-bottom: 1em;
+		    line-height: 1.5em;
+			position: fixed;
+		    width: 100%;
+		    top: 44px;
+		    z-index: 201;
+		    box-shadow: 0 2px 3px rgba(0,0,0,.3);
+		    border: none;
+		    transform: translate3d(0,-110%,0);
+		    -webkit-transform: translate3d(0,-110%,0);
+			transition: transform .5s;
+			-webkit-transition: -webkit-transform .5s;
+		}
+		#details.show{
+			transform: translate3d(0,0,0);
+			-webkit-transform: translate3d(0,0,0);
+		}
+		
+		.charts_card{
+			height:70vw;
+			margin-bottom: 10px;
+		}
+		
+		.date_nav{
+			position: fixed;
+		    width: 100%;
+		    top: 94px;
+		    z-index: 2;
+		}
+		.date_nav>div{
+			height: 50px;
+   		 	background: #fff;
+    		border-bottom: 1px solid #ddd;
+    		display: table;
+    		width: 100%;
+		}
+		.d_radio{
+			display: table-cell;
+		    vertical-align: middle;
+		    text-align: center;
+		}
+		.d_radio>span{
+			line-height: 1.8em;
+		    border: 1px solid #ddd;
+		    display: inline-block;
+		    width: 4.5em;
+		    border-radius: .9em;
+		    color: #888;
+		}
+		.d_radio.active>span{
+			color: #65BFE1;
+			border: 1px solid #A8DBEF;
+		}
+		#select_date{
+			display: none;
+		}
+		#select_date input{
+			display: inline;
+		    border: none;
+		    width: 8em;
+		    margin: 0;
+		    text-align: center;
+		}
+		#select_date>*{
+			display: table-cell;
+		    text-align: center;
+		    vertical-align: middle;
+		    color: #50B7DE;
+		}
+		
+		.nav2{padding: .5em 0;border-bottom: 1px solid #ddd;}
+		.nav2 ul{margin:0;padding:0;font-size:12px;display: table;width: 100%;}
+		.nav2 ul li{overflow:hidden;color:#999999;width:25%;display: table-cell;list-style: none;line-height:2em;}
+		.nav2 ul li>span{width:100%;display:inline-block;text-align:center;}
+		.nav2 ul li a{width:100%;display:inline-block;text-align:center;color:#7bc9e6;height: 2em;overflow: hidden;}
+		.nav2 .line{margin-left:15%;width:65%;border: 1px solid #CCCCCC; -webkit-transform: rotate(-45deg);-moz-transform: rotate(-45deg);}
+		.mui-icon.mui-icon-star-filled{
+			display: inline;
+		    color: #FB9D3A;
+		    font-size: 16px;
+		}
+		.no_chart,.no_repair,.no_data{display: none;text-align: center;padding: 1em 0}
+		.no_chart>p,.no_repair>p{margin: 0;}
+		
+		.sigle_errcode{display: block; width:90%; margin:0 5% 20px; border:solid 1px #eee; border-radius:5px ;}
+		.errcode_title{background-color: #f4c31f; border-top-left-radius: 5px; border-top-right-radius: 5px; padding:5px 10px;}
+		.errcode_describle{background-color: white; padding:10px;word-wrap: break-word; font-size: 0.8em;}
+		.errcode_describle>p{padding:0;}
+		.errcode_search{background-color: #ddd; width: 100%;display: block; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; padding:5px 10px;font-size: 0.8em;color: #333;}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<span class="mui-icon mui-icon-left-nav mui-pull-left W_back"></span>
+			<span class="mui-icon mui-pull-right">详情</span>
+			<h1 class="mui-title">车辆状况</h1>
+		</header>
+		<nav class="mui-bar mui-bar-tab top">
+			<div class="tab_item active" data-target="health">
+				<span>车况历史</span>
+			</div>
+			<div class="tab_item" data-target="errcode">
+				<span>故障码</span>
+			</div>
+		</nav>
+		<div class="date_nav">
+			<div id="date_nav_btn">
+				<div class="d_radio active" data-day="7">
+					<span>1周内</span>
+				</div>
+				<div class="d_radio" data-day="30">
+					<span>1个月内</span>
+				</div>
+				<div class="d_radio" data-day="180">
+					<span>半年内</span>
+				</div>
+				<div class="d_radio">
+					<span>自选</span>
+				</div>
+			</div>
+			<div id="select_date">
+				<div><script id="start">echo(new DateSelector())</script></div>
+				<span>至</span>
+				<div><script id="end">echo(new DateSelector())</script></div>
+			</div>
+		</div>
+		<div class="mui-content" style="padding-top: 144px;">
+			<div class="list" id="health">
+				<div class="chart">
+					<div id="dpdy" class="charts_card"></div>
+					<div id="sw" class="charts_card"></div>
+					<div id="mileage" class="charts_card"></div>
+					<div id="fuel" class="charts_card"></div>
+				</div>
+				<div class="no_chart">
+					<p>
+						当前车辆还未绑定设备，无法查看车况历史。
+					</p>
+				</div>
+				<div class="no_data">
+					<p>
+						设备暂无数据。
+					</p>
+				</div>
+			</div>
+			<div class="list" id="errcode" >
+				<div class="no_errcode" style="display: none; text-align: center; padding:1em;">
+					<p>
+						暂无故障码数据。
+					</p>
+				</div>
+				<template id="sigle_errcode" class="sigle_errcode">
+					<div class="errcode_title">
+						<div style="color: #666; font-size: 0.8em;">故障码</div>
+						<div name="code" style="font-size: 1.5em; margin-top:5px; margin-bottom:5px;"><%code%></div>
+					</div>
+					<div class="errcode_describle">
+						<p name="title" style="color: #333;"><%c_define%></p>
+						<p name="content"><%content%></p>
+					</div>
+					<a name="search" class="errcode_search" href="http://www.baidu.com/s?word=汽车故障码 <%code%>" target="_blank">
+						点击搜索更多信息
+						<span class="mui-icon mui-icon-arrowright" style="float: right;"></span>
+					</a>
+				</template>
+			</div>
+		</div>
+		<div class="ui_car_d" id="details"></div>
+
+	</body>
+	<script for="base">
+		W(".mui-icon.mui-pull-right").addEvent("click",showDetails);
+		var dom={
+			dCard:W("#details"),
+			s:W("#start"),
+			e:W("#end"),
+			sigle_errcode:W("#sigle_errcode")
+		},_startTime,_endTime,_car;
+		
+		window.addEventListener("load",load);
+		function load(){
+			var p={
+				obj_id:_g.obj_id,//在url中传递过来的obj_id
+				access_token:_user.access_token
+			}
+			Wapi.vehicle.get(setCarDetail,p);
+			
+			//绑定选择自选时间事件，选择完自动更新全局变量_startTime和_endTime
+			dom.s.addEvent("change",saveTime);
+			dom.e.addEvent("change",saveTime);
+			
+			//绑定日期范围选择按钮选择
+			var dateBtns=W(".d_radio",true);
+			for(var i=0;i<dateBtns.length;i++){
+				dateBtns[i].addEvent("click",changeDateItem);
+			}
+			
+			//绑定切换页面
+			var item=W(".tab_item",true);
+			for(var i=0;i<item.length;i++){
+				item[i].addEvent("click",changeItem);
+				var id=item[i].getAttribute("data-target");
+				item[i].type=item[i].getAttribute("data-type");
+				item[i].list=W("#"+id);
+				item[i]._t=dateBtns[0];
+			}
+			dom.show=item[0];
+		}
+		//把开始和结束日期更新到全局变量_startTime和_endTime
+		function saveTime(){
+			if(this.id=="start")
+				_startTime=this.value;
+			else
+				_endTime=this.value;
+			loadChart();
+		}
+		
+		//切换日期范围
+		function changeDateItem(){
+			var day=this.getAttribute("data-day");
+			if(day){
+				var now=new Date();
+				//设置结束时间日期组件的value
+				dom.e.value=now.WtoString().slice(0,10);
+				//更新_endTime
+				_endTime=dom.e.value;
+				
+				//计算开始日期
+				now.setDate(now.getDate()-day);
+				//设置value并且更新_startTime
+				dom.s.value=now.WtoString().slice(0,10);
+				_startTime=dom.s.value;
+				
+				W("#select_date").style.display="none";
+				W(".mui-content").style.paddingTop="144px";
+				if(typeof arguments[0]=="object")
+					loadChart();
+			}else{
+				W("#select_date").style.display="table";
+				W(".mui-content").style.paddingTop="194px";
+			}
+			//把之前选择高亮取消
+			W(".d_radio.active").classList.remove("active");
+			//把当前选择高亮
+			this.classList.add("active");
+		}
+		
+		//切换车况和维修历史
+		function changeItem(){
+			//保存当前选择的时间，在切回来的时候使用
+			dom.show.setAttribute("data-start",_startTime);
+			dom.show.setAttribute("data-end",_endTime);
+			dom.show._t=W(".d_radio.active");//当前高亮的日期选择按钮
+			dom.show.list.style.display="none";
+			dom.show.classList.remove("active");
+			
+			dom.show=this;
+			
+			this.classList.add("active");
+			this.list.style.display="block";
+			if(this.getAttribute("data-target")=="errcode"){
+				W(".date_nav").style.display="none";
+				W(".mui-content").style.paddingTop="90px";
+			}else{
+				W(".date_nav").style.display="block";
+				W(".mui-content").style.paddingTop="144px";
+				_startTime=this.getAttribute("data-start");
+				_endTime=this.getAttribute("data-end");
+				dom.s.value=_startTime;
+				dom.e.value=_endTime;
+				changeDateItem.call(this._t,true);
+			}
+			if(!this.data){
+				this.data=true;
+				if(this.getAttribute("data-target")=="health"){
+					//获取选定时间范围内的车况信息
+					loadChart();
+				}
+			}
+		}
+		
+		//显示或者隐藏详细信息卡片
+		function showDetails(){
+			dom.dCard.classList.toggle("show");
+			//dom.dCard.classList.toggle("hide");
+		}
+		
+		//绘制车辆详细信息卡片
+		function setCarDetail(res){
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			var d=_car=res||{};
+			var last_arrive=NewDate(d.last_arrive_time).WtoString().slice(5,-3);
+			var maintain_mileage=(d.mileage||0)-(d.maintain_last_mileage||0);
+			if(!d.arrive_count)
+				d.arrive_count=0;
+			if(!d.evaluate_count)
+				d.evaluate_count=0;
+			dom.dCard.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_'+d.car_brand_id+'_100.png" onerror=\'javascript:this.src="../../img/icon_car_moren.png"\'><span name="value">'+d.obj_name+'</span></th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+d.cust_name+'</span></td><td><span class="name">最后到店:</span><span class="value">'+last_arrive+'</span></td></tr><tr><td><span class="name">车型:</span><span class="value">'+d.car_type+'</span></td><td><span class="name">车架号:</span><span class="value">'+d.frame_no+'</span></td></tr><tr><td><span class="name">行驶里程:</span><span class="value">'+d.mileage+'公里</span></td><td><span class="name">保养后里程:</span><span class="value">'+maintain_mileage+'公里</span></td></tr><tr><td><span class="name">到店次数:</span><span class="value">'+d.arrive_count+'</span></td><td><span class="name">评价次数:</span><span class="value">'+d.evaluate_count+'</span></td></tr></table>';
+			
+			//设备信息
+			if(d.device_id){
+				var p={
+				    access_token:_user.access_token,
+				    device_id:d.device_id
+				}
+				var op={
+					fields:"device_id,serial,cust_id,cust_name,device_type,sim,status,active_time,active_obd_data,active_obd_err"
+				}
+				Wapi.device.get(setDeviceDetail,p,op);
+			}
+		}
+		//给信息卡片添加车辆的设备信息
+		function setDeviceDetail(res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			if(!res.device_id)return;
+			var d=res;
+			_car.serial=d.serial;
+			if(!d.active_obd_data)return;
+			var data=d.active_obd_data;
+			var table=dom.dCard.querySelector("tbody");
+			
+			var errorText="无故障";
+			if(d.active_obd_err&&d.active_obd_err.length!==0){
+				errorText=d.active_obd_err.join(",");
+			}
+				
+			table.innerHTML+='<tr><td><span class="name">电瓶电压:</span><span class="value">'+data.dpdy+'V</span></td><td><span class="name">水温:</span><span class="value">'+data.sw+'度</span></td></tr><tr><td><span class="name">空气质量:</span><span class="value">--</span></td><td><span class="name">故障码:</span><span class="value">'+errorText+'</span></td></tr>';
+			
+			loadErr(errorText);//给故障码页面添加内容
+			var item=W(".tab_item",true);
+			changeItem.call(item[0]);//显示车况历史
+		}
+	</script>
+	<script for = "车况历史">
+		//折线图样式
+		var option = {
+		    title : {
+		        x:'center',
+		        textStyle:{
+		        	fontFamily:"微软雅黑",
+		        	fontWeight:"normal",
+		        	fontSize:16
+		        }
+		    },
+		    tooltip : {
+		        trigger: 'item'
+		    },
+		    grid:{
+		    	x:35,
+		    	y:40,
+		    	x2:35,
+		    	y2:40,
+		    	borderWidth:0
+		    },
+		    yAxis : [
+		        {
+		            type : 'value',
+		            splitLine:{
+		            	show:true,
+		            	lineStyle:{
+		            		color:"#eee"
+		            	}
+		            }
+		        }
+		    ],
+		    xAxis:[{
+	            type : 'category',
+	            boundaryGap : false,
+	            splitLine:{
+	            	show:false
+	            }
+	        }],
+		    series:[{
+	            type:'line',
+	            smooth:true,
+	            symbol:'none',
+	            itemStyle: {normal: {areaStyle: {type: 'default',color:"rgba(27,158,208,0.4)"},lineStyle:{width:0}}}
+	        }],
+	        animation:false
+		};
+		function loadChart(){
+			if(!_car.device_id){//如果没有绑定设备
+				W(".chart").style.display="none";
+				W(".no_chart").style.display="block";
+				return;
+			}
+			var p={
+				access_token:_user.access_token,
+				serial: _car.serial,
+				rcv_time:_startTime+" 00:00:00@"+_endTime+" 23:59:59"
+			};
+			Wapi.device.getDeviceObdDataList(function(res){//获取水温和电瓶电压
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				if(!res.data||!res.data.length){
+					W('#dpdy').style.display="none";
+					W('#sw').style.display="none";
+					W(".no_data").style.display="block";
+					return;
+				}
+				var data=res.data;
+				
+//				/**
+//				 * 测试使用
+//				 */
+//				for(var i=0;i<1000;i++){
+//					data.push(data[0]);
+//				}
+				
+				var xy=makeXY_sw_dpdy(data);//构造图表的坐标数组
+				//绘制电瓶电压折线
+		        option.title.text="电瓶电压(V)";
+		        option.xAxis[0].data=xy.x;
+				option.series[0].data=xy.dpdy;
+		        var myChart2 = echarts.init(W('#dpdy'));
+		        myChart2.setOption(option); 
+		        
+		        //绘制水温折线
+				option.title.text="水温(℃)";
+				option.series[0].data=xy.sw;
+		        var myChart3 = echarts.init(W('#sw'));
+		        myChart3.setOption(option); 
+			},p);
+			p.rcv_day=_startTime+"@"+_endTime;
+			delete p.rcv_time;
+			Wapi.device.getDayTripList(function(res){//获取平均油耗和里程
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				if(!res.data||!res.data.length){
+					W('#mileage').style.display="none";
+					W('#fuel').style.display="none";
+					W(".no_data").style.display="block";
+					return;
+				}
+				var data=res.data;
+				
+//				/**
+//				 * 测试使用
+//				 */
+//				for(var i=0;i<30;i++){
+//					data.push(data[0]);
+//				}
+				
+				var xy=makeXY_fuel_dis(data);//构造图表的坐标数组
+				//绘制里程折线
+		        option.title.text="里程(km)";
+		        option.xAxis[0].data=xy.x;
+				option.series[0].data=xy.distance;
+		        var myChart0 = echarts.init(W('#mileage'));
+		        myChart0.setOption(option); 
+		        
+		        //绘制平均油耗折线
+				option.title.text="平均油耗(L/100km)";
+				option.series[0].data=xy.fuel;
+		        var myChart1 = echarts.init(W('#fuel'));
+		        myChart1.setOption(option); 
+			},p);
+		}
+		
+		function makeXY_sw_dpdy(data){
+			var l=data.length;
+			var j;
+			if(l>30)
+				j=(l/30);//图表取值间隔（数据如果太多，则隔几个数据取一个）
+			else j=1;
+			var res={
+				sw:[],
+				dpdy:[],
+				x:[]
+			},temD,x;
+			for(var i=0;i<l;i+=j){
+				x=parseInt(i);
+				temD=data[x].rcv_time.slice(5,10);
+				res.sw.push(data[x].obd_data.sw);
+				res.dpdy.push(data[x].obd_data.dpdy);
+//				if(res.x.length&&res.x[res.x.length-1]==temD){
+//					temD=1;
+//				}
+				res.x.push(temD);
+			}
+			return res;
+		}
+		function makeXY_fuel_dis(data){
+			var l=data.length;
+			if(l>30)
+				j=(l/30);//图表取值间隔（数据如果太多，则隔几个数据取一个）
+			else j=1;
+			var res={
+				distance:[],
+				fuel:[],
+				x:[]
+			},temD,x;
+			for(var i=0;i<l;i+=j){
+				x=parseInt(i);
+				temD=data[x].rcv_day.slice(5,10);
+				res.distance.push(data[x].total_distance);
+				res.fuel.push(data[x].avg_fuel);
+				res.x.push(temD);
+			}
+			return res;
+		}
+	</script>
+	<script for="故障码">
+	function loadErr(errcode){
+		if(errcode=="无故障"){
+			W(".no_errcode").style.display="block";
+			W("#sigle_errcode").style.display="none";
+			return;
+		}
+		//替换code格式
+		errcode=errcode.replace(",","|");
+		Wapi.obderr.list(function(res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			} else{
+				var errcode=W("#errcode");
+				for(var i=res.data.length-1;i>=0;i--){//添加单个故障码组件
+					errcode.appendChild(new Errcard(res.data[i]));
+				}
+			}
+		},{
+			access_token: _user.access_token,
+			code:errcode
+		});
+	}
+	function Errcard(data){
+		var obj=new WiStormUI("div");//创建一个div组件
+		obj.merge(this);//将原型中的方法赋予当前obj
+		obj.className="sigle_errcode";
+		obj.setData(data);
+		return obj;
+	}
+	Errcard.prototype.setData=function(data){
+		this.template(dom.sigle_errcode,data);
+	}
+	</script>
+</html>

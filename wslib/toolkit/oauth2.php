@@ -9,7 +9,8 @@ if(isset($_GET['code'])){
     //echo $_GET['code'];
     $code = $_GET['code'];
     $userinfo = getUserInfo($code);
-	$userinfo["sso_login"]="sso_login";
+	if(isset($_GET['state']))
+		$userinfo["state"]=$_GET['state'];
     //echo "nickname:".$userinfo["nickname"];
 }else{
     echo 'No code';
@@ -18,7 +19,7 @@ if(isset($_GET['code'])){
 
 function getUserInfo($code){
     $appid = "wxa5c196f7ec4b5df9";
-    $appsecret = "公众号秘钥";
+    $appsecret = "e89542d7376fc479aac35706305fc23f";
     $access_token = "";
 
     // 根据code获取access_token
@@ -30,8 +31,8 @@ function getUserInfo($code){
 //    echo "access_token:$access_token";
     $openid = $access_token_array['openid'];
 	
-	if($_GET['state']=='snsapiBase'){
-		$arr=array("openid"=>$access_token_array['openid']);
+	if($_GET['state']=='getOpenId'){//如果只是获取openid，则就此返回
+		$arr=array("openid"=>$openid);
 		return $arr;
 	}
 		
@@ -39,7 +40,11 @@ function getUserInfo($code){
     $userinfo_url = "https://api.weixin.qq.com/sns/userinfo?access_token=$access_token&openid=$openid";
     $userinfo_json = https_request($userinfo_url);
     $userinfo_array = json_decode($userinfo_json, true);
-	$login_info=sso_login($userinfo_array["openid"]);
+	if($_GET['state']=='sso_login'){//进行登录
+		$login_info=sso_login($userinfo_array["openid"]);
+		$login_info['sso_login']='sso_login';
+	}
+		
 	
 	if($login_info){
 		$userinfo_array=array_merge($userinfo_array,$login_info);
@@ -51,10 +56,10 @@ function getUserInfo($code){
 function sso_login($login_id){
 	$d=date('Y-m-d H:i:s',strtotime('+8 hour'));
 	$D=date('Y-m-d%20H:i:s',strtotime('+8 hour'));
-	$str='21fb644e20c93b72773bf0f8d0905052app_key9410bc1cbfa8f44ee5f8a331ba8dd3fcformatjsonlogin_id'.$login_id.'methodwicare.user.sso_loginsign_methodmd5timestamp'.$D.'v1.0weixin_appsecret公众号秘钥21fb644e20c93b72773bf0f8d0905052';
+	$str='21fb644e20c93b72773bf0f8d0905052app_key9410bc1cbfa8f44ee5f8a331ba8dd3fcformatjsonlogin_id'.$login_id.'methodwicare.user.sso_loginsign_methodmd5timestamp'.$D.'v1.0weixin_appsecrete89542d7376fc479aac35706305fc23f21fb644e20c93b72773bf0f8d0905052';
 	$sing=strtoupper(md5($str));
 	
-	$url = "http://o.bibibaba.cn/router/rest?app_key=9410bc1cbfa8f44ee5f8a331ba8dd3fc&v=1.0&format=json&sign_method=md5&method=wicare.user.sso_login&weixin_appsecret=公众号秘钥&timestamp=".$D."&login_id=".$login_id."&sign=".$sing;
+	$url = "http://o.bibibaba.cn/router/rest?app_key=9410bc1cbfa8f44ee5f8a331ba8dd3fc&v=1.0&format=json&sign_method=md5&method=wicare.user.sso_login&weixin_appsecret=e89542d7376fc479aac35706305fc23f&timestamp=".$D."&login_id=".$login_id."&sign=".$sing;
     $info_json = https_request($url);
     $info_array = json_decode($info_json, true);
 	return $info_array;

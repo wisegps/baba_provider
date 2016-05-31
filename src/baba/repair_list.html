@@ -19,7 +19,7 @@
 		<script>
 			link("W.css")
 		</script>
-		<script src="../../wslib/api/Wapi.js"></script>
+		<script src="../../wslib/api/newWapi.js"></script>
 
 		<script>
 			link("ui.css")
@@ -29,19 +29,13 @@
 		<script src="../../wslib/ui/DateTime.js"></script>
 		<script src="../ui/ui.js"></script>
 		<script src="../js/string_factory.js"></script>
+		<script src="../ui/RepairCard.js"></script>
 
 	</head>
 	<style>
 		body {
 			background-color: #f0f0f0;
 		}
-		
-		.preview {
-			display: table;
-			background: white;
-			width: 100%;
-		}
-		
 		.condition {
 			background: white;
 			margin-top: 12px;
@@ -63,26 +57,6 @@
 		.time {
 			color: #52b8e0;
 		}
-		
-		.t_row {
-			display: table-row;
-		}
-		
-		.t_cell {
-			display: table-cell;
-			padding-top: 15px;
-			padding-bottom: 15px;
-		}
-		
-		.t_value {
-			color: #50b7de;
-		}
-		
-		.t_label {
-			color: #999999;
-			font-size: small;
-		}
-		
 		.title_img {
 			width: 2em !important;
 			vertical-align: middle;
@@ -93,11 +67,6 @@
 			margin-top: 1px;
 			text-align: center;
 			padding: 10px;
-		}
-		
-		.star{
-			color: #ccc;
-			font-size: 30px;
 		}
 		.business_content{
 			width: 80vw;
@@ -110,6 +79,7 @@
 
 	<body>
 		<header class="mui-bar mui-bar-nav noshadow">
+			<span class="mui-icon mui-icon-left-nav mui-pull-left W_back"></span>
 			<h1 class="mui-title">维修记录</h1>
 		</header>
 		<div class="mui-content">
@@ -132,10 +102,9 @@
 			<div class="condition">
 				<div class="duration_div">
 					<center>
-
-						<button id="select_today" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(0)">今天</button>
-						<button id="select_week" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(1)">1周内</button>
-						<button id="select_month" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(2)">1个月内</button>
+						<button id="select_today" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(0)">1周内</button>
+						<button id="select_week" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(1)" style="padding-left: 6px;">1个月内</button>
+						<button id="select_month" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(2)" style="padding-left: 6px;">3个月内</button>
 						<button id="select_custom" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(3)">自选</button>
 					</center>
 				</div>
@@ -143,16 +112,16 @@
 				<center>
 					<div class="time_box" hidden="true">
 						<span class="time">
-						<script id="begin_time"  class="ctime" data-ccc="ccc" style=" text-align:right;border: 0px #000000 solid; border-radius: 5px; width: 45%;">
-									echo(new DateSelector())
-								</script>
-				</span>
+							<script id="begin_time"  class="ctime" data-ccc="ccc" style=" text-align:right;border: 0px #000000 solid; border-radius: 5px; width: 45%;">
+								echo(new DateSelector())
+							</script>
+						</span>
 						<span class="time">至</span>
 						<span class="time" style="background: #007AFF;">
-						<script id="end_time"  class="ctime" data-ccc="ccc" style="border: 0px #000000 solid; border-radius: 5px;width: 45%;">
-									echo(new DateSelector())
-								</script>
-				</span>
+							<script id="end_time"  class="ctime" data-ccc="ccc" style="border: 0px #000000 solid; border-radius: 5px;width: 45%;">
+								echo(new DateSelector())
+							</script>
+						</span>
 					</div>
 				</center>
 			</div>
@@ -208,27 +177,6 @@
 			</table>
 		</div>
 
-		<div id="toTop" class="alert_view content hide">
-			<div class="tabel_center">
-				<div id="fade" class="cover_paper alert_box fadeOut" style="padding: 1em;position: relative;">
-					<span class="mui-icon mui-icon-close"></span>
-					<div>选择评价星级</div>
-						<div class="checkin_box">
-							<div style="text-align: center;margin-bottom: 5px;">
-								<span class="mui-icon mui-icon-star-filled star"></span>
-								<span class="mui-icon mui-icon-star-filled star"></span>
-								<span class="mui-icon mui-icon-star-filled star"></span>
-								<span class="mui-icon mui-icon-star-filled star"></span>
-								<span class="mui-icon mui-icon-star-filled star"></span>
-							</div>
-							<textarea id="leave_val" placeholder="评价内容（可不填）"></textarea>
-							<div style="text-align: center;margin-bottom: 5px;">
-								<button type="button" class="mui-btn W_primary">确定</button>
-							</div>
-						</div>
-				</div>
-			</div>
-		</div>
 	</body>
 	<script>
 		var StateCode = {
@@ -263,29 +211,16 @@
 				select(4);
 			});
 			var data = {
-					cust_id: _user.cust_id,
-					access_token: _user.access_token
-				}
-				//调用接口，获取用户车辆,并绘制到页面上
-			W.userApi.getVehicleList(makeCarList, data);
-			W(".mui-icon-close").addEvent('click',closeFade);//关掉遮罩
-			var spans = W(".mui-icon-star-filled",true);
-			for(var i=0;i<spans.length;i++){
-				spans[i].index=i+1;
-				spans[i].addEvent('click',creatColor);//添加点击改变颜色
+				cust_id: _user.cust_id,
+				access_token: _user.access_token
 			}
-			W('.W_primary').addEvent('click',updateCar);//添加点击保存  更新业务数据
+			if(_g.obj_id){
+				data.obj_id=_g.obj_id;
+			}
+			//调用接口，获取用户车辆,并绘制到页面上
+			Wapi.vehicle.list(makeCarList, data);
 		});
 		
-		function closeFade(){
-			var spans = W(".star",true);
-			for(var j=0;j<spans.length;j++){
-				spans[j].style.color='#ccc';
-			}			
-			W('#toTop').className='cover_paper alert_box fadeOut';
-			W('#fade').className='alert_view content toTop';
-			W('#leave_val').value='';
-		}
 		
 		function makeCarList(res) {
 			if (res && res.status_code) {
@@ -340,166 +275,14 @@
 			return this.data;
 		}
 		car.prototype.setData = function(data) {
-				this.innerHTML = W("#car_tmp").innerHTML;
-				initText(this, "car_brand", data.obj_name);
-				initText(this, "car_name", data.nick_name);
-				this.getElementsByTagName('img')[0].src="http://img.wisegps.cn/logo/m_"+data.car_brand_id+"_100.png";
-				this.data = data;
-			}
-
-		//车辆列表中的一项，的对象
-		function cv(data) {
-			var obj = new WiStormUI("div"); //创建一个div组件
-			obj.merge(this); //将原型cv.prototype中的方法赋予当前obj
-			obj.className = "ui_car_d"; //设置div的class属性
-			obj.data=data;
-			obj.setData(data); //设置obj的内容,setData()在下面cv.prototype中定义
-			return obj; //最后记得要返回组件
-		}
-		//给组件添加对象方法
-		cv.prototype.getData = function() {
-			return this.data;
-		}
-		cv.prototype.setData = function(data) {
-			this.innerHTML = dom.car_left.innerHTML;
-			initEvaluate_level(this,data.evaluate_level);
-			var name;
-			if(!data.business_content)
-				name=$BizType(data.business_type);
-			else
-				name=$BizType(data.business_type)+"["+data.business_content+']'
+			this.innerHTML = W("#car_tmp").innerHTML;
+			initText(this, "car_brand", data.obj_name);
+			initText(this, "car_name", data.nick_name);
 			this.getElementsByTagName('img')[0].src="http://img.wisegps.cn/logo/m_"+data.car_brand_id+"_100.png";
-				
-			initText(this, "value",name);
-			var status=["未知","已到店","已完工","已离店","作业中"];
-			initText(this, "business_status", status[data.status]);
-			var ctype = $V(data.car_series) + " " + $V(data.car_type);
-			initText(this, "car_type", ctype);
-			initText(this, "mileage", data.mileage);
-			initText(this, "business_type", $BizType(data.business_type));
-			initText(this, "arrive_time", $T(data.arrive_time));
-			initText(this, "leave_time", $T(data.leave_time));
-			initText(this, "job_start_time", $T(data.job_start_time));
-			initText(this, "job_end_time", $T(data.job_end_time));
-		
-			this.data = data; //直接把数据缓存进入组件（按需求，如果数据是需要重复用的就这样缓存）
+			this.data = data;
 		}
-
-			/**
-			 * 传入元素的名字，设置值
-			 * @param {Object} ctx  this,上下文
-			 * @param {Object} name  
-			 * @param {Object} value
-			 */
-		function initText(ctx, name, value) {
-			var ele = ctx.querySelector("[name=" + name + "]");
-			if (ele != null) {
-				ele.innerText = $V(value);
-			}
-		}
-		/**
-		 * 
-		 * 设置评价等级
-		 * @param {Object} level
-		 */
-		function initEvaluate_level(taget,level) {
-			var nodes=taget.querySelector("[name='comment']>.value").parentNode;
-			if (level == undefined) {
-				nodes.parentNode.removeChild(nodes);
-				if(taget.data.status==3){
-					var footer= document.createElement('footer');
-					footer.innerHTML='<button class="mui-btn mui-btn-primary" type="button" style="margin-right: .5em; ">点击评价 </button>';
-					footer.className='fot';
-					taget.appendChild(footer);
-					footer.firstChild.addEvent('click',setLevel);//添加点击评价			
-				}
-			}else{
-				var star = "";
-				for (var i = 1; i <= level; i++) {
-					star += "<span class='mui-icon mui-icon-star-filled'></span>";
-				}
-				taget.querySelector("[name='comment']>.value").innerHTML = star;
-				var td =document.createElement('td');
-				td.style.whiteSpace="pre-wrap";
-				var evaluate_content=taget.data.evaluate_content||"";
-				if(evaluate_content.length>7){
-					td.innerHTML=evaluate_content.slice(0,7)+"...<span style='float:right;color: #50b7de;font-size: 20px;' class='mui-icon mui-icon-eye'></span>";
-					td.addEvent('click',showLevel);//点击眼睛显示评价内容
-				}else
-					td.innerHTML=evaluate_content;	
-					nodes.parentNode.appendChild(td);				
-			}
-
-		}
-	/**
-	 *点击眼睛显示评价内容 
-	 */
-	function showLevel(){
-		var json={
-		"title":'评价',
-		"content":W.parents(this,4).data.evaluate_content,
-		"ok":___.ok,
-		"callback":function(){}
-		}
-		W.alert(json);
-	}
-	/**
-	 *点击评价 
-	 */
-		function setLevel(){
-			W('#toTop').className='cover_paper alert_box fadeIn';
-			W('#fade').className='alert_view content fromTop';
-			level_data=W.parents(this,2);//获取点击元素的data属性 拿到之前保存的json数据
-		}
-	/**
-	 *点击星星 改变颜色 
-	 */
-		function creatColor(){
-			z_index= this.index;
-			var spans = W(".star",true);
-			for(var j=0;j<spans.length;j++){
-				spans[j].style.color='#ccc';
-			}
-			for(var i=0;i<z_index;i++){
-				spans[i].style.color='#FF8F00';
-			}
-		}
-	/**
-	 *点击保存更新业务数据
-	 */
-	 	function updateCar(){
-	 		var level=z_index;
-			var level_val=W('#leave_val').value;
-			if(level_val!=undefined)
-				level_val=level_val;
-			else
-				level_val='';
-			var dates = new Date();
-			dates=dates.WtoString();
-			if(!level){
-				W.toast('请选择评定星级');
-			}else{
-		 		var data={
-					_business_id:level_data.data.business_id,
-					access_token:_user.access_token,
-					evaluate_level:level,
-					evaluate_content:level_val,
-					evaluate_time:dates
-		 		}
-		 		Wapi.vehicle.updateBusiness(function(res){
-					if (res.status_code) {
-						W.errorCode(res);
-						return;
-					}
-						closeFade();
-						level_data.data.evaluate_level=level;
-						level_data.data.evaluate_content=level_val;
-						level_data.setData(level_data.data);
-		 		},data);
-		 	}
-	 	}
+	
 	 
-		/*Wapi.updateBusiness(function(){},data);*/
 		/**
 		 * 刷新车辆列表
 		 * @param {Object} carList
@@ -520,7 +303,6 @@
 				}
 				refresh(dom_arrived, res);
 			}
-			//////////////////////////////////////////////////////////////
 		}
 
 		function refresh(d, res) {
@@ -544,7 +326,7 @@
 			for (var i =0; i<resData.length; i++) {
 				var data = resData[i];
 				data.obj_name=cardata.obj_name;
-				list.appendChild(new cv(data)); //创建一个dv组件，并添加到DocumentFragment里
+				list.appendChild(new RepairCard(data)); //创建一个dv组件，并添加到DocumentFragment里
 				target.data.push(data); //保存节点
 			}
 			/**
@@ -561,9 +343,7 @@
 				var autoLoad;
 				if (target.autoLoad) {
 					autoLoad = target.autoLoad;
-				} else if (WiStorm.agent.ios)
-					autoLoad = new ui_autoLoad(W(".mui-content"), _load);
-				else
+				} else 
 					autoLoad = new ui_autoLoad(document, _load);
 				list.appendChild(autoLoad);
 				target.autoLoad = autoLoad;
@@ -603,10 +383,10 @@
 				param.min_id = dom_left.min_id;
 			}
 			var op={
-				fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,evaluate_content,job_start_time,job_end_time',
+				fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,evaluate_content,job_start_time,job_end_time,seller_name',
 				sorts:"-business_id"
 			};
-			Wapi.vehicle.getBusinessList(function(res) {
+			Wapi.business.list(function(res) {
 				var carList = res.data;
 				showMore(res);
 			}, param,op);
@@ -621,7 +401,7 @@
 				param.min_id = dom_left.min_id;
 			}
 			var op={
-				fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,evaluate_content,job_start_time,job_end_time',
+				fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,evaluate_content,job_start_time,job_end_time,seller_name',
 				sorts:"-business_id"
 			};
 			WVehicleApi.prototype.getBusinessList(function(res) {
@@ -630,7 +410,7 @@
 			}, param,op);
 		}
 		/**
-		 * 点击时间段标签(今天0，1周1，1个月2，自选3，日期选择4)
+		 * 点击时间段标签(1周0，1个月1，三个月2，自选3，日期选择4)
 		 */
 		function select(index) {
 			/**
@@ -650,17 +430,17 @@
 				case 0:
 					W("#select_today").style.color = "#7ac9e7";
 					W("#select_today").style.borderColor = "#7ac9e7";
-					W("#begin_time").value = getBeginToday();
+					W("#begin_time").value = getBeginWeek();
 					break;
 				case 1:
 					W("#select_week").style.color = "#7ac9e7";
 					W("#select_week").style.borderColor = "#7ac9e7";
-					W("#begin_time").value = getBeginWeek();
+					W("#begin_time").value = getBeginMonth();
 					break;
 				case 2:
 					W("#select_month").style.color = "#7ac9e7";
 					W("#select_month").style.borderColor = "#7ac9e7";
-					W("#begin_time").value = getBeginMonth();
+					W("#begin_time").value = getPre3months();
 					break;
 				case 3:
 					W("#select_custom").style.color = "#7ac9e7";
@@ -682,18 +462,26 @@
 			getBusinessData(StateCode.left, begin, end);
 		}
 		/**
-		 * 显示提示：type： 0今天，1，本周，2本月，3自定义时间段  ，4自定义时间段  ，5在店，
+		 * 显示提示：type： 0本周，1本月，2三个月，3自定义时间段  ，4自定义时间段  ，5在店，
 		 */
 		function showTip() {
 			W("#null_tip").style.display = "block";
-			var t0 = "您好，当天还没有维修记录";
-			var t1 = "您好，本周还没有维修记录";
-			var t2 = "您好，本月还没有维修记录";
+			var t0 = "您好，本周还没有维修记录";
+			var t1 = "您好，本月还没有维修记录";
+			var t2 = "您好，三个月内还没有维修记录";
 			var t3 = "您好，该时段还没有维修记录";
 			var t4 = "您好，该时段还没有维修记录";
 			var t5 = "您好，您目前还没有维修记录";
 			var tips = new Array(t0, t1, t2, t3, t4, t5);
 			W(".tip_text").innerText = tips[showTipType];
+		}
+
+		//工具类  获取三个月前（90天前）时间
+		function getPre3months(){
+			var date = new Date();
+			date.setDate(date.getDate()-90);
+			var d=date.WtoString();
+			return d.slice(0,-9);
 		}
 	</script>
 

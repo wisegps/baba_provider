@@ -17,115 +17,12 @@
 		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
 		<script>link("W.css")</script>
 		<script>link("ui.css")</script>
-		<script src="../../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../../wslib/api/newWapi.js" defer="defer"></script>
 		<script src="../../wslib/toolkit/WxSdk.js" defer="defer"></script>
 		<script src="../ui/ui.js" defer="defer"></script>
 	</head>
 	<style>
-	#car_list{background: #fff;overflow: hidden;}
-	.car{
-	    white-space: nowrap;
-	    border-bottom: 1px solid #efefef;
-	    transform:translate3d(0,0,0);
-	    -webkit-transform:translate3d(0,0,0);
-	    transition: transform .5s;
-	    -webkit-transition: -webkit-transform .5s;
-	}
-	.car.show_option{
-		transform:translate3d(-12.5em,0,0);
-		-webkit-transform:translate3d(-12.5em,0,0);
-	}
-	.car>div{
-		display: inline-block;
-		padding: .5em;
-		width: 100%;
-		position: relative;
-	}
-	.logo{
-		display: inline-block;
-		width: 60px;
-	}
-	.logo>img{
-		width: 50px;
-		vertical-align: middle;
-	}
-	.details{
-		display: inline-block;
-		vertical-align: middle;
-		font-size: 16px;
-	}
-	.car_name{font-size: .9em;}
-	.car>.operation{
-	    display: inline-table;
-	    width: 4em;
-	    padding: 0;
-	    height: 67px;
-	    vertical-align: middle;
-	    text-align: center;
-	}
-	.option{
-		display: table-cell;
-		vertical-align: middle;
-	    width: 4em;
-	    padding: 0 1em;
-	    border-right: 1px solid;
-	    background: #4DB8EF;
-	    color: #fff;
-	    white-space: normal;
-	}
-	.option:last-child{
-		background: #F56D77;
-	    border-right: none;
-	}
-	#add_car{background: #efefef;position: fixed;padding-top:44px}
-	#add_btn{
-		text-align: center;
-	    background: #fff;
-	    padding: .5em;
-	    line-height: 1em;
-	}
-	.form{padding: .5em;line-height: 2.5em;font-size: 16px;}
-	.row{
-		border-bottom: 1px solid #efefef;
-    	display: table;
-    	width: 100%;
-	}
-	.row:last-child{border:none}
-	.row>*{
-		line-height: 1em;
-	    display: table-cell;
-	    vertical-align: middle;
-	    text-align: center;
-	}
-	.row>label {
-	    width: 5em;
-	    text-align: right;
-	}
-	.infobox{
-	    padding: 0 .5em;
-    	margin-bottom: 10px;
-    	background: #fff;
-    	border-radius: 4px;
-    	box-shadow: 1px 1px 2px rgba(0,0,0,.15);
-	}
-	.infobox>.row>input{
-		margin: 0;
-	    border: none;
-	    font-size: 16px;
-	    line-height: 1em;
-	    vertical-align: middle;
-	    padding-left: 0;
-	    text-align: left;
-	}
-	#province{width: 1em;}
-	#car_picker{height: 40px;text-align: left;width:auto;}
-	.car .mui-btn-primary{
-		background: #50B7DF;
-	    border: none;
-	    position: absolute;
-	    right: .5em;
-	    bottom: .2em;
-	}
+	#car_list{background:#fff;overflow:hidden}.car{white-space:nowrap;border-bottom:1px solid #efefef;transform:translate3d(0,0,0);-webkit-transform:translate3d(0,0,0);transition:transform .5s;-webkit-transition:-webkit-transform .5s}.car.show_option{transform:translate3d(-12.5em,0,0);-webkit-transform:translate3d(-12.5em,0,0)}.car>div{display:inline-block;padding:.5em;width:100%;position:relative}.logo{display:inline-block;width:60px}.logo>img{width:50px;vertical-align:middle}.details{display:inline-block;vertical-align:middle;font-size:16px}.type{font-size:.9em;color:#ccc}.car>.operation{display:inline-table;width:8.5em;padding:0;height:67px;vertical-align:middle;text-align:center}.option{display:table-cell;vertical-align:middle;width:4em;padding:0 1em;border-right:1px solid;background:#4db8ef;color:#fff;white-space:normal}.option:last-child{background:#f56d77;border-right:0}#add_car{background:#efefef;position:fixed;padding-top:44px}#btn_box{text-align:center;background:#fff;padding:.5em;line-height:1em}#add_btn,#buy_btn{width:40%;font-size:16px;line-height:2.2em}.form{padding:.5em;line-height:2.5em;font-size:16px}.row{border-bottom:1px solid #efefef;display:table;width:100%}.row:last-child{border:0}.row>*{line-height:1em;display:table-cell;vertical-align:middle;text-align:center}.row>label{width:5em;text-align:right}.infobox{padding:0 .5em;margin-bottom:10px;background:#fff;border-radius:4px;box-shadow:1px 1px 2px rgba(0,0,0,.15)}.infobox>.row>input{margin:0;border:0;font-size:16px;line-height:1em;vertical-align:middle;padding-left:0;text-align:left}#province{width:1em}#car_picker{height:40px;text-align:left;width:auto}.car .mui-btn-primary{background:#50b7df;border:0;position:absolute;right:.5em;bottom:.2em}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav">
@@ -139,9 +36,9 @@
 				</div>
 			</div>
 			
-			<div id="add_btn">
-				<img src="img/icon_add.png" style="width: 2.5em;">
-				<div>添加爱车</div>
+			<div id="btn_box">
+				<button type="button" id="add_btn" class="mui-btn mui-btn-primary">添加爱车</button>
+				<button type="button" id="buy_btn" class="mui-btn mui-btn-danger">购买设备</button>
 			</div>
 		</div>
 		<div id="add_car" class="child_view hide">
@@ -173,6 +70,11 @@
 					</div>
 					
 					<div class="infobox">
+						<div class="row" id="serial_in">
+							<label>序列号：</label>
+							<input type="text" placeholder="选填" name="serial">
+							<a href="../air_cleaner_details.html">没有设备？</a>
+						</div>
 						<div class="row">
 							<label>车架号：</label>
 							<input type="text" placeholder="选填" name="frame_no">
@@ -200,7 +102,7 @@
 		obj.addEvent("touchstart",car.touchS);
 		obj.addEvent("touchmove",car.touchM);
 		obj.addEvent("touchend",car.touchE);//监听触摸事件以分辨手势
-		
+		obj.addEvent('click',car.click);//事件委托
 		return obj;//最后记得要返回组件
 	}
 	car.prototype.setData=function(data){
@@ -209,37 +111,40 @@
 			car_name=data.car_type;
 		else
 			car_name=data.car_series+' '+data.car_type;
-		this.innerHTML='<div class="car_details"><div class="logo"><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png"></div><div class="details"><div class="type">'+car_name+'</div><div class="car_name">'+data.nick_name+'</div></div></div><div class="operation"></div>';
+		this.innerHTML='<div class="car_details"><div class="logo"><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png"></div><div class="details"><div class="car_name">'+data.nick_name+'</div><div class="type">'+car_name+'</div></div></div><div class="operation"></div>';
 		var logo=this.querySelector(".logo>img");
 		logo.addEvent("error",car.noLogo);//处理没有获取到车辆logo错误
 		var active=this.querySelector(".operation");
 		var b0=document.createElement("div");//创建删除按钮
 		b0.className="option";
 		b0.innerText="删除";
+		var b2=b0.cloneNode(true);
+		b2.innerText="编辑信息";
+		b2.dataset.click='edit';
+		b0.dataset.click='delete';
 		if(data.device_id){//如果已经绑定设备，则创建解除绑定按钮
 			var b1=b0.cloneNode(true);
 			b1.innerText="解除绑定";
-			b1.addEvent("click",car.relieve);		
+			b1.dataset.click='relieve';	
 			active.appendChild(b1);
-			active.style.width="8.5em";
+			active.style.width="12.5em";
 		}else{
 			var b=document.createElement("button");//创建绑定终端
 			b.type="button";
 			b.className="mui-btn mui-btn-primary";
 			var b1=b.cloneNode(true);
 			b.innerText="扫描绑定";
-			b.addEvent("click",car.update);
+			b.dataset.click='update';
 			
 			b1.innerText="输入绑定";
-			b1.addEvent("click",car.inputUpdate);
+			b1.dataset.click='inputUpdate';
 			b1.style.right="6.5em";
 			var det=this.querySelector(".car_details");
 			det.appendChild(b);
 			det.appendChild(b1);
 		}
-		b0.addEvent("click",car.delete);
+		active.appendChild(b2);//添加按钮
 		active.appendChild(b0);//添加按钮
-		this.querySelector(".car_details").addEvent("click",edit);
 		this.data=data;
 	}
 	
@@ -273,13 +178,21 @@
 			that.parentElement.removeChild(that);
 		},data);
 	}
-	
+	//事件分发
+	car.click=function(){
+		var h=event.target.dataset.click;
+		if(h=='none')return;
+		if(h)
+			car[h].call(this);
+		else
+			car.toDetail.call(this);
+	}
 	car.noLogo=function(){//处理没有获取到车辆logo错误的方法
 		this.src="../../img/icon_car_moren.png";
 	}
 	car.delete=function(){
 		//点击删除车辆
-		var thisCar=W.parents(this,2);
+		var thisCar=this;
 		W.confirm("确认删除该车辆吗？",function(b){
 			if(b)
 				thisCar.delete();
@@ -288,7 +201,7 @@
 	car.update=function(){
 		//点击绑定终端
 		if(this.tagName){//判断是否是元素
-			var thisCar=W.parents(this,2);
+			var thisCar=this;
 			thisCar.hideOption();
 			W.focus(thisCar);//设置为伪焦点,扫描返回后找到伪焦点元素处理
 			event.stopPropagation(); //阻止冒泡
@@ -301,13 +214,15 @@
 			if(car.update.addEvent)
 				return;
 			W.toast("请稍等，正在准备扫描");
-			window.addEventListener("nativeSdkReady",car.update);
+			window.addEventListener("nativeSdkReady",function(){
+				car.update.call(thisCar);
+			});
 			car.update.addEvent=true;
 		}
 	}
 	car.inputUpdate=function(){
 		//输入序列号绑定设备
-		var thisCar=W.parents(this,2);
+		var thisCar=this;
 		thisCar.hideOption();
 		W.focus(thisCar);//设置为伪焦点,扫描返回后找到伪焦点元素处理
 		event.stopPropagation(); //阻止冒泡
@@ -328,45 +243,51 @@
 	
 	car.relieve=function(){
 		//点击解除绑定
-		var thisCar=W.parents(this,2);
+		var thisCar=this;
 		var carData=thisCar.data;
 		W.confirm("确认解除该车辆的设备绑定吗？",function(b){
 			if(!b)return;
 			thisCar.hideOption();
 			W.loading(true);
+			
 			var data={
-				_obj_id:carData.obj_id,
 				access_token:_user.access_token,
-				device_id:0
+				_device_id:carData.device_id,
+				cust_id: 0,//归属用户，默认0，公司仓库，如果用户购买并支付，则变成用户id
+			    cust_name:'',
+			    mobile:"",
+			    email:"",
 			}
-			Wapi.vehicle.update(function(res){
+			Wapi.device.update(function(res){//修改车辆绑定信息
 				if (res && res.status_code) {
 					W.loading();
 					W.errorCode(res);
+					W.alert("修改设备失败，请重试解除");
 					return;
 				}
-				//修改设备绑定信息
 				var data={
+					_obj_id:carData.obj_id,
 					access_token:_user.access_token,
-					_device_id:carData.device_id,
-					cust_id: 0,//归属用户，默认0，公司仓库，如果用户购买并支付，则变成用户id
-				    cust_name:'',
-				    mobile:"",
-				    email:"",
+					device_id:0
 				}
-				Wapi.device.update(function(res){//修改车辆绑定信息
+				Wapi.vehicle.update(function(res){
 					W.loading();
 					if (res && res.status_code) {
 						W.errorCode(res);
-						W.alert("修改设备失败，请重试解除");
 						return;
 					}
+					//修改设备绑定信息
 					W.toast("解除绑定成功");//设备信息也更改了才算解除绑定成功
 					carData.device_id=0;
 					thisCar.setData(carData);
 				},data);
 			},data);
 		});
+	}
+	
+	car.toDetail=function(){
+		var id=this.data.obj_id;
+		top.location='repair_list.html?obj_id='+id;
 	}
 	car.touchS=function(){
 		//监听触摸开始事件
@@ -388,6 +309,47 @@
 			event.preventDefault();
 	}//触摸移动事件应付微信神经病的
 		
+	car.edit=function(){
+		var data=this.data;
+		
+		dom.nick_name.value=data.nick_name;
+		dom.mileage.value=data.mileage;
+		dom.frame.value=data.frame_no||"";
+		dom.engine.value=data.engine_no||"";
+		
+		//处理车牌号
+		dom.obj_name.value=data.obj_name.slice(1);
+		W("#province").innerText=data.obj_name.charAt(0);
+		
+		//处理车型json，选择车型组件没做好，应该直接按数据库字段命名的，下个项目修复
+		var car_json={
+			brandId:data.car_brand_id,
+			brand:data.car_brand,
+			seriesId:data.car_series_id,
+			series:data.car_series,
+			typeId:data.car_type_id,
+			type:data.car_type
+		}
+		dom.series.value=car_json;
+		dom.series.innerText=data.car_series+" "+data.car_type;
+		
+		if(data.device_id&&!data.serial){
+			Wapi.device.get(function(res){
+				if(res.serial){
+					dom.serial.style.display='';
+					dom.serial.innerHTML="序列号："+res.serial;
+					data.serial=res.serial;
+				}
+			},{'device_id':data.device_id,'access_token':_user.access_token}
+			,{'fields':'serial'});
+		}else if(data.serial){
+			dom.serial.innerHTML="序列号:"+data.serial;
+		}else{
+			dom.serial.style.display='none';
+		}
+		dom.save.data=data;
+		showAddCar();
+	}
 	//二维码扫描返回，获取所扫描的设备信息
 	function receive(res){
 		W.loading("绑定中……");
@@ -395,7 +357,7 @@
 			serial:res,
 			access_token:_user.access_token
 		}
-		Wapi.device.getOne(receiveBack,param);
+		Wapi.device.get(receiveBack,param);
 	}
 	//获取所扫描的设备信息返回,开始绑定设备
 	function receiveBack(res){
@@ -462,7 +424,7 @@
 			Wapi.user.update(function(res){
 				if (res && res.status_code) {
 					W.errorCode(res);
-					W.alert("修改用户资料，请重试绑定");
+					W.alert("修改用户资料错误，请重试绑定");
 					return;
 				}
 			},uData);
@@ -481,10 +443,15 @@
 			frame:W("[name='frame_no']"),
 			engine:W("[name='engine_no']"),
 			save:W("#save"),
-			serial:W("#serial")
+			serial:W("#serial"),
+			serial_in:W("#serial_in")
 		};
+		var askData;
 		
 		window.addEventListener("W.loginSuccess",function(){
+			if(_g.askData){
+				askData=JSON.parse(_g.askData);
+			}
 			getUserCar();//加载用户车辆
 			
 			W("#province").addEvent("click",ui_areaBox);//点击选择省份
@@ -495,6 +462,7 @@
 		function addEvent(){
 			//添加事件监听
 			W("#add_btn").addEvent("click",showAddCar);
+			W("#buy_btn").addEvent('click',function(){location=WiStorm.root+'src/air_cleaner_details.html?intent=logout&needOpenId=true'})
 			dom.save.addEvent("click",saveCar);//保存车辆信息按钮
 			
 			W(".row>.icon_next").addEvent("click",function(){//选择车型的右箭头，点击触发选择车型
@@ -524,11 +492,11 @@
 				access_token:_user.access_token
 			}
 			var op={
-				fields:"nick_name,cust_name,obj_id,cust_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,engine_no,mileage"
+				fields:"nick_name,cust_name,obj_id,cust_id,obj_name,device_id,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,frame_no,engine_no,mileage,seller_id"
 			}
 			//调用接口，获取用户车辆,并绘制到页面上
-			Wapi.user.getVehicleList(function(res){
-				if (res && res.status_code) {
+			Wapi.vehicle.list(function(res){
+				if (res.status_code) {
 					W.errorCode(res);
 					return;
 				}
@@ -542,21 +510,73 @@
 				var list = document.createDocumentFragment();
 				for(var i=cars.length-1;i>=0;i--){
 					list.appendChild(new car(cars[i]));
+					if(askData&&askData.seller_id==cars[i].seller_id&&askData.obj_id==cars[i].obj_id&&askData.device_id==cars[i].device_id){
+						ask();
+					}
 				}
 				dom.list.appendChild(list);
 			},data,op);
 		}
+		
+		//申请授权
+		function ask(){
+			var opt={
+				"y":"授权",
+				"n":"不授权",
+				title:"申请授权",
+				content:"商户："+askData.seller_name+"，申请查看车辆【"+askData.obj_name+"】的设备信息，是否授权？",
+				"callback":function(o){
+					if(!o)
+						return;
+					//更新设备信息
+					var params={
+						access_token:_user.access_token,
+						_device_id:askData.device_id,
+						seller_id:askData.seller_id
+					}
+					Wapi.device.update(function(res){
+						if (res.status_code) {
+							W.errorCode(res);
+							return;
+						}
+						//推送一条给商户
+						var car_url=WiStorm.root+'src/car_details.html?obj_id='+askData.obj_id;
+						var params={
+							from:"设备数据授权",
+							content:"用户："+_user.cust_name+"已授权您查看"+askData.obj_name+"车辆的设备数据。",
+							remark:"点击详情查看",
+							open_id:askData.seller_open_id,
+							link:car_url
+						}
+						Wapi.comm.sendWeixin(function(res){
+							if(res.errcode){
+								W.alert('发送推送错误，请重试；错误码：'+res.errcode);
+								return;
+							}
+							W.toast("授权成功");
+						},params);
+					},params);
+				}
+			}
+			W.confirm(opt);
+		}
 	</script>
 	
 	<script for="添加/修改车辆">
-		function showAddCar(){
-			if(this.id=="add_btn"){
+		function showAddCar(e){
+			if(e){
+				dom.add.querySelector(".mui-title").innerText="添加车辆";
 				delete dom.save.intent;
 				W("#car_form").reset();
 				dom.series.innerText="必选";
 				W("#province").innerText="粤";
+				dom.serial_in.style.display='table';
+				dom.serial.style.display='none';
+			}else{
+				dom.serial_in.style.display='none';
+				dom.add.querySelector(".mui-title").innerText="修改车辆";
+				dom.save.intent="edit";
 			}
-				
 			history.pushState(null,"my_car.html","my_car.html");
 			dom.add.show();
 		}
@@ -564,49 +584,6 @@
 		window.addEventListener("popstate",function(){
 			dom.add.hide();
 		});
-		
-		
-		function edit(){
-			var c=this.parentElement;
-			var data=c.data;
-			
-			dom.nick_name.value=data.nick_name;
-			dom.mileage.value=data.mileage;
-			dom.frame.value=data.frame_no||"";
-			dom.engine.value=data.engine_no||"";
-			
-			//处理车牌号
-			dom.obj_name.value=data.obj_name.slice(1);
-			W("#province").innerText=data.obj_name.charAt(0);
-			
-			//处理车型json，选择车型组件没做好，应该直接按数据库字段命名的，下个项目修复
-			var car_json={
-				brandId:data.car_brand_id,
-				brand:data.car_brand,
-				seriesId:data.car_series_id,
-				series:data.car_series,
-				typeId:data.car_type_id,
-				type:data.car_type
-			}
-			dom.series.value=car_json;
-			dom.series.innerText=data.car_series+" "+data.car_type;
-			
-			if(data.device_id&&!data.serial){
-				Wapi.device.getOne(function(res){
-					dom.serial.innerHTML="序列号："+res.serial;
-					data.serial=res.serial;
-				},{'device_id':data.device_id,'access_token':_user.access_token}
-				,{'fields':'serial'});
-			}else if(data.serial){
-				dom.serial.innerHTML="序列号:"+data.serial;
-			}
-			
-			
-			dom.add.querySelector(".mui-title").innerText="修改车辆";
-			dom.save.intent="edit";
-			dom.save.data=data;
-			showAddCar();
-		}
 		
 		//保存车辆信息
 		function saveCar(){
@@ -636,11 +613,11 @@
 				W.toast("车辆昵称为必填项");
 				return;
 			}
-			var numTest=/\D/;
+
 			if(!data.mileage){
 				W.toast("里程为必填项");
 				return;
-			}else if(numTest.test(data.mileage)){
+			}else if(isNaN(data.mileage*1)){
 				W.toast("里程必须为数字");
 				return;
 			}
@@ -650,37 +627,57 @@
 			}else{
 				data.obj_name=W("#province").innerText+data.obj_name;
 			}
-			W.loading(true);
-			if(this.intent=="edit"){//如果意图为
-				var carData=this.data;
-				data._obj_id=carData.obj_id;
-				Wapi.vehicle.update(function(res){
-					W.loading();
-					if (res && res.status_code) {
-						W.errorCode(res);
-						return;
+			var that=this;
+			Wapi.vehicle.get(function(re){
+				if(re.status_code||re.cust_id==_user.cust_id){
+					W.loading(true);
+					if(that.intent=="edit"){//如果意图为
+						var carData=that.data;
+						data._obj_id=carData.obj_id;
+						Wapi.vehicle.update(function(res){
+							W.loading();
+							if (res && res.status_code) {
+								W.errorCode(res);
+								return;
+							}
+							var id=data._obj_id;
+							delete data._obj_id;
+							jsonConcat(carData,data);
+							W("#id_"+id).setData(carData);
+							history.back();
+							W.toast("保存成功");
+						},data);
+					}else{//默认新增一辆车
+						Wapi.vehicle.add(function(res){
+							W.loading();
+							if (res && res.status_code) {
+								W.errorCode(res);
+								return;
+							}
+							W(".null_tip").style.display="none";
+							data.obj_id=res.obj_id;
+							var newCar=new car(data);
+							dom.list.insertBefore(newCar,dom.list.childNodes[0]);
+							history.back();
+							var serial=dom.serial_in.querySelector('input').value;
+							if(serial){
+								W.focus(newCar);//设置为伪焦点,扫描返回后找到伪焦点元素处理
+								receive(serial);
+								W.toast("新增成功，正在为绑定车辆");
+							}else{
+								W.toast("新增成功");
+							}
+						},data);
 					}
-					var id=data._obj_id;
-					delete data._obj_id;
-					jsonConcat(carData,data);
-					W("#id_"+id).setData(carData);
-					history.back();
-					W.toast("保存成功");
-				},data);
-			}else{//默认新增一辆车
-				Wapi.vehicle.create(function(res){
-					W.loading();
-					if (res && res.status_code) {
-						W.errorCode(res);
-						return;
-					}
-					W(".null_tip").style.display="none";
-					data.obj_id=res.obj_id;
-					dom.list.insertBefore(new car(data),dom.list.childNodes[0]);
-					history.back();
-					W.toast("保存成功");
-				},data);
-			}
+				}else if(re.cust_id!=_user.cust_id){
+					W.toast("该车牌号已存在，请确认后重新输入。");
+					return;
+				}
+			},{
+				access_token:_user.access_token,
+				obj_name:data.obj_name
+			});
+				
 		}
 		addEvent();
 	</script>

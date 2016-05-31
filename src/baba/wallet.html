@@ -1,0 +1,388 @@
+<!--
+	作者：江海
+	时间：2016-3-28
+	描述：我的钱包
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>我的钱包</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script>link("W.css")</script>
+		<script src="../../wslib/api/newWapi.js" defer="defer"></script>
+		<script type="text/javascript" src="../ui/coupon.js" defer="defer" ></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+	</head>
+	<style>
+		body {
+			background-color: #f0f0f0;
+			font-size: 14px;
+		}
+		.nop{padding: 0;}
+		#basic_info {
+			width: 100%;
+			background: white;
+			margin-bottom: 10px;
+			margin-top: 10px;
+		}
+		.setting {
+			width: 100%;
+			padding:0.7em 1em;
+			color: #999999;
+			border-bottom: solid 1px #f4f4f4;
+		}
+		#recordPage,#couponPage{
+			margin-left:2%;
+			width:96%;
+		}
+		.header_circle{
+			border-radius:50px;
+			background-color: orange; 
+			width:100px; height:100px;
+			margin: 1em auto;
+			color: white;
+		}
+		.record{
+			width: 100%;
+			height: 4em;
+			background-color: white;
+			text-align: left;
+			padding: 0.5em 1em 0;
+			border-bottom: solid 1px #efefef;
+		}
+		/*.coupon{
+			width: 100%;
+			height: 8em;
+			background-color: white;
+			padding: 0.5em 1em 0;
+			border-bottom: solid 1px #efefef;
+			margin-bottom: 1em;
+		}*/
+		label {
+			color: #999999;
+		}
+		.fl{float: left;}
+		.fr{float: right;}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav nop">
+			<span class="mui-icon mui-icon-left-nav mui-pull-left W_back"></span>
+			<h1 id="title" class="mui-title">我的钱包</h1>
+		</header>
+		
+		<div id="homePage" class="mui-content" style="display: none;">
+			<div id="basic_info">
+				<div id="coupons" class="setting">
+					<label class="label" style="line-height: 24px;vertical-align: super;">奖券</label>
+					<div class="fr">
+						<span name="total_coupon"></span>
+						<span class="mui-icon mui-icon-arrowright" style="color: #ccc;"></span>
+					</div>
+				</div>
+				<div id="wi_dou" class="setting">
+					<label class="label" style="line-height: 24px;vertical-align: super;">微豆</label>
+					<div class="fr">
+						<span name="total_wi_dou"></span>
+						<span class="mui-icon mui-icon-arrowright" style="color: #ccc;"></span>
+					</div>
+				</div>
+				<div id="balance" class="setting">
+					<label class="label" style="line-height: 24px;vertical-align: super;">余额</label>
+					<div class="fr">
+						<span name="total_balance"></span>
+						<span class="mui-icon mui-icon-arrowright" style="color: #ccc;"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="couponPage" class="mui-content" style="display: none; text-align: left;">
+			<div id="coupon_buy" class="fl" style="margin-top:1em; margin-left: 1em;">立即使用</div>
+			<div id="coupon_rule" class="fr" style="margin-top:1em; margin-right: 1em;">相关规则</div>
+			<div id="coupon_box" style="margin-top: 3em;"></div>
+		</div>
+		
+		<div id="recordPage" class="mui-content" style="display: none; text-align: center;">
+			<div id="record_rule" class="fr" style="margin-top:1em;">相关规则</div>
+			<div id="recordPage_header" style="margin-bottom: 1em;">
+				<div class="header_circle">
+					<div id="record_title" style="padding-top:20px; padding-bottom: 3px;">微元</div>
+					<div id="record_number" style="font-size: 2em;">150</div>
+				</div>
+				<div id="wiDou_hongbao" style="display: none;">微豆抽奖</div>
+			</div>
+			<div id="record_box"></div>
+			<div id="widou_record_box" style="display: none;"></div>
+			<div id="balance_record_box" style="display: none;"></div>
+			<div id="record" class="record" hidden="true">
+				<div class="fl">
+					<div name="detail">参与抽奖</div>
+					<div name="time">2016-3-28 15:00:21</div>
+				</div>
+				<div name="money" class="fr" style="margin-top:0.5em;">-5</div>
+			</div>
+		</div>
+	</body>
+	<script>
+	var open_id=_user.login_id;
+	var _param={
+		open_id: open_id,
+		access_token: _user.access_token
+	}
+	if(!open_id){
+		_param={
+			cust_id: _user.cust_id,
+			access_token: _user.access_token
+		}
+	}
+	var dom={
+		homePage:W("#homePage"),
+		back:W("#back"),
+		title:W("#title"),
+		basic_info:W("#basic_info"),
+		coupons:W("#coupons"),
+		wi_dou:W("#wi_dou"),
+		balance:W("#balance"),
+		childPage:null,
+		couponPage:W("#couponPage"),
+		coupon_box:W("#coupon_box"),
+		coupon_buy:W("#coupon_buy"),
+		coupon_rule:W("#coupon_rule"),
+		recordPage:W("#recordPage"),
+		record_box:W("#record_box"),
+		record_rule:W("#record_rule"),
+		record_title:W("#record_title"),
+		record_number:W("#record_number"),
+		widou_record_box:W("#widou_record_box"),
+		balance_record_box:W("#balance_record_box"),
+		wiDou_hongbao:W("#wiDou_hongbao")
+	}
+	
+	var basicInfo={
+		coupon:3,
+		wi_dou:20,
+		balance:50
+	}
+	
+	window.addEventListener("load",function(){
+		addBasicInfo();
+		dom.back.addEvent('click',back);
+		dom.coupons.addEvent('click',showCoupon);
+		dom.wi_dou.addEvent('click',showWiDou);
+		dom.balance.addEvent('click',showBalance);
+	});
+	
+	function showCoupon(){
+		dom.title.innerHTML="我的奖券";
+		dom.coupon_buy.addEvent('click',function(){location="../air_cleaner_details.html?intent=logout&needOpenId=true";});
+		dom.coupon_rule.addEvent('click',showRulePage);
+		dom.childPage=dom.couponPage;
+		showChildPage();
+//		addCoupons();
+	}
+	function showWiDou(){
+//		addRecords(1);
+		dom.record_rule.addEvent('click',showRulePage);
+		dom.record_title.innerHTML="微豆";
+		dom.record_number.innerHTML=basicInfo.wi_dou;
+		dom.childPage=dom.recordPage;
+		hide(dom.balance_record_box);
+		show(dom.widou_record_box);
+		show(dom.wiDou_hongbao);
+		dom.wiDou_hongbao.addEvent('click',function(){location="../game/hongbao.html?intent=logout&needOpenId=true";});
+		showChildPage();
+	}
+	function showBalance(){
+//		addRecords(0);
+		dom.record_rule.addEvent('click',showRulePage);
+		dom.record_title.innerHTML="余额";
+		dom.record_number.innerHTML=basicInfo.balance;
+		dom.childPage=dom.recordPage;
+		hide(dom.widou_record_box);
+		show(dom.balance_record_box);
+		showChildPage();
+	}
+	function addBasicInfo(){
+		var flag=0;
+		Wapi.voucher.list(function(res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			} else{
+				//console.log(res);
+				basicInfo.coupon=res.data.length;
+				initText(dom.basic_info,"total_coupon",basicInfo.coupon+"张");
+				flag++;
+				if(flag==2)show(dom.homePage);
+			}
+		},_param);
+		
+		
+		
+		var param={
+			login_id: open_id,
+			access_token: _user.access_token
+		}
+		if(!open_id){
+			param={
+				cust_id: _user.cust_id,
+				access_token: _user.access_token
+			}
+		}
+		Wapi.user.get(function(res) {
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			} else {
+				//console.log(res);
+				var wi_dou=v(res.wi_dou);
+				var balance=v(res.balance);
+				
+				basicInfo.balance=balance;
+				basicInfo.wi_dou=wi_dou;
+				
+				initText(dom.basic_info,"total_wi_dou",wi_dou+"个");
+				initText(dom.basic_info,"total_balance",balance+"元");
+				flag++;
+				if(flag==2)show(dom.homePage);
+			}
+		},param,{//op
+			fields:'frozen_balance,balance,wi_dou'
+		});
+//		show(dom.homePage);
+		addCoupons();
+		addRecords();
+	}
+	
+	function addCoupons(){
+		_ui_coupon(dom.coupon_box,share);
+		
+	}
+	function addRecords(){
+//		dom.record_box.innerHTML="";
+		var wiDou_records=[];
+		var balance_records=[];
+		Wapi.bill.list(function(res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			} else{
+				for(var i=res.data.length-1;i>=0;i--){
+					if(res.data[i].m_type==0){
+						balance_records.push(res.data[i]);
+					}else if(res.data[i].m_type==1){
+						wiDou_records.push(res.data[i]);
+					}
+				}
+//				for(var i=0;i<records.length;i++){
+//					var r=new Record(records[i]);
+//					dom.record_box.appendChild(r);
+//				}
+				for(var i=0;i<wiDou_records.length;i++){
+					var r=new Record(wiDou_records[i]);
+					dom.widou_record_box.appendChild(r);
+				}
+				for(var i=0;i<balance_records.length;i++){
+					var r=new Record(balance_records[i]);
+					dom.balance_record_box.appendChild(r);
+				}
+			}
+		},_param,{
+//			limit:5
+		});
+		
+		
+	}
+	
+	function share(){
+//		location="coupon_receive.html?coupon_code="+this.data.code+"&from_open_id="+open_id;//测试用，正式暂时不用
+	}
+	//消费记录组件
+	function Record(data) {
+		var record = new WiStormUI("div"); //创建一个div组件
+		record.merge(this);
+		record.innerHTML = W("#record").innerHTML;
+		record.className = "record";
+		record.setData(data);
+		return record;
+	}
+	//给组件添加对象方法
+	Record.prototype.getData = function() {
+		return this.data;
+	}
+	Record.prototype.setData = function(data) {
+		initText(this,"detail",data.remark);
+		
+		var time=data.create_time.toString();
+		time=time.slice(0,10);
+		initText(this,"time",time);
+		
+		if(data.sum>0){
+			initText(this,"money","+"+data.sum);
+			changeColor(this,"money","orange");
+		}else if(data.sum<=0){
+			initText(this,"money",data.sum);
+			changeColor(this,"money","green");
+		}
+		this.data = data;
+	}
+	
+	function showChildPage(){
+		history.pushState(null,"","wallet.html");
+		hide(dom.homePage);
+		show(dom.childPage);
+	}
+	function showRulePage(){
+		location="../game/use_rule.html?intent=logout&needOpenId=true";
+	}
+	//返回
+	function back(){
+		window.history.back();
+	}
+	window.addEventListener("popstate",function(){
+		if(dom.childPage!=null){
+			hide(dom.wiDou_hongbao);
+			hide(dom.childPage);
+			show(dom.homePage);
+			dom.title.innerHTML="我的钱包";
+			dom.childPage=null;
+		}
+	});
+	//工具类 显示、隐藏某个元素
+	function hide(ele){
+		ele.style.display='none';
+	}
+	function show(ele){
+		ele.style.display='block';
+	}
+	//工具类 改变元素中某个子元素的innerText,用name选择子元素
+	function initText(parent, name, value) {
+		if(value==undefined||value==null) value="";
+		var ele = parent.querySelector("[name=" + name + "]");
+		if (ele != null) {
+			ele.innerText = value;
+		}
+	}
+	//工具类 改变元素中某个子元素的颜色，用name选择子元素
+	function changeColor(parent,name,color){
+		var ele = parent.querySelector("[name=" + name + "]");
+		if (ele != null) {
+			ele.style.color = color;
+		}
+	}
+	//工具类 获取数值为undefined和null时返回0
+	function v(num){
+		if(num==undefined||num==null){
+			return 0;
+		}else{
+			return num;
+		}
+	}
+	</script>
+</html>

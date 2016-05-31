@@ -449,7 +449,7 @@
 		function setShare(){
 			var name=_user?_user.cust_name:"";
 			var share_url=WiStorm_root+'src/game/guess_pic.html?intent=logout&needOpenId=true&id='+open_id+'&name='+name+'&x='+x+'&img='+encodeURIComponent(img)+'&answer='+correctAnswer;
-			history.pushState(null,"",share_url);
+			
 			if(!W.fillFriend.fill){
 				W.fillFriend(_g.id,open_id,_g.name,name);
 				W.fillFriend.fill=true;
@@ -458,6 +458,7 @@
 				window.addEventListener("nativeSdkReady",setShare);
 				return;
 			}
+			history.pushState(null,"",share_url);
 			W.debug(open_id);
 			var op={
 			    title: '火眼金睛，我是猜图王，你要不要来挑战一下我的照片？', // 分享标题

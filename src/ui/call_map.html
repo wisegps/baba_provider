@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<title>充电桩导航</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script>link("W.css")</script>
+	</head>
+	<body>
+		<div class="table">
+			<div class="cell">
+				如未安装百度地图，请<a href="http://gdown.baidu.com/data/wisegame/f2100cf7e5273715/baiduditu_740.apk">立即下载安装</a>
+				<a href="" id='bd'><button type="button" class="mui-btn mui-btn-block w" style="background: #5cb85c;">打开导航</button></a>
+				<!--<a href="" id='gd'><button type="button" class="mui-btn mui-btn-block w" style="background: #d9534f;">高德地图</button></a>-->
+			</div>
+		</div>
+	</body>
+	<script>
+		var bd=W("#bd");
+		if(WiStorm.agent.weixin){
+			W(".cell").innerHTML='微信内无法启动导航，请打开右上角菜单，点击‘在浏览器中打开’';
+		}else{
+			var s='bdapp';
+			if(WiStorm.agent.ios){
+				s='baidumap';
+			}
+			if(_g.destination)
+				var href=s+'://map/direction?origin=我的位置&destination=latlng:'+_g.destination+'|name:'+_g.name+'&mode=driving&src=WiCARE';
+			else
+				var href=s+'://map/direction?origin=我的位置&destination='+_g.name+'&mode=driving&src=WiCARE';
+			bd.href=href;
+		}
+	</script>
+	<style>
+		button{color: #fff;}
+		body{text-align: center;}
+		.table{display: table;width: 100%;height: 100vh;padding: 0 10%;}
+		.cell{display: table-cell;vertical-align: middle;}
+	</style>
+</html>

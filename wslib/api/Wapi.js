@@ -86,6 +86,8 @@ WiStormAPI.prototype.makeUrl=function(json){
 			val=JSON.stringify(val);			
 		}else
 			val=val.toString();
+		val=val.replace(/\+/g,'%2B');
+		val=val.replace(/\&/g,'%26');
 		val=encodeURI(val.replace(reg,""));
 		signText+=key+val;
 		getData+="&"+key+"="+val;
@@ -310,7 +312,7 @@ WUserApi.prototype.create=function(callback,data,op){
  */
 WUserApi.prototype.get=function(callback,data,op){
 	var OP={
-		fields:'cust_id,cust_name,cust_type,saler_id,car_brand,car_series,parent_cust_id,logo,remark,create_time,update_time,photo,address,tel,mobile,seller_id'//默认返回的字段
+		fields:'cust_id,login_id,privilege,cust_name,cust_type,saler_id,car_brand,car_series,seller_id,logo,remark,create_time,update_time,photo,address,tel,mobile'//默认返回的字段
 	};
 	this.jsonConcat(OP,op);
 	OP.method="wicare.user.get"; //接口名称
@@ -1105,7 +1107,7 @@ WPayApi.prototype=new WiStormAPI();//继承父类WiStormAPI的方法
  *	total_price: 总价;
  */
 WPayApi.prototype.pay=function(callback,data){
-	data.method='wicare.pay.weixin';
+	data.method='wicare.pay.buy';
 	this.getApi(data,function(res){
 		if(res.status_code){
 			//后台下单不成功

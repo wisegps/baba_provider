@@ -23,7 +23,7 @@
 		<script>
 			window.addEventListener("load",windowLoad);
 			function windowLoad(){
-				if(_user.cust_type==3&&(!_user.privilege||_user.privilege[8]=="0")){
+				if(_user.cust_type!=2){
 					location="home.html";
 				}
 				var user =_user;
@@ -96,104 +96,7 @@
 		
 	</head>
 	<style>
-		body {
-			background-color: #f0f0f0;
-			font-size: 13px;
-		}
-		
-		.shop {
-			width: 100%;
-			background: white;
-			margin-bottom: 10px;
-			margin-top: 10px;
-			padding: 10px;
-			
-		}
-		.shop_logo{
-			vertical-align: sub;
-		}
-		.div_account {
-			width: 100%;
-			background: white;
-			margin-bottom: 10px;
-			margin-top: 10px;
-		}
-		
-		.div_others {
-			width: 100%;
-			background: white;
-			margin-bottom: 10px;
-			margin-top: 10px;
-		}
-		
-		.shop_infos {
-			width: 40%;
-			display: inline-block;
-			vertical-align: super;
-		}
-		
-		.shop_info {
-			display: block;
-			padding:0 10px;
-			line-height: 1.5em;
-		}
-		
-		#img_logo {
-			width: 100px;
-			height: 62px;
-		}
-		
-		#cust_name {
-			font-size: 15px;
-			color: black;
-		}
-		
-		.setting {
-			width: 100%;
-			padding:7px 10px;
-		}
-		
-		label {
-			color: #999999;
-		}
-		
-		hr {
-			color: #eeeeee;
-			opacity: 0.1;
-			background: #000000;
-			margin-left: 10px;
-			margin: 0;
-		}
-		
-		h4 {
-			color: ;
-		}
-		
-		.mui-icon-arrowright {
-			float: right;
-			opacity: 0.4;
-		}
-		
-		.exit {
-			text-align: center;
-		}
-		
-		.mui-btn.mui-btn-block {
-			margin: auto;
-			margin-top: 2em;
-			width: 85%;
-		    height: 40px;
-		    border-radius: 4px;
-		    color: #fff;
-		    background-color: #50B7DE;
-		    border: none;
-		    padding: 0;
-		    font-size: 16px;
-		}
-		
-		.mui-btn.mui-btn-block:active {
-			background-color: #3B89A7;
-		}
+body{background-color:#f0f0f0;font-size:13px}.shop{width:100%;background:white;margin-bottom:10px;margin-top:10px;padding:10px 10px 0 10px}.shop_logo{vertical-align:sub}.div_account{width:100%;background:white;margin-bottom:10px;margin-top:10px}.div_others{width:100%;background:white;margin-bottom:10px;margin-top:10px}.shop_infos{width:55%;display:inline-block;vertical-align:super}.shop_info{display:block;padding:0 10px;line-height:1.5em}#img_logo{width:100px;height:62px}#cust_name{font-size:15px;color:black}.setting{width:100%;padding:7px 10px}label{color:#999}hr{color:#eee;opacity:.1;background:#000;margin-left:10px;margin:0}h4{color:}.mui-icon-arrowright{float:right;opacity:.4;line-height: 31px;}.exit{text-align:center}.mui-btn.mui-btn-block{margin:auto;margin-top:2em;width:85%;height:40px;border-radius:4px;color:#fff;background-color:#50b7de;border:0;padding:0;font-size:16px}.mui-btn.mui-btn-block:active{background-color:#3b89a7}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav">
@@ -209,7 +112,7 @@
 				<span class="shop_logo"> <img id="img_logo" src="../img/shop.jpg"/></span>
 				<span class="shop_infos"> 
 					<label class="shop_info" id="cust_name"></label>
-				<label class="shop_info" id="address"></label>
+				<label style="text-overflow: ellipsis;white-space: nowrap;overflow: hidden;" class="shop_info" id="address"></label>
 				<label class="shop_info" id="phone"></label>
 				</span>
 			</div>
@@ -225,13 +128,17 @@
 					<span class="mui-icon mui-icon-arrowright"></span>
 				</div>
 			</div>
+			
+			<div class="div_account">
+				<a href="child_account.html">
+					<div class="setting">
+						<label class="label">子账号管理</label>
+						<label class="value" style="float: right;"></label>
+					</div>
+				</a>
+			</div>
 
 			<div class="div_others">
-				<div class="setting" id="comments">
-					<label class="label">意见反馈</label>
-					<span class="right"><span class="mui-icon mui-icon-arrowright"></span></span>
-				</div>
-				<hr />
 				<div class="setting" id="about" onclick="show();">
 					<label class="label">关于叭叭</label>
 					<span class="right"><span class="mui-icon mui-icon-arrowright"></span></span>

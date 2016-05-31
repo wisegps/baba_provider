@@ -1,0 +1,445 @@
+<!--
+	作者：江海
+	时间：2016-5-17
+	描述：单个活动编辑页
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>WiCARE商户版</title>
+		<script src="../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+		<script>
+			link("W.css")
+		</script>
+
+		<!--<script src="../wslib/api/Wapi.js" defer="defer"></script>-->
+		<script src="../wslib/api/newWapi.js" defer="defer"></script>
+		<script src="../wslib/ui/DateTime.js"></script>
+		<style>
+			body {background-color: #F0F0F0;}
+			.mui-content {padding: 1.2em;}
+			.mui-content a {color: #000;}
+			.selectPhotos {
+				margin-bottom: 10px;
+				width: 75px;
+				color: #E1E1E1;
+				height: 75px;
+				background-color: #fff;
+				border-radius: 4px;
+				font-size: 4.3em;
+				float: left;
+			}
+			.tab {
+				display: table;
+				width: 100%;
+				background: #fff;
+				margin-top: 20px;
+				border-radius: 4px;
+			}
+			.int_d {
+				display: table-row;
+				margin-top: 20px;
+				height: auto;
+			}
+			.int_d span {
+				padding: 7px 0 0 10px;
+				display: table-cell;
+				width: 5em;
+				font-size: 15px;
+				color: #CBCBCB;
+			}
+			.int_d input {
+				display: table-cell;
+				border: 0;
+				height: auto;
+				margin: 4px 0;
+				font-size: 14px;
+				padding: 7px;
+			}
+			.mui-content div textarea {
+				height: 100%;
+				border: 0;
+				font-size: 14px;
+			}
+			#img_a {margin-top: 20px;}
+			.clear {clear: both;}
+			.img {
+				width: 75px;
+				height: 75px;
+				border-radius: 4px;
+			}
+			.img_v {
+				height: 75px;
+				margin-right: 10px;
+				float: left;
+				position: relative;
+				margin-bottom: 10px;
+			}
+			#img_div {height: 75px;margin: 30px 0;}
+			.remove_b {
+				background: #BD0606;
+				width: 20px;
+				height: 20px;
+				display: block;
+				color: #fff;
+				position: absolute;
+				top: -5px;
+				right: -5px;
+				border-radius: 10px;
+				font-size: 25px;
+				text-align: center;
+				line-height: 20px;
+			}
+			.remove_b:before {content: "-";}
+		</style>
+	</head>
+
+	<body>
+
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav W_back"></a>
+			<h1 class="mui-title">活动编辑</h1>
+		</header>
+		<div class="mui-content">
+			<div id="img_div">
+				<div id="event_img" class="selectPhotos mui-icon mui-icon-plusempty"></div>
+			</div>
+			<div class="tab">
+				<div class="int_d">
+					<span>活动名称</span>
+					<input type="text" id="event_name" class="mui-input-clear" placeholder="请输入活动名称" />
+				</div>
+			</div>
+			<!--<div class="tab">
+				<div class="int_d">
+					<span>活动日期</span>
+					<input type="text" id="event_time" class="mui-input-clear" placeholder="请输入活动日期" />
+				</div>
+			</div>-->
+			<div class="tab">
+				<div class="int_d">
+					<span>开始时间</span>
+					<script id="begin_time" class="ctime" value="2016-05-17" style="border: 0px #000000 solid; border-radius: 5px; width: 45%;">
+						echo(new DateSelector())
+					</script>
+				</div>
+			</div>
+			<div class="tab">
+				<div class="int_d">
+					<span>结束时间</span>
+					<script id="end_time" class="ctime" value="2016-05-17" style="border: 0px #000000 solid; border-radius: 5px;width: 45%;">
+						echo(new DateSelector())
+					</script>
+				</div>
+			</div>
+			<div style="height: 120px;padding: .5em;border-radius: .3em;background-color: #fff;margin-top: 20px;">
+				<textarea id="event_remark" type="text" class="mui-input-clear" placeholder="请输入活动详情" /></textarea>
+			</div>
+			<button type="button" class="mui-btn mui-btn-block w" id="preview">预览</button>
+			<button type="button" class="mui-btn mui-btn-block w" id="submit">保存</button>
+
+		</div>
+		<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<!--<a href="#file" style="z-index: 1;">选择照片</a>-->
+					<label for="inputf">
+						<div>
+							选择文件
+							<input type="file" capture="camera" id="inputf" name="inputf" style="display: none;"accept="image/*" onchange="fileUpload(this)"/>
+						</div>
+					</label>
+				</li>
+			</ul>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell">
+					<a id="noActive">取消</a>
+				</li>
+			</ul>
+		</div>
+	</body>
+	<script>
+		var open_id=_g.openid;
+		var user = _user;
+		var edit=_g.intent||0;
+		var game_id;
+		var dom = {
+			event_img: W("#event_img"),
+			event_name: W("#event_name"),
+			event_remark: W("#event_remark"),
+			begin_time: W("#begin_time"),
+			end_time: W("#end_time")
+		}
+		var d = {
+			material_url: "",
+			title: "",
+			remark: "",
+			start_time:"",
+			invalid_time:"",
+			activity_url:""
+		}
+		window.addEventListener("load", windowLoad);
+
+		function windowLoad() {
+			if(!(_user.cust_type==2||(_user.cust_type==3&&_user.privilege&&_user.privilege.el))){
+				location = "home.html";
+			}
+			W("#preview").addEvent("click", previewM);
+			W("#submit").addEvent("click", storeM);
+			
+			W("#event_img").addEvent('click', showPicture);
+			W("#noActive").addEvent('click', hidePicture);
+			
+			var now=new Date();
+			var startDate=now.WtoString().slice(0,10);
+			now.setDate(now.getDate()+2);
+			var endDate=now.WtoString().slice(0,10);
+			dom.begin_time.value=startDate;
+			dom.end_time.value=endDate;
+			
+			var lsData=W.ls("event_edit");
+			if(lsData){
+				initEvent(lsData);
+				W.setLS("event_edit","");
+			}
+			if(edit=="edit"){
+				var data=JSON.parse(_g.data);
+				initEvent(data);
+			}
+		}
+		function initEvent(data){
+			console.log(data);
+			insertImg(data.material_url);
+			W("#event_img").style.display="none";
+			fileUpload.code = 2;
+			
+			dom.event_name.value=data.title;
+			dom.event_remark.value=data.remark;
+			dom.begin_time.value=data.start_time;
+			dom.end_time.value=data.invalid_time;
+			
+			for(var i in d){
+				if(i=="activity_url")continue;
+				d[i]=data[i];
+			}
+			game_id=data.game_id;
+		}
+		
+		function previewM(){
+			d.title=dom.event_name.value;
+			d.remark=dom.event_remark.value;
+			d.start_time=dom.begin_time.value;
+			d.invalid_time=dom.end_time.value;
+			var startTime=new Date(d.start_time);
+			var endTime=new Date(d.invalid_time);
+			if(endTime-startTime<0){
+				W.toast("请选择正确的开始时间/结束时间。");
+				return;
+			}
+			W.setLS("event_edit",d);
+			if(d.material_url==""){
+				location=WiStorm.root+'src/game/mode1.html?intent=preview&data='+encodeURIComponent(JSON.stringify(d));
+			}else{
+				location=WiStorm.root+'src/game/mode2.html?intent=preview&data='+encodeURIComponent(JSON.stringify(d));
+			}
+		}
+		/**
+		 * 提交店面管理的数据
+		 */
+		function storeM(b) {
+			d.title=dom.event_name.value;
+			d.remark=dom.event_remark.value;
+			d.start_time=dom.begin_time.value;
+			d.invalid_time=dom.end_time.value;
+			var startTime=new Date(d.start_time);
+			var endTime=new Date(d.invalid_time);
+			if(endTime-startTime<0){
+				W.toast("请选择正确的开始时间/结束时间。");
+				return;
+			}
+			//d.activity_url=WiStorm.root+'src/game/mode1.html?data='+JSON.stringify(d);
+			
+			if (!fileUpload.code || fileUpload.code == 2) {
+				if (d.title != null && d.title != "") {
+					var data = {
+						cust_id:_user.seller_id,
+						access_token: _user.access_token,
+						material_url: d.material_url,
+						title: d.title,
+						remark: d.remark,
+						type:'4',
+						start_time:d.start_time,
+						invalid_time:d.invalid_time,
+						activity_url:d.activity_url
+					}
+					
+					var _activity_url;
+					_activity_url=getActivityUrl(data.material_url,game_id);
+					
+					if(edit=="edit"){
+						Wapi.game.update(function(res){
+							W.loading();
+							if (!res||res.status_code) {
+								W.errorCode(res);
+								return;
+							}
+							console.log(game_id);
+							W.confirm("活动已保存，是否预览活动页面？",function(b){
+								if(b){
+									location=_activity_url;
+								}else{
+									W.back();
+								}
+							});
+							
+						},data,{
+							_game_id:game_id
+						});
+					}else{
+						Wapi.game.add(function(res){
+							W.loading();
+							if (!res||res.status_code) {
+								W.errorCode(res);
+								return;
+							}
+							
+							_activity_url=getActivityUrl(data.material_url,res.game_id);
+							Wapi.game.update(function(re){
+								W.loading();
+								if (!re||re.status_code) {
+									W.errorCode(re);
+									return;
+								}
+								W.back();
+							},{
+								_game_id:res.game_id,
+								access_token: _user.access_token,
+								activity_url:_activity_url
+							});
+						},data);
+					}
+				} else {
+					W.toast("活动名称未填写！");
+				}
+			} else {
+				W.toast("您的图片还未上传成功.");
+			}
+		}
+		
+		function getActivityUrl(mUrl,gameId){
+			var aUrl;
+			if(mUrl==""){
+				aUrl=WiStorm.root+'src/game/mode1.html?intent=logout&game_id='+gameId;
+			}else{
+				aUrl=WiStorm.root+'src/game/mode2.html?intent=logout&game_id='+gameId;
+			}
+			aUrl=encodeURIComponent(aUrl);
+			return aUrl;
+		}
+		/**
+		 * 图片上传
+		 * @param {Object} h
+		 */
+		function fileUpload(h) {
+			/**
+			 * 选择图片前 把遮罩隐藏
+			 */
+			W("#picture").style.display = 'none';
+			W("#picture").className = 'mui-popover mui-popover-action mui-popover-bottom';
+			document.body.removeChild(W(".mui-backdrop"));
+			if (!h.files.length) {
+				W.toast("未选择文件");
+				return;
+			}
+			var type, h_type;
+			h_type = h.value.split(".");
+			type = h_type[h_type.length - 1].toLocaleLowerCase();
+			var file = h.files[0];
+			if ((type != "jpg" && type != "png" && type != "jpeg")) {
+				h.value = "";
+				h.files = null;
+				W.alert("抱歉，仅支持的jpg或png或者jpeg图片");
+				return;
+			}
+			var fr = new FileReader();
+			fr.onload = function(e) {
+				insertImg(e.target.result);
+			}
+			fr.readAsDataURL(file);
+			/**
+			 * 图片上传成功后弹出提示成功
+			 */
+			fileUpload.code = 1; //利用方法的全局调用 直接给方法添加属性 可以避免命名污染  
+			W.loading("正在上传文件，请稍等");
+			Wapi.file.upload(function(res) {
+				W.loading();
+				if (res && res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+//				img_URL.push(res.image_file_url);
+				
+				d.material_url=res.image_file_url;
+				W("#event_img").style.display="none";
+				
+				fileUpload.code = 2;
+				//storeM(true); //保存但不跳回首页
+			}, file);
+		}
+		
+		
+		//在界面上插入一张图片
+		function insertImg(url, index) {
+			var img = document.createElement("img");
+			img.className = 'img';
+			img.src = url;
+			var img_div = W("#img_div");
+			var div = document.createElement("div");
+			div.className = "img_v";
+			div.appendChild(img);
+			var btn = document.createElement("span");
+			btn.className = "remove_b";
+			btn.addEvent("click", removeImg);
+			btn._i = index;
+			div.appendChild(btn);
+			img_div.insertBefore(div, W("#event_img"));
+		}
+		//从界面和photo数组删除一张图片
+		function removeImg() {
+//			user.photo.splice(this._i, 1);
+			var img_v = this.parentElement;
+			img_v.parentElement.removeChild(img_v);
+			W("#event_img").style.display="block";
+//			storeM(true);
+		}
+
+		function showPicture() {
+			W("#picture").classList.add('mui-active');
+			W("#picture").style.display = 'block';
+			var tem = W(".mui-backdrop");
+			if (tem)
+				tem.style.display = "block";
+			else {
+				var odiv = document.createElement('div');
+				odiv.className = "mui-backdrop mui-backdrop-action mui-active";
+				odiv.addEvent("click", hidePicture);
+				W("body").appendChild(odiv);
+			}
+		}
+
+		function hidePicture() {
+			W("#picture").classList.remove('mui-active');
+			W(".mui-backdrop").style.display = "none";
+		}
+		
+	</script>
+
+</html>

@@ -1,0 +1,28 @@
+
+@font-face {font-family: "gameicon";
+  src: url('../icon/iconfont.eot?t=1459400422'); /* IE9*/
+  src: url('../icon/iconfont.eot?t=1459400422#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('../icon/iconfont.woff?t=1459400422') format('woff'), /* chrome, firefox */
+  url('../icon/iconfont.ttf?t=1459400422') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+  url('../icon/iconfont.svg?t=1459400422#iconfont') format('svg'); /* iOS 4.1- */
+}
+
+.icon {
+  font-family:"gameicon" !important;
+  font-size:16px;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke-width: 0.2px;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon_xianjin:before { content: "\e6d9"; }
+.icon_bean:before { content: "\e610"; }
+.icon_iconyuan:before { content: "\e608"; }
+.icon_daijinjuan:before { content: "\e6bf"; }
+.icon_zengjuantongyong:before { content: "\e65c"; }
+.icon_zhekouquan:before { content: "\e652"; }
+.icon_shangpin:before { content: "\e60a"; }
+.icon_biaoqingleiben:before { content: "\e603"; }
+.icon_jiantou:before { content: "\e609"; }
+

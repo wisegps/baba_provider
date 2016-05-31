@@ -12,14 +12,17 @@ document.lastChild.appendChild(_ui_style);
  * 确认到店按钮
  * @param {Object} id
  */
-function ui_checkInBtn(data){
+function ui_checkInBtn(data,callback){
 	var obj=WiStormUI("button");
 	obj.className="mui-btn mui-btn-primary";
 	obj.type="button";
 	obj.innerText="确认到店";
 	obj.setAttribute("data-id",data.obj_id);
 	obj.addEvent("click",ui_checkInBtn.showBox);
+	ui_checkInBtn.getSeller();//获取主帐号信息
 	obj.data=data;
+	if(callback)
+		obj._callback=callback;
 	return obj;
 }
 ui_checkInBtn._finish=function(){
@@ -36,25 +39,37 @@ ui_checkInBtn.finish=function(){
 	var car=box.car_data;
 	var params={
 		seller_id:_user.seller_id,
+		seller_name:_user.seller_name||_user.cust_name,
 		cust_id: car.cust_id,
-		cust_name: car.cust_name,
+		cust_name: car.cust_name||"无",
 		obj_id: car.obj_id,
 		obj_name: car.obj_name,
-		mileage: car.mileage,
+		mileage: car.mileage||0,
 		business_type: type,
 		business_content: text,
 		access_token:_user.access_token
 	}
 	W.loading(true);
-	
-	W.vehicleApi.createBusiness(function(res){
-		W.loading();
-		if(res.status_code){
-			W.errorCode(res);
-			return;
-		}
-		location="customer_leave.html";
-	},params);
+	if(_user.cust_type==3&&!_user.seller_name){
+		ui_checkInBtn.getSeller(function(){
+			params.seller_name=_user.seller_name;
+			add();
+		});
+	}else
+		add();
+	function add(){
+		Wapi.business.add(function(res){
+			W.loading();
+			if(res.status_code){
+				W.errorCode(res);
+				return;
+			}
+			if(box._obj._callback)
+				box._obj._callback(box.car_data);
+			else
+				location="customer_leave.html";
+		},params);
+	}
 }
 
 //确认到店按钮的点击事件触发
@@ -62,6 +77,7 @@ ui_checkInBtn.showBox=function(){
 	var obj=ui_checkInBtn.box;
 	if(obj){
 		obj.car_data=this.data;
+		obj._obj=this;
 		obj.show();
 	}else{
 		obj=new WiStormUI("div");
@@ -80,9 +96,30 @@ ui_checkInBtn.showBox=function(){
 		obj.querySelector("[data-type='4']").addEvent("click",ui_checkInBtn._finish);
 		
 		obj.car_data=this.data;
+		obj._obj=this;
 		obj._show=true;
 		document.body.appendChild(obj);
 		ui_checkInBtn.box=obj;
+	}
+	event.stopPropagation();
+}
+
+ui_checkInBtn.getSeller=function(callback){
+	if(_user.cust_type==3&&!_user.seller_name){
+		Wapi.user.get(function(res){
+			if(res.status_code){
+				W.loading();
+				W.errorCode(res);
+				return;
+			}
+			_user.seller_name=res.cust_name;
+			W.setSetting('user',_user);
+			if(callback)
+				callback();
+		},{
+			cust_id:_user.seller_id,
+			access_token:_user.access_token
+		})
 	}
 }
 
@@ -218,6 +255,10 @@ ui_autoLoad._scroll = function() {
 	var Otop,autoLoad,se = document.documentElement.clientHeight; //浏览器可见区域高度。
 	for(var i=this._ui_autoLoad.length-1;i>=0;i--){
 		autoLoad = this._ui_autoLoad[i];
+		if(!autoLoad.parentElement){
+			this._ui_autoLoad.slice(i,1);
+			continue;
+		}
 		Otop = autoLoad.getBoundingClientRect().top; //元素顶端到可见区域顶端的距离
 		if (se > Otop && autoLoad.canLoad) {
 			autoLoad.canLoad = false;

@@ -1,0 +1,180 @@
+<!--
+	作者：江海
+	时间：2016-4-12
+	描述：奖券领取
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>奖券领取</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
+		<script>link("W.css")</script>
+		<script src="../../wslib/api/newWapi.js" defer="defer"></script>
+		<style>
+		.body{
+			font-size: 13px;
+		}
+		.coupon_box{
+			text-align: left; 
+			margin-left:2%; 
+			margin-top:1em;
+			width:96%;
+		}
+		.coupon{
+			width: 100%;
+			height: 7em;
+			background-color: white;
+			padding: 0.5em 1em 0;
+			border-bottom: solid 1px #efefef;
+			margin-bottom: 1em;
+		}
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav nop">
+			<a class="mui-pull-left">
+				<span id="back" class="mui-icon mui-icon-arrowleft" style="color: #ccc;"></span>
+			</a>
+			<h1 id="title" class="mui-title">我的钱包</h1>
+		</header>
+		<div id="main" style="margin-top: 3em; margin-left:1em;"></div>
+		<div id="coupon_box" class="coupon_box"></div>
+		<div id="coupon" class="coupon" hidden="true">
+			<div style="float: left;">
+				<div name="coupon_remark" style="font-size: 1.2em;">优惠券</div>
+				<div name="coupon_valid_time" style="font-size: 0.8em; color: #666666;">有效期至2016-6-6</div>
+			</div>
+			<div class="fr" style="float:right; font-size: 2em; margin-top: 0.2em; color: orange;">
+				<div name="coupon_sum">8.8折</div>
+				<div name="is_used" style="font-size:0.5em; color: #333333; float: right; margin-top:1em;">未使用</div>
+			</div>
+			<div name="coupon_exp" style="margin-top: 6em; font-size: 0.5em; color: #666666;">购买WiCARE Air可以抵扣[sum]元，不可叠加使用。</div>
+		</div>
+	</body>
+	<script>
+	var coupon_code=_g.coupon_code;
+	var from_open_id=_g.from_open_id;
+	var open_id=_g.openid;//测试用
+//	if(!open_id)//正式用
+//		W.getOpenId();
+	window.addEventListener("load",function(){
+		W("#back").addEvent('click',back);
+		showCoupon(coupon_code);
+		
+	});
+	
+	function showCoupon(code){
+		Wapi.voucher.list(function(res){
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			} else{
+				for(var i=0;i<res.data.length;i++){
+					if(res.data[i].code==code){
+						shareOrReceive(res.data[i]);
+						W("#coupon_box").appendChild(new Coupon(res.data[i]));
+						break;
+					}else if(res.data[i].code!=code&&i==res.data.length-1){
+						W("#main").innerHTML="该奖券已被领取";
+					}
+				}
+			}
+		},{//param
+			open_id: _user.login_id,//测试用
+//			open_id: from_open_id,//正式用
+			access_token: _user.access_token
+		});
+	}
+	//根据from_open_id和open_id判断是否本人，本人则分享，不是本人则领取
+	function shareOrReceive(data){
+		//var couponState=0;
+		//判断奖券状态代码;
+		//奖券状态: 0，可领取/可分享；1，已被领取；2，已过期；3，已使用
+		//不能分享/领取的状态：已过期，已使用，已被领取
+		//判定奖券已被领取的部分写在了showCoupon()中
+		var current_time=new Date();
+		var valid_time=data.valid_time;
+		if(current_time>valid_time||data.is_used==true){//couponState==2||couponState==3
+			W("#main").innerHTML="该奖券已过期或已使用";
+		}else{
+			if(open_id==from_open_id){
+				W("#main").innerHTML="分享此页面可将奖券赠送给好友";
+			}else{
+				receiveCoupon();
+			}
+		}
+	}
+	function receiveCoupon(){
+		//奖券领取代码;
+		W("#main").innerHTML="领取奖券成功！";
+	}
+	//奖券组件
+	function Coupon(data) {
+		var coupon = new WiStormUI("div"); //创建一个div组件
+		coupon.merge(this);
+		coupon.innerHTML = W("#coupon").innerHTML;
+		coupon.className = "coupon";
+		coupon.setData(data);
+		return coupon;
+	}
+	//给组件添加对象方法
+	Coupon.prototype.getData = function() {
+		return this.data;
+	}
+	Coupon.prototype.setData = function(data) {
+		initText(this,"coupon_remark",data.remark);
+		
+		var time=data.valid_time.toString();
+		time=time.slice(0,10);
+		initText(this,"time",time);
+		
+		var sum=data.sum;
+		if(data.type==0){
+			sum+="元";
+			initText(this,"coupon_exp","购买WiCARE Air可以抵扣"+sum+"，不可叠加使用");
+		}else if(data.type==1){
+			sum+="折";
+			initText(this,"coupon_exp","购买WiCARE Air可以享受"+sum+"，不可叠加使用");
+		}else if(data.type==2){
+			sum+="台";
+			initText(this,"coupon_exp","购买WiCARE Air可以抵扣"+sum+"。");
+		}
+		initText(this,"coupon_sum",sum);
+		if(data.is_used==true){
+			changeColor(this,"coupon_sum","gray");
+			initText(this,"is_used","已使用");
+		}
+		
+		this.addEvent('click',Coupon.share);
+		this.data = data;
+	}
+	
+	//返回
+	function back(){
+		location="wallet.html?temporary=1";
+	}
+	//工具类 改变元素中某个子元素的innerText,用name选择子元素
+	function initText(parent, name, value) {
+		if(value==undefined||value==null) value="";
+		var ele = parent.querySelector("[name=" + name + "]");
+		if (ele != null) {
+			ele.innerText = value;
+		}
+	}
+	
+	//工具类 改变元素中某个子元素的颜色，用name选择子元素
+	function changeColor(parent,name,color){
+		var ele = parent.querySelector("[name=" + name + "]");
+		if (ele != null) {
+			ele.style.color = color;
+		}
+	}
+	</script>
+</html>

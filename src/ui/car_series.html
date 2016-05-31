@@ -15,7 +15,7 @@
 			link("ui.css")
 		</script>
 
-		<script src="../../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../../wslib/api/newWapi.js" defer="defer"></script>
 	</head>
 
 	<body style="overflow: auto;height: 100%;">
@@ -87,12 +87,12 @@ function windowLoad(){
 			v[v.length - 1].classList.remove("no_scroll");
 		});
 	}
-	W.vehicleApi.getBrands(getCarBrand); //获取车的品牌列表
+	Wapi.base.getBrands(getCarBrand,{id:">0"}); //获取车的品牌列表
 	
 	dom.series_main.addEvent("click",chooseT);
 	dom.search_div.addEvent("click",chooseT);
 	dom.car_type.addEvent("click",chooseType);
-	dom.search_text.addEvent("keyup",searchSeries);
+	dom.search_text.addEvent("keyup",searchBrand);
 	if (_g.select == "multi")
 		W(".mui-pull-right").addEvent("click", function() {
 			window.parent.ui_carSeries.finish(car);
@@ -100,6 +100,10 @@ function windowLoad(){
 }
 
 function getCarBrand(res) { //获取汽车品牌
+	if (res.status_code) {
+		W.errorCode(res);
+		return;
+	}
 	Bjson = res.data;
 	var F = "";
 	var img;
@@ -158,14 +162,14 @@ function chooseT() { //选择该品牌，获取该品牌车型，或者该车型
 			dom.series_title.innerText=name;
 			car.brandId = id;
 			car.brand = name;
-			W.vehicleApi.getSeriess(getSeriesOrType, id);
+			Wapi.base.getSeriess(getSeriesOrType,{pid:id});
 		}
 	} else {
 		main.classList.add("no_scroll");
 		dom.type_title.innerText=name;
 		car.series = name;
 		car.seriesId = id;
-		W.vehicleApi.getTypes(getSeriesOrType, id);
+		Wapi.base.getTypes(getSeriesOrType,{pid:id});
 	}
 }
 
@@ -178,7 +182,6 @@ function getSeriesOrType(json) {
 		var Did, html = "";
 		if (json.total)
 			json = json.data;
-
 		if (!json.length) {
 			dom.series_main.classList.remove("no_scroll");
 			car.typeId = car.seriesId;
@@ -190,12 +193,12 @@ function getSeriesOrType(json) {
 		var temBody=document.createDocumentFragment();
 		if (Tid != "series_main") {
 			Did = "series";
-			for (var i = json.length - 1; i >= 0; i--) {
+			for (var i =0; i<json.length; i++) {
 				temBody.appendChild(new series(json[i]));
 			};
 		} else {
 			Did = "car_type";
-			for (var i = json.length - 1; i >= 0; i--) {
+			for (var i =0; i<json.length; i++) {
 				temBody.appendChild(new series(json[i]));
 			};
 		}
@@ -220,7 +223,7 @@ function chooseType() { //选择完车款返回给父页面，调用父页面的
 	window.parent.ui_carSeries.finish(car);
 }
 
-function searchSeries() {
+function searchBrand() {
 	//搜索
 	var val = event.target.value;
 	var str = W.trim(val);
@@ -230,17 +233,62 @@ function searchSeries() {
 	}
 	var exp = new RegExp(str, "i");
 	var tempHtml=document.createDocumentFragment();
+	var c=0;
 	for (var i = Bjson.length - 1; i >= 0; i--) {
 		if (Bjson[i].name.search(exp) != -1) {
 			var cloneN=W("#id_"+Bjson[i].id).cloneNode(true);
 			cloneN.id="_"+cloneN.id;
 			tempHtml.appendChild(cloneN);
+			c++;
+			if(c>=10)break;
 		}
 	};
 
 	dom.search_div.innerHTML = '';
 	dom.search_div.appendChild(tempHtml);
 	dom.search_div.style.display = "block";
+	
+	searchSeries(val);
+}
+//搜索车型
+function searchSeries(str){
+	var p={
+		name:'^'+str
+	}
+	var op={
+		limit:10
+	}
+	Wapi.base.getSeriess(function(res){
+		if (res.status_code) {
+			W.errorCode(res);
+			return;
+		}
+		var ser=res.data;
+		var tempHtml=document.createDocumentFragment(),s;
+		for (var i = ser.length - 1; i >= 0; i--) {
+			s=new series(ser[i]);
+			s.addEvent('click',getBrandAndType);
+			tempHtml.appendChild(s);
+		};
+		dom.search_div.appendChild(tempHtml);
+	},p,op);
+}
+
+function getBrandAndType(){
+	var pid={
+		id:this.data.pid
+	}
+	Wapi.base.getBrands(function(res){
+		if (res.status_code) {
+			W.errorCode(res);
+			return;
+		}
+		var b=res.data[0];
+		car.brandId =b.id;
+		car.brand = b.name;
+	},pid);
+	chooseT.call(dom.series_main);
+	event.stopPropagation();
 }
 
 //从已选择的品牌中删除
@@ -295,9 +343,10 @@ function series(data){
 	obj.className="car";//设置div的class属性
 	obj.id="id_"+data.id;
 	if(data.go_name)
-		obj.innerHTML=data.name+" "+data.go_name;
+		obj.innerHTML=data.go_name+" "+data.name;
 	else
 		obj.innerHTML=data.name;
+	obj.data=data;
 	return obj;//最后记得要返回组件
 }
 

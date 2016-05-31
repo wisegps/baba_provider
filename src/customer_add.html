@@ -23,7 +23,7 @@
 			link("ui.css")
 		</script>
 
-		<script src="../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../wslib/api/newWapi.js" defer="defer"></script>
 	</head>
 	<style type="text/css">
 		body {
@@ -132,13 +132,13 @@
 								<span class="s"></span>
 								<span id="short_province" class="s_text">粤</span>
 							</div>
-							<input type="text" id="car_number" placeholder="888888" required="required">
+							<input type="text" maxlength="6" id="car_number" placeholder="888888" required="required">
 						</div>
 
 					</div>
 					<div class="mui-input-row">
 						<label>车架号</label>
-						<input type="text" id="vehicle_number" placeholder="请输入车架号" required="required">
+						<input type="text" id="vehicle_number" maxlength="17" placeholder="请输入车架号" required="required">
 					</div>
 
 					<div class="mui-input-row" id="car_picker">
@@ -185,7 +185,7 @@
 		var updateObjId = "";
 		var toPage = "car_manage.html";
 		window.addEventListener("DOMContentLoaded", function() {
-			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[1]=="0")){
+			if(!(_user.cust_type==2||(_user.cust_type==3&&_user.privilege&&_user.privilege.cm))){
 				location="home.html";
 			}
 			var mSession = _g;
@@ -290,25 +290,28 @@
 		}
 		//选择确认到店操作返回
 		ui_checkInBtn.finish = function() {
-				var box = ui_checkInBtn.box;
-				var textarea = box.querySelector("textarea");
-				var type = this.getAttribute("data-type");
-				var text = textarea.value;
-				//维修保养业务等
-				commit_customer.business_type = type;
-				commit_customer.business_content = text;
-				box.hide();
-				textarea.value = "";
-				box.car_id = null;
-			}
-			/*
-			 * 创建客户信息
-			 */
+			var box = ui_checkInBtn.box;
+			var textarea = box.querySelector("textarea");
+			var type = this.getAttribute("data-type");
+			var text = textarea.value;
+			//维修保养业务等
+			commit_customer.business_type = type;
+			commit_customer.business_content = text;
+			commit_customer.seller_name=_user.cust_name;
+		    if(_user.cust_type==3)
+				commit_customer.seller_name=_user.seller_name;
+			box.hide();
+			textarea.value = "";
+			box.car_id = null;
+		}
+		/*
+		 * 创建客户信息
+		 */
 		var commit_customer = {
 			mode: "2", // 创建模式 1:仅仅创建用户 2:同时创建用户,车辆,到店记录
 			seller_id: "0", //商户ID,如果没有默认为0
 			access_token: _user.access_token,
-			cust_type: "1", //用户类型 1: 车主 2: 商户
+			cust_type: "0", //用户类型 1: 车主 2: 商户
 			cust_name: "", //用户名称
 			mobile: "", //手机
 			obj_name: "", //车牌号
@@ -347,7 +350,7 @@
 			var obj_name = short_province + car_number; ////组合车牌，号码 *
 			var frame_no = W("#vehicle_number").value; //车架号*
 			var mileage = W("#mileage").value; //行驶里程*
-			if (!isNumberOr_Letter(car_number)) {
+			if (!is_Letter(car_number)) {
 				W.toast("车牌号格式不正确");
 				return;
 			}
@@ -369,27 +372,65 @@
 			commit_customer.obj_name = obj_name;
 			commit_customer.frame_no = frame_no;
 			commit_customer.mileage = mileage;
+
 			if (_g.intent == "edit") {
-				//完善资料接口
-				callback._canLeave=0;
-				commit_customer._cust_id = updateCustId;
-				
-				delete commit_customer.mobile;
-				delete commit_customer.business_content;
-				delete commit_customer.business_type;
-				delete commit_customer.constructor;
-				delete commit_customer.cust_type;
-				delete commit_customer.if_arrive;
-				delete commit_customer.mode;
-				delete commit_customer.seller_id;
-				
-				Wapi.user.update(callback, commit_customer);
-				commit_customer._obj_id = updateObjId;
-				Wapi.vehicle.update(callback, commit_customer);
+				Wapi.vehicle.get(function(res){
+					if (res.status_code||res.cust_id==_user.cust_id) {
+						//完善资料接口
+						callback._canLeave=0;
+						commit_customer._cust_id = updateCustId;
+						
+						delete commit_customer.mobile;
+						delete commit_customer.business_content;
+						delete commit_customer.business_type;
+						delete commit_customer.constructor;
+						delete commit_customer.cust_type;
+						delete commit_customer.if_arrive;
+						delete commit_customer.mode;
+						delete commit_customer.seller_id;
+						
+						Wapi.user.update(callback, commit_customer);
+						commit_customer._obj_id = updateObjId;
+						Wapi.vehicle.update(callback, commit_customer);
+					}else if(res.cust_id!=_user.cust_id){
+						W.toast("该车牌号已存在，请确认后重新输入。");
+						return;
+					}
+				},{
+					access_token:_user.access_token,
+					obj_name:obj_name
+				});
 			} else {
 				//新增客户接口
 				callback._canLeave=1;
-				Wapi.user.create(callback, commit_customer);
+				Wapi.user.add(function(res){
+					if (res.status_code) {
+						W.errorCode(res);
+						return;
+					}
+					var user=res;
+					Wapi.user.addSeller(function(res){
+						if (res.status_code) {
+							W.alert('添加用户至商户名下出错');
+							return;
+						}
+						Wapi.vehicle.addSeller(function(res){
+							if (res.status_code) {
+								W.errorCode(res);
+								return;
+							}
+							callback(user);
+						},{
+							obj_id:user.obj_id,
+							seller_id:_user.seller_id,
+							access_token:_user.access_token
+						});
+					},{
+						cust_id:user.cust_id,
+						seller_id:_user.seller_id,
+						access_token:_user.access_token
+					});
+				}, commit_customer);
 			}
 		}
 		/**
@@ -410,5 +451,4 @@
 			}
 		}
 	</script>
-
 </html>

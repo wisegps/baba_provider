@@ -68,8 +68,8 @@ W.dom.Search=W("#search");//缓存
 			}
 			
 			this.innerHTML='<table><tr><th><img src="http://img.wisegps.cn/logo/m_'+data.car_brand_id+'_100.png" onerror=\'javascript:this.src="../img/icon_car_moren.png"\'><span name="value">'+data.obj_name+'</span></th></tr><tr><td><span class="name">客户名称:</span><span class="value">'+keyVal+'</span></td><td><span class="name">车型:</span><span class="value">'+data.car_type+'</span></td></tr><tr><td><span class="name">最后一次到店:</span><span class="value">'+slast_maintain+'</span></td><td><span class="name">车架号:</span><span class="value">'+data.frame_no+'</span></td></tr><tr><td><span class="name">行驶里程:</span><span class="value">'+data.mileage+'公里</span></td><td><span class="name">保养后里程:</span><span class="value">'+next_mileage+'</span></td></tr><tr><td><span class="name">到店次数:</span><span class="value">'+arrive_num+'</span></td><td><span class="name">评价次数:</span><span class="value">'+evaluate_num+'</span></td></tr></table><footer><span class="text">'+device+'</span></footer>'
-			if(data.business_status==3)
-				this.querySelector("footer").appendChild(new ui_checkInBtn(data));//给其中的按钮添加点击事件监听，使用sc.editData来处理点击事件
+			if(data.business_status!=1)
+				this.querySelector("footer").appendChild(new ui_checkInBtn(data,afterCheckin));//给其中的按钮添加点击事件监听，使用sc.editData来处理点击事件
 			else
 				this.querySelector(".text").style.float='none';
 			if(data.obj_id){
@@ -85,20 +85,24 @@ W.dom.Search=W("#search");//缓存
 /**
  * 搜索显示的车辆信息
  */
-	var MAX_ID=0,noInfo;
+	var noInfo,
+	op={
+		fields:Wapi.vehicle._get_op.fields+',seller_id,seller_ids',
+		sorts:"obj_id",
+		page:"obj_id",
+		limit:"5"
+	};
 	function creatCar(){
 		var val=W.dom.Search.value;
 		if(val.length<3){
 			return;
 		}
-		MAX_ID=0;
 		var data={
 			access_token:_user.access_token,
-			parent_cust_id:_user.seller_id,
-			max_id:MAX_ID,
-			obj_name:val
+			seller_ids:_user.seller_id+'|~[]',
+			obj_name:'^'+val
 		}
-		W.userApi.searchCustomerVehicle(carLists,data);
+		Wapi.vehicle.list(carLists,data,op);
 	};
 	
 /**
@@ -126,45 +130,47 @@ W.dom.Search=W("#search");//缓存
 			var target=W.dom.target;
 			if(!target)
 				target=W("#sc_list");//缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
-			if(!target.data)								 //W.dom是一个json，专门用于缓存元素
-				target.data=data;
-			else
-				target.data=target.data.concat(data);
-			/*创建DocumentFragment碎片；
-			构造列表时不要每创建一个元素就添加到页面里，这样会造成性能低下，把元素添加到DocumentFragment，
-			最后再把DocumentFragment添加到页面*/
 			var list=document.createDocumentFragment();
 			
 			for(var i=data.length-1;i>=0;i--){
 				list.appendChild(new sc(data[i]));//创建一个sc组件，并添加到DocumentFragment里		
-				if(data[i].obj_id>MAX_ID)
-					MAX_ID=data[i].obj_id;
-			}
-			if(res.total>target.data.length){       //判断当前列表的长度是否小于总条数
-				dom.show.max_id=MAX_ID;
-				data.max_id=MAX_ID;
-				var autoLoad;						//把加载的存起来		
-				if(target.autoLoad){
-					autoLoad=target.autoLoad;
-				}else if(WiStorm.agent.ios)
-					autoLoad=new ui_autoLoad(W(".mui-content"),_load);
-				else
-					autoLoad=new ui_autoLoad(document,_load);
-				list.appendChild(autoLoad);
-				target.autoLoad=autoLoad;
-			}else if(target.autoLoad){
-				//删除自动加载组件,释放内存
-				target.autoLoad.remove();
-				delete target.autoLoad;
 			}
 			target.appendChild(list);//把整个列表添加到页面
 	
 		}		
 	}
-		//自动加载下一页
-		function _load(){
-			W.userApi.getDeviceList(carLists,param);
+		
+	//确认到店之后执行的操作
+	function afterCheckin(data){
+		//如果是散户，则成为商户的客户
+		if(!data.seller_ids.length||(data.seller_ids.toString().indexOf(_user.seller_id)&&data.seller_ids.length<5)){
+			W.loading('已确认到店，正在纳入客户资料');
+			Wapi.user.addSeller(function(res){
+				if(res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				W.loading('已确认到店，正在纳入车辆资料');
+				Wapi.vehicle.addSeller(function(res){
+					if(res.status_code) {
+						W.errorCode(res);
+						return;
+					}
+					location="customer_leave.html";
+				},{
+					access_token:_user.access_token,
+					obj_id:data.obj_id,
+					seller_id:_user.seller_id
+				});
+			},{
+				access_token:_user.access_token,
+				cust_id:data.cust_id,
+				seller_id:_user.seller_id
+			});
+		}else{
+			location="customer_leave.html";
 		}
+	}
 		
 /**
  * 把多条数据加入到数组存储到本地
@@ -202,14 +208,13 @@ W.dom.Search=W("#search");//缓存
  * 扫描二维码
  */
 function code(str){
-	W.dom.Search.value=str;//str=serial
 	W("#search_d").classList.add('mui-active');
 	var data={
 		serial:str,
-		seller_id:_user.seller_id,
+		seller_id:_user.seller_id+'|0',
 		access_token:_user.access_token
 	}
-	Wapi.user.getDeviceList(getdeviceId,data);//设备列表接口
+	Wapi.device.get(getdeviceId,data);//设备列表接口
 }
 /**
  * 
@@ -220,15 +225,12 @@ function code(str){
 				W.errorCode(res);
 				return;
 		}
-		if(res.data!=null && res.data.length!=0){
-			var device_id = res.data[0].device_id;
-			var deviceID={
-				access_token:_user.access_token,
-				seller_id:_user.seller_id,
-				device_id:device_id
-			}
-			Wapi.user.searchCustomerVehicle(carLists,deviceID);//搜索接口		
+		var device_id = res.device_id;
+		var deviceID={
+			access_token:_user.access_token,
+			device_id:device_id
 		}
+		Wapi.vehicle.list(carLists,deviceID,op);//搜索接口		
 	}
 
 	function QRcode(){
@@ -239,9 +241,9 @@ function code(str){
 			window.addEventListener("nativeSdkReady",QRcode);
 		}
 	}
-/*W.native.scanner={
-	start:function(callback){
-		callback("55621854091")
-	}
-}
-*/
+//W.native={};
+//W.native.scanner={
+//	start:function(callback){
+//		callback("56622821834")
+//	}
+//}

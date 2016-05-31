@@ -207,9 +207,7 @@
 				var autoLoad;
 				if (target.autoLoad) {
 					autoLoad = target.autoLoad;
-				} else if (WiStorm.agent.ios)
-					autoLoad = new ui_autoLoad(W(".mui-content"), loadMore);
-				else
+				} else 
 					autoLoad = new ui_autoLoad(document, loadMore);
 				list.appendChild(autoLoad);
 				target.autoLoad = autoLoad;

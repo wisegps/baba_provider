@@ -150,8 +150,9 @@
 			var data ={
 				user_id:_user.seller_id,
 				access_token:_user.access_token,	
-				cust_name:ndata.cust_name,
+				cust_name:_user.cust_name,
 				friend_id:ndata.cust_id,
+				friend_name:ndata.cust_name,
 				type:'0',
 				content:ndata.msg_template
 			};
@@ -258,9 +259,7 @@
 					var autoLoad;						//把加载的存起来		
 					if(target.autoLoad){
 						autoLoad=target.autoLoad;
-					}else if(WiStorm.agent.ios)
-						autoLoad=new ui_autoLoad(W(".mui-content"),_load);
-					else
+					}else 
 						autoLoad=new ui_autoLoad(document,_load);
 					list.appendChild(autoLoad);
 					target.autoLoad=autoLoad;

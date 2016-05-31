@@ -70,7 +70,7 @@
 					<input type="text" placeholder="手机号码" name="mobile" class="mobile">	
 					<label><span class="w_icon icon_user"></label>
 				</div>
-				<span class="but sms send" data-type = "2">获取验证码</span>
+				<span class="but sms send" data-type = "4">获取验证码</span>
 				<div class="mui-input-row">
 					<input type="text" placeholder="短信验证码" name="valid_code">	
 					<label><span class="w_icon icon_sms"></label>
@@ -116,7 +116,6 @@
 			var v=W.trim(this.value);
 			if(v!=''){
 				var data={
-					access_token:_user.access_token,				
 					cust_name:v
 				};
 				Wapi.user.list(function(res){
@@ -221,7 +220,6 @@
 					if(json.valid){
 						codeInput.pass=2;
 						addTally(codeInput);
-						checkEverything(true);
 					}else{
 						addErr(codeInput);
 						codeInput.pass=1;
@@ -260,6 +258,7 @@
 		}
 		//验证邀请手机号
 		function chenckTel(){
+				if(W.dom.tel.value.length==11){
 				var data={
 					parent_mobile:W.dom.tel.value,
 					parent_open_id:_g.parent_open_id
@@ -273,7 +272,7 @@
 						addErr(W.dom.tel);	
 					}
 				},data);
-			
+			}
 		}
 		//添加错误或者正确span
 		function addErr(dom){
@@ -309,26 +308,31 @@
 				W.loading();
 				return;
 			}
-			var data={
-				login_id:_g.openid,
-				cust_name:W.dom.cn.value,
-				mobile:com.tel.value,
-				parent_mobile:W.dom.tel.value,
-				valid_code:W.dom.ci.value,
-				password:W.dom.rpwd.value,
-				valid_type:1,
-				parent_open_id:_g.parent_open_id			
+			if((checkName.pass && W.dom.ci.pass && W.dom.rpwd.pass && W.dom.pwd.pass && checkMobile.pass &&chenckTel.pass)==2){
+				var data={
+					login_id:_g.openid,
+					cust_name:W.dom.cn.value,
+					mobile:com.tel.value,
+					parent_mobile:W.dom.tel.value,
+					valid_code:W.dom.ci.value,
+					password:W.dom.rpwd.value,
+					valid_type:1,
+					parent_open_id:_g.parent_open_id			
+				}
+				Wapi.user.distributorRegister(function(res){
+					//cust_type:4,
+						if(!res.status_code){
+							W.alert('加盟成功');						
+							location.href="../home.html";
+						}else{
+							W.alert(res.err_msg);						
+						}
+						W.loading();
+				},data);
+			}else{
+				W.loading();
+				W.alert('请填写正确的信息才能加盟微商.')
 			}
-			Wapi.user.distributorRegister(function(res){
-				//cust_type:4,
-					if(!res.status_code){
-						W.alert('加盟成功');						
-						location.href="../home.html";
-					}else{
-						W.alert(res.err_msg);						
-					}
-					W.loading();
-			},data);
 		}
 	</script>
 </html>

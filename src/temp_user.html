@@ -114,7 +114,7 @@
 			register:W("#register")
 		}
 		var uri=W.getCookie("__login_redirect_uri__");
-		var reg=/src\/baba\/\S*.html/;
+		var reg=/src\/baba\/\S*.html.*/;
 		if(reg.test(uri)){
 			registerUrl="../index.html?intent=register&type=user";
 		}else{

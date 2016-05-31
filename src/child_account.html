@@ -1,7 +1,7 @@
 <!--
 	作者：小吴
-	时间：2015-11-10
-	描述：车辆管理页面,目前用于展示框架的使用，会尽量详细的写各种注释
+	时间：2016-5-27
+	描述：子帐号管理
 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -85,9 +85,9 @@
 		    font-size: .5em;
     		color: #ccc;
 		}
-		#main{display: table;width: 100%; text-align: center;background: #fff;}
+		#main{background: #fff;font-size: 0;}
 		.card{
-			display: table-cell;
+			display: inline-block;
 			width: 33.33333%;
 			padding: 2em 0;
 			font-size: 13px;
@@ -95,17 +95,12 @@
 			border-bottom: 1px solid #eee;
 			border-right: 1px solid #eee;
 			position: relative;
+			text-align: center;
 		}
 		.card:active{background: #f9f9f9;}
 		.card-icon{display: block;font-size: 2.5em;}
 		.card-row{display: table-row;}
 		.child_view{position: fixed;}
-		.mui-icon.mui-pull-right {
-		    font-size: 15px;
-		    line-height: 24px;
-		    font-family: "微软雅黑";
-		    color: #79C6E4;
-		}
 		.icon_star{  
 		    position: absolute;
 		   	color: #5cb85c;
@@ -115,24 +110,36 @@
 		}
 		#cust_name{margin: 0;margin-top: 10px;}
 		#submit{width: 90%;margin: 1em auto;}
+		
+		.mui-slider-title{	
+		    bottom: 30px;
+		    text-align: center;
+		    color: #fff;
+		    background: rgba(0,0,0,.7);
+		    opacity: 1;
+		}
+		.mui-slider .mui-slider-group .mui-slider-item img{
+			width: 70%;
+		}
+		.mui-slider .mui-slider-group .mui-slider-item{
+			text-align: center;
+    		background: rgba(0,0,0,.5);
+		}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left" href="home.html"></a>
+			<a class="mui-icon mui-icon-left-nav W_back"></a>
 			<h1 class="mui-title">帐号管理</h1>
+			<a class="mui-icon mui-pull-right mui-icon-help"></a>
 		</header>
 		<div class="mui-content">
 			<div id="acc_list">
 				<div class="null_tip">
 					<h1>NULL</h1>
 					<p>您目前还没有子帐号。</p>
+					<p><a>如何添加子帐号?</a></p>
 				</div>
 			</div>
-			
-			<!--<div id="add_btn">
-				<img src="baba/img/icon_add.png" style="width: 2.5em;">
-				<div>添加子帐号</div>
-			</div>-->
 		</div>
 		<div class="child_view hide" style="padding-top: 44px;overflow: auto;" id="privilege">
 			<div class="mui-bar mui-bar-nav">
@@ -147,60 +154,106 @@
 				<p id="mobile">用户手机号</p>
 			</div>
 			<div id="main">
-				<div class="card-row">
-					<div class="card">
-						<span class="card-icon w_icon icon_stores" style="color: #FF5D5B;"></span>
-						<span class="card-name">客户到店</span>
-					</div>
-					<div class="card">
-						<span class="card-icon w_icon icon_establish" style="color: #FFCC4F;"></span>
-						<span class="card-name">新增客户</span>
-					</div>
-					<div class="card">
-						<span class="card-icon w_icon icon_abnormal" style="color: #42D7C1;"></span>
-						<span class="card-name">异常车况</span>
-					</div>
+				<div class="card" data-privilege="cl">
+					<span class="card-icon w_icon icon_stores" style="color: #FF5D5B;"></span>
+					<span class="card-name">客户到店</span>
 				</div>
-				<div class="card-row">
-					<div class="card">
-						<span class="card-icon w_icon icon_vehicle" style="color: #66CAEE;"></span>
-						<span class="card-name">车辆管理</span>
-					</div>
-					<div class="card">
-						<span class="card-icon w_icon icon_equipment" style="color: #FF6A68;"></span>
-						<span class="card-name">设备管理</span>
-					</div>
-					<div class="card">
-						<span class="card-icon w_icon icon_remind" style="color: #FFD87D;"></span>
-						<span class="card-name">提醒设置</span>
-					</div>
+				<div class="card" data-privilege="cm">
+					<span class="card-icon w_icon icon_vehicle" style="color: #66CAEE;"></span>
+					<span class="card-name">客户管理</span>
 				</div>
-				<div class="card-row">
-					<div class="card">
-						<span class="card-icon w_icon icon_consultation" style="color: #68DECD;"></span>
-						<span class="card-name">客户咨询</span>
-					</div>
-					<div class="card">
-						<span class="card-icon w_icon icon_store_management" style="color: #FFCC4F;"></span>
-						<span class="card-name">店面管理</span>
-					</div>
-					<div class="card">
-						<span class="card-icon w_icon icon_set" style="color: #42D7C1;"></span>
-						<span class="card-name">设置中心</span>
-					</div>
+				<div class="card" data-privilege="ca">
+					<span class="card-icon w_icon icon_consultation" style="color: #68DECD;"></span>
+					<span class="card-name">客户咨询</span>
 				</div>
-				<div class="card-row">
-					<div class="card" data-name="child_account.html" data-open="false">
-						<span class="card-icon w_icon icon_account" style="color: #66CAEE;"></span>
-						<span class="card-name">子帐号管理</span>
-					</div>
+				<div class="card" data-privilege="dm">
+					<span class="card-icon w_icon icon_equipment" style="color: #FF6A68;"></span>
+					<span class="card-name">设备管理</span>
+				</div>
+				<div class="card" data-privilege="el">
+					<span class="card-icon w_icon icon_activity" style="color: #68DECD;"></span>
+					<span class="card-name">活动管理</span>
+				</div>
+				<div class="card" data-privilege="sm">
+					<span class="card-icon w_icon icon_store_management" style="color: #FFCC4F;"></span>
+					<span class="card-name">店面管理</span>
 				</div>
 			</div>
-			<div class="mui-input-row mui-radio" style="margin-top: 1em;">
+			<div class="mui-input-row mui-checkbox " style="margin-top: 1em;">
 				<label>是否能接收推送：</label>
-				<input type="radio" name="receive_push" value="1" id="receive_push">
+				<input type="checkbox" name="receive_push" value="1" id="receive_push">
 			</div>
 			<button type="button" class="mui-btn mui-btn-block w" id="submit">保存</button>
+		</div>
+		<div id="slider" class="mui-slider fromTop hide" style="position: fixed;top: 44px;width: 100%;">
+			<div class="mui-slider-group mui-slider-loop">
+				<!-- 额外增加的一个节点(循环轮播：第一个节点是最后一张轮播) -->
+				<div class="mui-slider-item mui-slider-item-duplicate">
+					<a href="#">
+						<img data-src="../img/child7.jpg">
+						<p class="mui-slider-title">员工获得商户授予的权限</p>
+					</a>
+				</div>
+				<div class="mui-slider-item">
+					<a href="#">
+						<img data-src="../img/child1.jpg">
+						<p class="mui-slider-title">员工点击右下角“更多”中的“商户入口”</p>
+					</a>
+				</div>
+				<div class="mui-slider-item">
+					<a href="#">
+						<img data-src="../img/child2.jpg">
+						<p class="mui-slider-title">进入注册页面，选择“员工”注册</p>
+					</a>
+				</div>
+				<div class="mui-slider-item">
+					<a href="#">
+						<img data-src="../img/child3.jpg">
+						<p class="mui-slider-title">填写信息，发起子帐号申请</p>
+					</a>
+				</div>
+				<div class="mui-slider-item">
+					<a href="#">
+						<img data-src="../img/child4.jpg">
+						<p class="mui-slider-title">商户收到系统通知，点击进入</p>
+					</a>
+				</div>
+				<div class="mui-slider-item">
+					<a href="#">
+						<img data-src="../img/child5.jpg">
+						<p class="mui-slider-title">进入子帐号确认页面</p>
+					</a>
+				</div>
+				<div class="mui-slider-item">
+					<a href="#">
+						<img data-src="../img/child6.jpg">
+						<p class="mui-slider-title">商户确认后开始分配权限</p>
+					</a>
+				</div>
+				<div class="mui-slider-item">
+					<a href="#">
+						<img data-src="../img/child7.jpg">
+						<p class="mui-slider-title">员工获得商户授予的权限</p>
+					</a>
+				</div>
+				<!-- 额外增加的一个节点(循环轮播：最后一个节点是第一张轮播) -->
+				<div class="mui-slider-item mui-slider-item-duplicate">
+					<a href="#">
+						<img data-src="../img/child1.jpg">
+						<p class="mui-slider-title">员工关注公众号后点击右下角“更多”中的“商户入口”进入注册页面</p>
+					</a>
+				</div>
+			</div>
+			<div class="mui-slider-indicator">
+				<div class="mui-indicator mui-active"></div>
+				<div class="mui-indicator"></div>
+				<div class="mui-indicator"></div>
+				<div class="mui-indicator"></div>
+				<div class="mui-indicator"></div>
+				<div class="mui-indicator"></div>
+				<div class="mui-indicator"></div>
+			</div>
+			<span class="mui-icon mui-icon-close" style="position: absolute;right: 10px;width: 1em;height: 1em;top: 10px;color: #fff;font-size: 30px;"></span>
 		</div>
 	</body>
 	<script>
@@ -214,21 +267,18 @@
 		pri:W("#privilege"),
 		logo:W("#logo"),
 		submit:W("#submit"),
-		push:W("#receive_push")
+		push:W("#receive_push"),
+		slider:W("#slider")
 	}
-	//_g.newAccount='{"mobile":"15611111111","valid_code":"1234","password":"123456","valid_type":1,"cust_type":3,"cust_name":"员工小吴","seller_id":1279,"logo":"http://img4.duitang.com/uploads/item/201601/21/20160121102221_LjFyB.thumb.700_0.png"}';
+//	_g.newAccount='{"mobile":"15611111111","valid_code":"1234","password":"123456","valid_type":1,"cust_type":3,"cust_name":"员工小吴","seller_id":1279,"logo":"http://img4.duitang.com/uploads/item/201601/21/20160121102221_LjFyB.thumb.700_0.png"}';
 	var newAccount;
 	var cards;
 	
 	window.addEventListener("load",function(){
-		if(_user.cust_type==3&&(!_user.privilege||_user.privilege[9]=="0")){
+		if(_user.cust_type!=2){
 			location="home.html";
 		}
-		var params={
-			seller_id:_user.seller_id,
-			cust_type:3
-		}
-		Wapi.user.list(makeList,params);
+		loadList();
 		if(_g.newAccount){
 			newAccount=JSON.parse(_g.newAccount);
 			var opt={
@@ -252,10 +302,45 @@
 		for(var i=0;i<cards.length;i++){
 			cards[i].addEvent("click",newOrDel);
 		}
+		W(".null_tip a").addEvent('click',showSlider);
+		W("#slider .mui-icon-close").addEvent('click',showSlider);
+		W(".mui-pull-right.mui-icon-help").addEvent('click',showSlider);
 	});
+	function showSlider(){
+		if(!dom.slider.classList.contains('hide')){
+			dom.slider.classList.add('toTop');
+			dom.slider.classList.remove('fromTop');
+			setTimeout(function(){
+				dom.slider.classList.add('hide');
+			},500);
+		}else{
+			if(!dom.slider.showBefore){
+				var imgs=dom.slider.querySelectorAll('img');
+				for(var i=0;i<imgs.length;i++){
+					imgs[i].src=imgs[i].dataset.src;
+				}
+			}
+			dom.slider.classList.add('fromTop');
+			dom.slider.classList.remove('toTop');
+			dom.slider.classList.remove('hide');
+			dom.slider.showBefore=true;
+		}
+	}
+	
+	function loadList(){
+		var params={
+			seller_id:_user.seller_id,
+			cust_type:3,
+			access_token:_user.access_token
+		}
+		var op={
+			fields:'cust_id,cust_name,cust_type,privilege,receive_push,logo,remark,mobile'
+		}
+		Wapi.user.list(makeList,params,op);
+	}
 	
 	function makeList(res){
-		if(res&&res.status_code){
+		if(res.status_code){
 			W.errorCode(res);
 			return;
 		}
@@ -263,18 +348,18 @@
 		if(!arr.length){
 			return;
 		}
-		W(".null_tip").style.display="none";
 		var l=document.createDocumentFragment();
 		for(var i=0;i<arr.length;i++){
 			l.appendChild(new acc(arr[i]));
 		}
+		dom.list.innerHTML='';
 		dom.list.appendChild(l);
 	}
 		
 	function acc(data){
 		var obj=new WiStormUI("div");//创建一个div组件
 		obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
-		
+		data.privilege=JSON.parse(data.privilege);
 		obj.className="acc";//设置div的class属性
 		obj.id="id_"+data.cust_id;
 		obj.setData(data);//设置obj的内容,setData()在下面cv.prototype中定义
@@ -285,8 +370,8 @@
 		return obj;//最后记得要返回组件
 	}
 	acc.prototype.setData=function(data){
-		data.privilege=data.privilege||"无权限";
-		this.innerHTML='<div class="acc_details"><div class="logo"><img src="'+data.logo+'"></div><div class="details"><div class="type">'+data.cust_name+'，'+data.mobile+'</div><div class="privilege">'+data.privilege+'</div></div></div><div class="operation"><div class="option">删除</div></div>';
+		var privilege=acc.getPrivilegeText(data.privilege);
+		this.innerHTML='<div class="acc_details"><div class="logo"><img src="'+data.logo+'"></div><div class="details"><div class="type">'+data.cust_name+'，'+data.mobile+'</div><div class="privilege">'+privilege+'</div></div></div><div class="operation"><div class="option">删除</div></div>';
 		var b0=this.querySelector(".option");
 		b0.addEvent("click",acc.delete);
 		this.querySelector(".acc_details").addEvent("click",acc.edit);
@@ -330,6 +415,19 @@
 				that.delete();
 		});
 	}
+	
+	acc.getPrivilegeText=function(privilege){
+		if(typeof privilege=="object"){
+			var a;
+			for(a in privilege){
+				if(privilege[a])
+					return '';
+			}
+			return '无权限';
+		}else{
+			return '权限异常，请重新设置权限';
+		}
+	}
 
 	acc.touchS=function(){
 		//监听触摸开始事件
@@ -365,6 +463,12 @@
 		dom.appendChild(span);
 		dom._star=span;
 	}
+	//删除星号
+	function removeStar(dom){
+		var star=dom.querySelector('.icon_star');
+		if(star)
+			dom.removeChild(star);
+	}
 	
 	//修改权限
 	function edit(data){
@@ -373,10 +477,16 @@
 		dom.mobile.innerHTML=data.mobile;
 		if(data.privilege){//已经设置了权限
 			for(var i=0;i<cards.length;i++){
-				if(data.privilege[i]==1)
+				if(data.privilege[cards[i].dataset.privilege])
 					addStar(cards[i]);
+				else
+					removeStar(cards[i]);
 			}
 		}
+		if(data.receive_push)
+			dom.push.checked=true;
+		else
+			dom.push.checked=false;
 		history.pushState(null,location,location);
 		dom.pri.data=data;
 		dom.pri.classList.remove("hide");
@@ -402,23 +512,25 @@
 	function submitData(){
 		var accData=dom.pri.data;
 		//收集权限
-		var p="";
+		var p={},push;
 		for(var i=0;i<cards.length;i++){
 			if(cards[i]._star)
-				p+="1";
+				p[cards[i].dataset.privilege]=1;
 			else 
-				p+="0";
+				p[cards[i].dataset.privilege]=0;
 		}
 		if(dom.push.checked){
-			accData.receive_push=1;
+			push=1;
 		}else{
-			accData.receive_push=0;
+			push=0;
 		}
 		
 		if(accData.cust_id){//子帐号已经创建的情况
 			var params={
 				_cust_id:accData.cust_id,
-				privilege:p
+				privilege:p,
+				receive_push:push,
+				access_token:_user.access_token
 			}
 			Wapi.user.update(function(res){
 				if (res.status_code) {
@@ -429,7 +541,10 @@
 				var acco=W("#id_"+accData.cust_id);
 				if(acco){
 					accData.privilege=p;
+					accData.receive_push=push;
 					acco.setData(accData);
+					W.toast("保存成功");
+					W.back();
 				}
 			},params);
 		}else{//子帐号还未创建
@@ -455,12 +570,12 @@
 						'cust_type':3,
 						seller_id:_user.seller_id,
 						privilege:p,
-						receive_push:accData.receive_push,
+						receive_push:push,
 						saler_id:_user.saler_id
 					}
 					if(accData.login_id){
 						data.login_id=accData.login_id;
-						data.logo=_accData.headimgurl;
+						data.logo=accData.logo;
 					}
 					Wapi.user.update(registerSuccess,data);//更新用户名等资料
 				}
@@ -475,7 +590,8 @@
 		}else{
 			W.toast("保存成功");
 		}
-		dom.list.appendChild(new acc(newAccount));
+		W.back();
+		loadList();
 	}
 	</script>
 </html>

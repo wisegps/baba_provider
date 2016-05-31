@@ -1,6 +1,6 @@
 <!--
-	作者：小吴
-	时间：2015-12-30
+	作者：小刘
+	时间：2016-5-23
 	描述：我的店
 -->
 <!DOCTYPE html>
@@ -12,24 +12,362 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 
-		<title>我的车</title>
+		<title>我的店</title>
 		<script src="../../wslib/WiStorm.js"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8"></script>
 		<script>link("W.css")</script>
-		<script src="../../wslib/api/Wapi.js"></script>
-		<script src="../../wslib/toolkit/WxSdk.js" defer="defer"></script>
+		<script>link("ui.css")</script>
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script src="../ui/ui.js"></script>
+		<script src="../js/string_factory.js"></script>
+		<script src="../ui/RepairCard.js"></script>
 	</head>
 	<style>
-	</style>
+	.shop{font-size:13px;color:black;overflow: hidden;line-height: 2.4em;padding-top: 44px;}
+	.shop_logo{vertical-align:sub}
+	.shop_infos{display:inline-block;vertical-align:super}
+	.shop_info{display:block;padding:0 10px;line-height:1.5em}
+	.img_logo{width:100px;height:62px}
+	.shop_box .tab_btn{
+	    display: inline-table;
+	    width: 4em;
+	    padding: 0;
+	    height:35px;
+	    vertical-align: bottom;				
+	}	
+
+	.ui_btn{
+	    border: none;
+	    display: table-cell;
+	    width: 4em;
+	    background: #4db8ef;
+	    color: #fff;
+	    white-space: normal;				
+		border-radius: 0;
+		padding: 1em;
+	    line-height: 1;
+	    height: 78px;
+	}
+	.ui_btn:last-of-type{
+		background: #F56D77;
+	}
+	.shop_box{ 
+	    white-space: nowrap;
+		background:white;
+		margin-bottom:2px;
+		transform: translate3d(0,0,0);
+	    -webkit-transform: translate3d(0,0,0);
+	    transition: transform .5s;
+	    -webkit-transition: -webkit-transform .5s;	
+	} 
+	.shop_con{
+	    display: inline-block;
+	    padding:.5em .5em 0 .5em;
+	    width: 100%;
+	    position: relative;
+	}
+	.shop_box div{display: inline-block;}
+	.details{
+		display: none;
+	    top: 44px;
+	    left: 0;
+	    width: 100%;
+	    height: 100%;
+	    position: absolute;		
+	}
+	.details_img{
+		width: 100%;
+		height: 45%;
+		position: relative;
+   		color: white
+	}
+	.details_img img{width: 100%;height: 100%;}
+	 .theme{
+	    position: absolute; 	
+	    width: 100%;
+	    text-align: center;
+   		top: 38%;
+   		font-size: 22px;
+   			 }
+   	.details_bottom{
+	    background-color: rgba(0,0,0,.7);
+    	padding: .5em;
+	    position: absolute;
+	    bottom: 0;
+	    left: 0;
+	    width: 100%;
+	    font-size: 14px;   		
+   	}
+   	.details_bottom div{margin: .5em 0;}
+	.ba{
+		padding: 5px 10px;border-radius:4px;
+	}
+		</style>
 	<body>
-		<header class="mui-bar mui-bar-nav noshadow">
-			<h1 class="mui-title">管理车辆</h1>
-		</header>
 		<div class="mui-content">
-			
+			<div class="shop">
+				<header class="mui-bar mui-bar-nav noshadow">
+					<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+					<h1 class="mui-title">我的店</h1>
+				</header>
+				<div class="null_tip">
+					<h1>NULL</h1>
+					<p>您好，您目前还没有添加商户。</p>
+				</div>				
+			</div>	
+			<div class="details">
+				<header class="mui-bar mui-bar-nav noshadow">
+					<a class="mui-icon mui-icon-left-nav mui-pull-left W_back btn_back"></a>
+					<h1 class="mui-title">我的店</h1>
+				</header>
+				<div class="details_img">
+					<img class="shop_details_img" src="../../img/shop.jpg">
+					<div class="theme">我的店铺</div>
+					<div class="details_bottom">
+						<div class="details_tel">
+							电话: <span class="details_mobile">12345678910</span>
+							<span id="news" class="ba" style="background-color: rosybrown;">跟掌柜的聊聊</span>
+						</div>
+						<div class="details_address">
+							地址: <span class="details_ads">深圳兴东创兴达</span>
+							<span id="map" class="ba" style="background-color: #5CCA48;">去这</span>
+						</div>
+					</div>
+				</div>
+				<div class="repair_histories"></div>
+			</div>
 		</div>
+		<template id="shopT">
+			<div class="shop_con">
+				<span class="shop_logo">
+					<img class="img_logo" src="<%img%>"/>
+				</span>
+				<span class="shop_infos">
+					<label class="shop_info" class="cust_name"><%name%></label>
+					<label style="text-overflow: ellipsis;white-space: nowrap;overflow: hidden;" class="shop_info" id="address"><%address%></label>
+					<label class="shop_info" id="phone"><%tel%></label>
+				</span>
+			</div><div class="tab_btn">
+				<button class="ui_btn shield" data-click="shield">屏蔽</button>
+				<button class="ui_btn" data-click="delete">删除</button>
+			</div>
+		</template>
 	</body>
 	<script>
+	var dom={
+		shop:W(".shop"),
+		details:W(".details"),
+		img:W('.shop_details_img'),
+		name:W(".theme"),
+		mobile:W(".details_mobile"),
+		address:W(".details_ads"),
+		rh:W(".repair_histories"),
+		shopT:W("#shopT")
+	}
+	window.onload=function(){
+		var data={
+			cust_id:_user.cust_id,
+			access_token:_user.access_token
+		}
+		Wapi.user.get(function(res){
+			if(res.seller_ids && res.seller_ids.length>0){
+				W(".null_tip").style.display='none';
+				var s,shield_ids='';
+				if(res.seller_ids)
+					s=res.seller_ids.join("|");
+				else
+					return;
+				if(res.shield_ids)
+					shield_ids=res.shield_ids.join("|");
+				var param={
+					cust_id:s,
+					access_token:_user.access_token
+				};
+				Wapi.user.list(function(res){
+					var res=res.data;
+					for(var i=0;i<res.length;i++){
+						if(shield_ids.indexOf(res[i].cust_id)!=-1)
+							res[i]._is_shield=true;
+						dom.shop.appendChild(new shops(res[i]));
+					}
+				},param);
+			}
+		},data,{fields:"seller_ids,shield_ids"});	
+		W('.btn_back').addEvent('click',hideDetails);
+		W("#map").addEvent('click',showMap);
+		W("#news").addEvent('click',showNews);
+	}
 
+		//列表组件
+		function shops(data){
+			var obj=new WiStormUI('div');
+			obj.merge(this);
+			obj.className='shop_box';
+			obj.setData(data);
+			obj.addEvent("touchstart",shops.touchS);
+			obj.addEvent("touchmove",shops.touchM);
+			obj.addEvent("touchend",shops.touchE);//监听触摸事件以分辨手势
+			obj.addEvent('click',shops.click);
+			return obj;
+		}
+		shops.prototype.setData=function(data){
+			var d={}
+			data.photo?d.img=data.photo[0]:img="../../img/shop.jpg";
+			data.cust_name?d.name=data.cust_name:name='该店铺暂无名称';
+			data.address?d.address=data.address:address='该店铺暂未填写地址';
+			data.mobile?d.tel=data.mobile:tel="该店铺暂未填写电话";
+			this.template(dom.shopT,d);
+			if(data._is_shield){
+				var sh=this.querySelector('.shield');
+				sh.dataset.click='deleteShield';
+				sh.innerHTML='取消屏蔽';
+			}
+			this.data=data;
+		}
+		shops.prototype.showOption=function(){//显示操作按钮
+			var w=this.querySelector(".tab_btn").offsetWidth;
+			this.style.transform='translate3d(-'+w+'px,0,0)';
+			this.style.webkitTransform='translate3d(-'+w+'px,0,0)';
+		}
+		shops.prototype.hideOption=function(){//隐藏操作按钮
+			this.style.transform='';
+			this.style.webkitTransform='';
+		}
+		shops.prototype.delete=function(){
+			var that=this;
+			Wapi.user.deleteSeller(function(res){
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				that.parentNode.removeChild(this);	
+				W.toast('已删除'+that.data.cust_name);
+			},{cust_id:_user.cust_id,access_token:_user.access_token,seller_id:this.data.cust_id});	
+		}
+		shops.touchS=function(){
+			//监听触摸开始事件
+			this.touchStart=event.touches[0].pageX;
+			this.touchY=event.touches[0].pageY;
+		}
+		shops.touchE=function(){
+			var e=event.changedTouches[0].pageX-this.touchStart;
+			if(e<-30){
+				this.showOption();
+			}else if(e>30){
+				this.hideOption();
+			}
+		}
+		shops.touchM=function(){
+			var y=Math.abs(event.changedTouches[0].pageY-this.touchY);
+			var x=Math.abs(event.changedTouches[0].pageX-this.touchStart);
+			if(x>y)
+				event.preventDefault();//阻止浏览器默认的滑动动作
+		}//触摸移动事件的
+		shops.click=function(){
+			var h=event.target.dataset.click;
+			if(h=='none')return;
+			if(h)
+				shops[h].call(this);
+			else
+				shwoDetails();
+		}
+		//删除按钮
+		shops.delete=function(){
+			event.stopPropagation();
+			var that=this;
+			W.confirm("确认删除该商户吗？",function(b){
+				if(b)
+					that.delete();
+				else	
+					that.hideOption();
+			});			
+		}
+		//屏蔽商户
+		shops.shield=function(){
+			event.stopPropagation();
+			var that=this;
+			W.confirm("屏蔽该商户会导致无法收到商户的活动信息推送，确定屏蔽该商户吗？",function(b){
+				if(b){
+					Wapi.user.update(function(res){
+						if (res.status_code) {
+							W.errorCode(res);
+							return;
+						}
+						W.toast('已屏蔽'+that.data.cust_name);
+						that.data._is_shield=true;
+						that.setData(that.data);
+					},{
+						access_token:_user.access_token,
+						_cust_id:_user.cust_id,
+						shield_ids:+that.data.cust_id
+					})
+				}else{
+					that.hideOption();
+				}
+			});			
+		}
+		shops.deleteShield=function(){
+			event.stopPropagation();
+			var that=this;
+			Wapi.user.update(function(res){
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				W.toast('已解除屏蔽'+that.data.cust_name);
+				that.data._is_shield=false;
+				that.setData(that.data);
+			},{
+				access_token:_user.access_token,
+				_cust_id:_user.cust_id,
+				shield_ids:-that.data.cust_id
+			})		
+		}
+		
+		//显示详细店铺信息
+		function shwoDetails(){
+			dom.shop.style.display='none';
+			dom.details.style.display='block';
+			var data=this.data;
+			dom.data=data;
+			dom.name.innerHTML=data.cust_name;
+			dom.mobile.innerHTML=data.mobile;
+			dom.address.innerHTML=data.address;
+			dom.img.src=data.photo[0];
+			var param={
+				cust_id:_user.cust_id,
+				seller_id:data.cust_id,
+				access_token:_user.access_token
+			};
+			var op={
+				fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,evaluate_content,job_start_time,job_end_time,seller_name',
+				sorts:"-business_id"
+			};			
+			Wapi.business.list(function(res){
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				if(res.data && res.data.length>0){
+					var data=res.data;
+					for(var i=0;i<data.length;i++){
+						dom.rh.appendChild(new RepairCard(data[i]));
+					}
+				}
+			},param,op);		
+		}
+		//隐藏详细店铺信息页
+		function hideDetails(){
+			dom.shop.style.display='block';
+			dom.details.style.display='none';
+			dom.rh.innerHTML='';
+		}
+		//跳转百度地图
+		function showMap(){
+			location.href="../ui/call_map.html?name="+dom.address.innerHTML;
+		}
+		//显示客户咨询页
+		function showNews(){
+			location.href='../customer_advisory.html?id='+dom.data.cust_id;
+		}
 	</script>
 </html>

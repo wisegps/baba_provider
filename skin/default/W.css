@@ -76,7 +76,7 @@ html{font-family:sans-serif;-webkit-text-size-adjust:100%}body{margin:0;font-fam
 	-webkit-overflow-scrolling: touch;
     height: 100%;
     width: 100%;
-    position: absolute;
+    /*position: absolute;*/
     overflow-y: auto;
     top: 0;
     left: 0;
@@ -563,21 +563,23 @@ body{
 	-webkit-animation: toTop .5s;
 	animation-fill-mode: forwards;
 	-webkit-animation-fill-mode: forwards;
+	pointer-events:none;
 }
 
 @keyframes toDown{
-	from {transform: translate3d(0,0,0);opacity: 0;}
-	to {transform: translate3d(0,40%,0);opacity: 1;}
+	from {transform: translate3d(0,0,0);opacity: 1;}
+	to {transform: translate3d(0,40%,0);opacity: 0;}
 }
 @-webkit-keyframes toDown{
-	from {-webkit-transform: translate3d(0,0,0);opacity: 0;}
-	to {-webkit-transform: translate3d(0,40%,0);opacity: 1;}
+	from {-webkit-transform: translate3d(0,0,0);opacity: 1;}
+	to {-webkit-transform: translate3d(0,40%,0);opacity: 0;}
 }
 .toDown{
 	animation: toDown .5s;
 	-webkit-animation: toDown .5s;
 	animation-fill-mode: forwards;
 	-webkit-animation-fill-mode: forwards;
+	pointer-events:none;
 }
 
 @keyframes toRight{
@@ -596,6 +598,7 @@ body{
 	-webkit-animation: toRight .4s;
 	animation-fill-mode: none;
 	-webkit-animation-fill-mode: none;
+	pointer-events:none;
 }
 
 @keyframes fadeOut{
@@ -611,6 +614,26 @@ body{
 .fadeOut{
 	animation: fadeOut .5s;
 	-webkit-animation: fadeOut .5s;
+	animation-fill-mode: forwards;
+	-webkit-animation-fill-mode: forwards;
+	pointer-events:none;
+}
+
+@keyframes like
+{
+	0%   {transform:scale3d(1,1,1) translate3d(0,0,0);opacity: 1;}
+	100% {transform:scale3d(2,2,1) translate3d(-0.8em,-0.75em,0);opacity: 0;}
+}
+
+@-webkit-keyframes like
+{
+	0%   {-webkit-transform:scale3d(1,1,1) translate3d(0,0,0);opacity: 1;}
+	100% {-webkit-transform:scale3d(2,2,1) translate3d(-0.8em,-0.75em,0);opacity: 0;}
+}
+/*点赞动画*/
+.like{
+	animation: like 2s;
+	-webkit-animation: like 2s;
 	animation-fill-mode: forwards;
 	-webkit-animation-fill-mode: forwards;
 }

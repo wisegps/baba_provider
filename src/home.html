@@ -17,97 +17,38 @@
 		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 		<script>link("W.css")</script>
 		
-		<script src="../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../wslib/api/newWapi.js" defer="defer"></script>
 		<script src="../wslib/toolkit/WxSdk.js" defer="defer"></script>
 	</head>
 	<style>
-		body{text-align: center;}
-		header.mui-bar.mui-bar-nav{background-color: #eee;}
-		.search-bar{
-			font-size: 15px;color: #888;
-			background-color: #fff;margin: 5px 0;height: 34px;line-height: 34px;border-radius: 34px;text-align: center;
-		}
-		.search-bar:before{
-			font-size: 18px;
-			font-family: Muiicons;
-			content: '\e466';
-		}
-		#head{
-			/*background-image: url(../img/shop.jpg);*/
-			background-size: cover;
-			color: rgba(255,255,255,.7);
-			font-size: 12px;
-			line-height: 2em;
-			color: #fff;
-		}
-		#logo{
-			width: 80px;
-			height: 80px;
-			background-color: #fff;
-			border: 2px solid #fff;
-			border-radius: 50%;
-			margin-top: 10px;
-		}
-		.a{
-			display: table-cell;
-			line-height: 1.2em;
-			padding: .8em;
-		}
-		#main{display: table;width: 100%;}
-		.card{
-			display: table-cell;
-			display: none;
-			width: 33.333%;
-			padding: 2em 0;
-			font-size: 13px;
-			color: #4D4D4D;
-			border-bottom: 1px solid #eee;
-			border-right: 1px solid #eee;
-			position: relative;
-		}
-		.card:active{background: #f9f9f9;}
-		.card-icon{display: block;font-size: 2.5em;}
-		.card-row{display: table-row;}
-		.shop_name{line-height: 5em;font-size: 2em;text-shadow: 2px 3px 3px rgba(0,0,0,.7);}
-		.card-name{
-			line-height: 2em;
-		}
-		.mui-tab-label{font-size: 10px;}
-		.mui-tab-item>.w_icon{font-size: 30px;position: relative;top: 4px;}
-		nav.mui-bar.mui-bar-tab{background-color: #f9f9f9;}
-		.mui-bar-tab .mui-tab-item.mui-active {
-		    color: #50B7DE;
-		}
-		.span_news{  
-		    width: 1.5em;
-		    height: 1.5em;
-		    position: absolute;
-		    background-color: #F13F40;
-		    color: white;
-		    text-align: center;
-		    line-height: 1.5em;
-		    border-radius: 100%;
-		    font-size: 12px;
-		    top: 1.5em;
-		}
-		#customer_advisory,#settings,nav.mui-bar-tab{display: none;}
+	body{text-align:center}header.mui-bar.mui-bar-nav{background-color:#eee}.search-bar{overflow:hidden;font-size:15px;color:#888;background-color:#fff;margin:5px 0;height:34px;line-height:34px;border-radius:34px;text-align:center}.search-bar:before{font-size:18px;font-family:Muiicons;content:'\e466'}#head{background-size:cover;color:rgba(255,255,255,.7);font-size:12px;line-height:2em;color:#fff}#logo{width:80px;height:80px;background-color:#fff;border:2px solid #fff;border-radius:50%;margin-top:10px}.a{display:table-cell;line-height:1.2em;padding:.8em}.card{display:none;text-align:center;width:33.333%;padding:2em 0;font-size:13px;color:#4d4d4d;border-bottom:1px solid #eee;border-right:1px solid #eee;position:relative}.card:active{background:#f9f9f9}.card-icon{display:block;font-size:2.5em}.card-row{display:table-row}.shop_name{line-height:5em;font-size:2em;text-shadow:2px 3px 3px rgba(0,0,0,.7)}.card-name{line-height:2em}.mui-tab-label{font-size:10px}.mui-tab-item>.w_icon{font-size:30px;position:relative;top:4px}nav.mui-bar.mui-bar-tab{background-color:#f9f9f9}.mui-bar-tab .mui-tab-item.mui-active{color:#50b7de}.span_news{width:1.5em;height:1.5em;position:absolute;background-color:#f13f40;color:white;text-align:center;line-height:1.5em;border-radius:100%;font-size:12px;top:1.5em}#customer_advisory,#settings,nav.mui-bar-tab{display:none}#ewm{margin:5px 0;width:34px;height:34px;float:right;margin-left:5px;background-image:url(../img/ewm.png);background-size:100%;background-origin:content-box;background-repeat:no-repeat;padding:3px}
+	#main{font-size: 0;text-align: left;position: relative;}
+	.card.can_move{
+		position: absolute;
+	    background: #fafafa;
+		z-index: 1;
+		transform: scale3d(1.2,1.2,1);
+		-webkit-transform: scale3d(1.2,1.2,1);
+		box-shadow: 5px 4px 15px rgba(0,0,0,0.3);
+	}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav">
+			<div id="ewm"></div>
 			<div class="search-bar" id="search"  data-name="search.html" data-open="false">快速搜索</div>
 		</header>
 		<nav class="mui-bar mui-bar-tab">
-			<a class="mui-tab-item mui-active" href="#a" id="home">
+			<a class="mui-tab-item mui-active" id="home">
 				<span class="w_icon icon_home"></span>
 				<span class="mui-tab-label">首页</span>
 			</a>
-			<a class="mui-tab-item" href="#a" id="customer_advisory">
+			<a class="mui-tab-item" id="customer_advisory">
 				<span class="w_icon icon_message"></span>
 				<span class="mui-tab-label">消息</span>
 			</a>
-			<a class="mui-tab-item" href="#a" id="settings">
+			<a class="mui-tab-item" id="settings">
 				<span class="w_icon icon_my"></span>
-				<span class="mui-tab-label">我的</span>
+				<span class="mui-tab-label">设置</span>
 			</a>
 		</nav>
 		<div class="mui-content" style="background: #fff;">
@@ -129,138 +70,88 @@
 				</div>
 			</div>
 			<div id="main">
-				<div class="card-row">
-					<div class="card" data-name="customer_leave.html" data-open="false">
-						<span class="card-icon w_icon icon_stores" style="color: #FF5D5B;"></span>
-						<span class="card-name">客户到店</span>
-					</div>
-					<div class="card" data-name="customer_add.html?intent=add" data-open="false">
-						<span class="card-icon w_icon icon_establish" style="color: #FFCC4F;"></span>
-						<span class="card-name">新增客户</span>
-					</div>
-					<div class="card" data-name="error_car.html" data-open="false" id="error_car">
-						<span class="card-icon w_icon icon_abnormal" style="color: #42D7C1;"></span>
-						<span class="card-name">异常车况</span>
-					</div>
+				<div class="card" data-name="customer_leave.html" data-open="false" data-privilege='cl'>
+					<span class="card-icon w_icon icon_stores" style="color: #FF5D5B;"></span>
+					<span class="card-name">客户到店</span>
 				</div>
-				<div class="card-row">
-					<div class="card" data-name="car_manage.html" data-open="false">
-						<span class="card-icon w_icon icon_vehicle" style="color: #66CAEE;"></span>
-						<span class="card-name">车辆管理</span>
-					</div>
-					<div class="card" data-name="device_manage.html" data-open="false">
-						<span class="card-icon w_icon icon_equipment" style="color: #FF6A68;"></span>
-						<span class="card-name">设备管理</span>
-					</div>
-					<div class="card" data-name="reminder_setting.html" data-open="false">
-						<span class="card-icon w_icon icon_remind" style="color: #FFD87D;"></span>
-						<span class="card-name">提醒设置</span>
-					</div>
+				<div class="card" data-name="car_manage.html" data-open="false" data-privilege='cm'>
+					<span class="card-icon w_icon icon_vehicle" style="color: #66CAEE;"></span>
+					<span class="card-name">客户管理</span>
 				</div>
-				<div class="card-row">
-					<div class="card" data-name="customer_advisory.html">
-						<span class="card-icon w_icon icon_consultation" style="color: #68DECD;"></span>
-						<span class="card-name">客户咨询</span>
-					</div>
-					<div class="card" data-name="store_management.html" data-open="false">
-						<span class="card-icon w_icon icon_store_management" style="color: #FFCC4F;"></span>
-						<span class="card-name">店面管理</span>
-					</div>
-					<div class="card" data-name="settings.html">
-						<span class="card-icon w_icon icon_set" style="color: #42D7C1;"></span>
-						<span class="card-name">设置中心</span>
-					</div>
+				<div class="card" data-name="customer_advisory.html" data-privilege='ca'>
+					<span class="card-icon w_icon icon_consultation" style="color: #68DECD;"></span>
+					<span class="card-name">客户咨询</span>
 				</div>
-				<div class="card-row">
-					<div class="card" data-name="child_account.html" data-open="false">
-						<span class="card-icon w_icon icon_account" style="color: #66CAEE;"></span>
-						<span class="card-name">子帐号管理</span>
-					</div>
+				<div class="card" data-name="device_manage.html" data-open="false" data-privilege='dm'>
+					<span class="card-icon w_icon icon_equipment" style="color: #FF6A68;"></span>
+					<span class="card-name">设备管理</span>
+				</div>
+				<div class="card" data-name="event_list.html" data-open="false" data-privilege='el'>
+					<span class="card-icon w_icon icon_activity" style="color: #68DECD;"></span>
+					<span class="card-name">活动管理</span>
+				</div>
+				<div class="card" data-name="store_management.html" data-open="false" data-privilege='sm'>
+					<span class="card-icon w_icon icon_store_management" style="color: #FFCC4F;"></span>
+					<span class="card-name">店面管理</span>
 				</div>
 			</div>
 		</div>
 	</body>
 	<script>
 		var dom={
-			cards:W(".card",true)
+			cards:W(".card",true),
+			main:W("#main")
 		}
+		W.dom.search=W("#search");
+		W.dom.msg=W("#customer_advisory");
+		W.dom.setting=W("#settings");
+		W.dom.home=W("#home");
+		W.dom.nav=W("nav");
 
 		//监听 html加载完成事件
 		window.addEventListener("W.loginSuccess",function(){
+			//识别身份，按权限加载
+			if(_user.cust_type==2){//商户
+				for(var i=0;i<dom.cards.length;i++){
+					dom.cards[i].style.display="inline-block";
+				}
+				//加载设置页
+				window.plus.webview.create("settings.html","settings.html");
+				W.dom.setting.style.display="table-cell";
+				W.dom.nav.style.display="table";
+			}else if(_user.cust_type==3){//员工
+				var cards=dom.cards;
+				dom.cards=[];
+				for(var i=0;i<cards.length;i++){
+					if(_user.privilege[cards[i].dataset.privilege]==1){
+						cards[i].style.display="inline-block";
+						dom.cards.push(cards[i]);
+					}else{
+						dom.main.removeChild(cards[i]);
+					}
+				}
+			}else{
+				if(!_user.cust_id){
+					W.toRegister();
+				}
+				var type=["无车车主","车主","商户","员工"];
+				W.alert("商户版叭叭只支持商户使用，如需成为商户请联系我们<a href='tel:88362578'>联系客服</a>",function(){
+					top.location="baba/air_home.html";
+				});
+				return;
+			}
+			
+			if(_user.cust_type==2||_user.privilege.ca==1){//预加载客户咨询
+				window.plus.webview.create("customer_advisory.html","customer_advisory.html");
+				W.dom.msg.style.display="table-cell";
+				W.dom.nav.style.display="table";
+			}
 			getShopData();//获取并展示店铺当天数据（包括店铺图片）
 			addEvent();
 			W(".shop_name").innerText=_user.cust_name;
-			//识别身份，按权限加载
-			if(_user.cust_type!=2&&_user.cust_type!=3){
-					var type=["无车车主","车主","商户","员工"];
-					W.alert("商户版叭叭只支持商户使用，如需成为商户请联系我们<a href='tel:88362578'>联系客服</a>",function(){
-						top.location="baba/air_home.html";
-					});
-					return;
-			}else{
-				if(_user.cust_type==2){
-					_user.privilege="";
-					for(var i=0;i<dom.cards.length;i++){
-						_user.privilege+="1";
-					}
-				}
-				if(_user.cust_type==3){//员工
-					if(!_user.privilege)return;
-					if(_user.privilege.search(/\s/)>-1){
-						W.alert("权限配置不正确");
-						return;
-					}
-				}
-				var row=W(".card-row");
-				row._i=0;
-				for(var i=0;i<dom.cards.length;i++){
-					if(_user.privilege[i]=="1"){
-						dom.cards[i].style.display="table-cell";
-						if(row._i<3){
-							row._i++;
-							row.appendChild(dom.cards[i]);
-						}else{
-							row=row.nextElementSibling;
-							row._i=1;
-							row.appendChild(dom.cards[i]);
-						}
-					}
-				}
-				if(_user.privilege[6]=="1"){//预加载客户咨询
-					window.plus.webview.create("customer_advisory.html","customer_advisory.html");
-					W.dom.msg.style.display="table-cell";
-					W.dom.nav.style.display="table";
-				}
-				if(_user.privilege[8]=="1"){//预加载设置中心
-					window.plus.webview.create("settings.html","settings.html");
-					W.dom.setting.style.display="table-cell";
-					W.dom.nav.style.display="table";
-				}
-				if(_user.privilege[2]=="1"){
-					Wapi.user.getExceptionList(exception,{seller_id:_user.seller_id,access_token:_user.access_token});
-				}
-			}
 		});
-		function exception(res){
-			if (res.status_code) {
-				W.errorCode(res);
-				return;
-			}
-			if(res.total){
-				var s=document.createElement("span");
-				s.className="span_news";
-				s.innerText=res.total;
-				W("#error_car").appendChild(s);
-			}
-		}
 		
 		function addEvent(){//添加事件监听器
-			W.dom.search=W("#search");
-			W.dom.msg=W("#customer_advisory");
-			W.dom.setting=W("#settings");
-			W.dom.home=W("#home");
-			W.dom.nav=W("nav");
-			
 			W.dom.msg.addEvent("click",showWeb);
 			W.dom.setting.addEvent("click",showWeb);
 			
@@ -270,8 +161,22 @@
 			});
 			
 			var cards=dom.cards;
+			var sc={};
 			for(var i=cards.length-1;i>=0;i--){
-				cards[i].addEvent("click",openView);
+				cards[i].addEvent("touchstart",cardS);
+				cards[i].addEvent("touchmove",cardM);
+				cards[i].addEvent("touchend",cardE);
+				sc[dom.cards[i].dataset.privilege]=dom.cards[i];
+			}
+			if(WiStorm.setting.home_sort){
+				var sort=WiStorm.setting.home_sort;
+				var t;
+				dom.cards=[];
+				for(var i=0;i<sort.length;i++){
+					t=sc[sort[i]];
+					dom.main.appendChild(t);
+					dom.cards.push(t);
+				}
 			}
 			
 			window.addEventListener("popstate",function(){
@@ -286,11 +191,97 @@
 				t.classList.add("mui-active");
 				W.dom.nav.style.display="block";
 			});
+			W('#ewm').addEvent('click',showEwm);
+		}
+		
+		function cardS(){
+			//监听触摸开始事件
+			var x=event.touches[0].pageX;
+			var y=event.touches[0].pageY;
+			event.preventDefault();
+			event.stopPropagation();
+			cardM._t=dom.main.offsetTop;
+			var that=this;
+			this._card_touch_id=setTimeout(function(){
+				var ofT=that.offsetTop;
+				var ofL=that.offsetLeft;
+				that._x=x-ofL;
+				that._y=y-ofT;
+				
+				that._cards=[];
+				for(var i=0;i<dom.cards.length;i++){
+					if(dom.cards[i]!=that){
+						that._cards.push(dom.cards[i]);
+					}
+				}
+				if(!dom.main._tem){//插入一个用于占位的div
+					dom.main._tem=that.cloneNode(true);
+					dom.main._tem.style.opacity=0;
+				}
+				dom.main.insertBefore(dom.main._tem,that);
+				that.classList.add("can_move");
+				that.style.top=ofT+'px';
+				that.style.left=ofL+'px';
+				that._status=true;//标记该方块进入移动状态
+			},500);
+		}
+		function cardM(){
+			if(!this._status)return;
+			event.preventDefault();
+			event.stopPropagation();
+			
+			var y=event.changedTouches[0].pageY;
+			var x=event.changedTouches[0].pageX;
+			var t=y-this._y;
+			var l=x-this._x;
+			this.style.top=t.toString()+'px';
+			this.style.left=l.toString()+'px';
+			var w=this.offsetWidth;
+			var h=this.offsetHeight;
+			var _t=dom.main._t;
+			var a=Math.floor((y-cardM._t)/h)*3+Math.floor(x/w);
+			var target=this._cards[a];
+			dom.main.insertBefore(dom.main._tem,target);
+		}
+		function cardE(){
+			if(this._status){
+				dom.main.replaceChild(this,dom.main._tem);
+				this.classList.remove('can_move');
+				this.style.removeProperty('top');
+				this.style.removeProperty('left');
+				delete this._cards;
+				delete this._status;
+				//记录顺序
+				dom.cards=W(".card",true);
+				var s=[];
+				for(var i=0;i<dom.cards.length;i++){
+					s.push(dom.cards[i].dataset.privilege);
+				}
+				W.setSetting('home_sort',s);
+			}else{
+				openView.call(this);
+				clearTimeout(this._card_touch_id);
+				delete this._card_touch_id;
+			}
+		}
+		
+		function showEwm(){//展示二维码
+			if(_user.ewm){
+				W.alert('<img src="'+_user.ewm+'" style="width: 100%;">');
+				return;
+			}
+			Wapi.user.getQrcode(function(res){
+				if(res.url){
+					_user.ewm=res.url;
+					W.setSetting("user",_user);
+					W.alert('<img src="'+res.url+'" style="width: 100%;">');
+				}
+			},{scene_str:_user.seller_id});
 		}
 		
 		function openView(){//点击打开新webview
-			var name=this.getAttribute("data-name");	
-			var open=this.getAttribute("data-open");
+			var name=this.dataset.name;	
+			var open=this.dataset.open;
 			if(open=="false"){
 				top.location=name;
 				return;
@@ -343,7 +334,11 @@
 				access_token:_user.access_token
 			}
 			
-			W.userApi.getBusinessTotal(function(res){
+			Wapi.business.getBusinessTotal(function(res){
+				if(res.status_code){
+					W.errorCode(res);
+					return;
+				}
 				W("#arrive_total").innerText=res.arrive_count;
 				W("#leave_total").innerText=res.leave_count;
 				W("#evaluate_total").innerText=res.evaluate_count;

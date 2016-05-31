@@ -413,7 +413,6 @@
 		function setShare(){
 			var name=_user?_user.cust_name:"";
 			var share_url=WiStorm_root+'src/game/puzzle.html?intent=logout&needOpenId=true&id='+open_id+'&name='+name+'&x='+x+'&img='+encodeURIComponent(img);
-			history.pushState(null,"",share_url);
 			if(!W.fillFriend.fill){
 				W.fillFriend(_g.id,open_id,_g.name,name);
 				W.fillFriend.fill=true;
@@ -423,6 +422,7 @@
 				return;
 			}
 			W.debug(open_id);
+			history.pushState(null,"",share_url);
 			var op={
 			    title: '←_←曹植7步成诗，我6步成图，你要不要来挑战一下我的照片？', // 分享标题
 			    desc: 'WiCARE空气净化器', // 分享描述

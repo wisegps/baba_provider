@@ -13,20 +13,16 @@ function _ui_hongbao(opt){
 	}
 	obj.setData(opt);
 	_ui_hongbao.obj=obj;
-	Wapi.util.getPicValidCode(function(res){
-		if(res&&res.status_code){
-			W.alert('获取验证码失败');
-			W.errorCode(res);
-			return;
-		}
-		_ui_hongbao.obj.data.img=res.valid_code_img;
-	},{mobile:opt.code});
 	W("body").appendChild(obj);
 	return obj;//最后记得要返回组件
 }
 _ui_hongbao.prototype.setData=function(opt){
 	var that=this;	
-	var html='<div class="hongbao center"><div class="hongbao_back_yuan"></div><div class="hongbao_content"><div class="hongbao_hong"><span class="w_icon icon_add"></span><img class="logo" src="<%logo%>"/><p><%user_name%><br>给你发了一个红包</p><span style="font-size: 24px;"><%text%></span></div><div class="hongbao_bao"><span class="hongbao_kai">開</span></div></div></div><div class="hongbao_details" style="display: none;"><div class="mui-bar mui-bar-nav" style="box-shadow: none;background: #D84E43;"><span class="mui-icon mui-icon-left-nav mui-pull-left" style="color: #FDDCAC;"></span><h1 class="mui-title" style="padding-left: 1em;text-align: left;color: #FDDCAC;line-height: 1.4;"><span style="position: absolute;left: .2em;top: 20%;width: 1em;height: 60%;border-left: 1px solid;"></span>红包详情<br><small style="font-size: 0.8em;">WiCARE红包</small></h1></div><div class="hongbao_describe"><div class="back_yuan"></div><div style="position: relative;"><img class="logo" src="<%logo%>"/><h4 style="font-weight: 100;"><%user_name%>的红包</h4><p style="font-size: 14px;" class="text"><%text%></p><p style="font-size: 60px;margin-top: .8em;color: #000000;"><%value%><small style="font-size: 14px;"><%name%></small></p><a style="font-size: 12px;color: #6B85BA;"><%msg%></a></div><div style="margin-top: 1.6em;padding: .9em;border-top: 1px solid #eee;">留言</div></div><div style="padding: 1.6em;text-align: center;"><a style="font-size: 15px;color: #6B85BA;" href="user_data.html">查看我的账户余额</a></div></div>';
+	if(!opt.value){
+		opt.value=opt.name.match(/\d*/)[0];
+		opt.name=opt.name.match(/\D+/)[0];
+	}
+	var html='<div class="hongbao center"><div class="hongbao_back_yuan"></div><div class="hongbao_content"><div class="hongbao_hong"><span class="w_icon icon_add"></span><img class="logo" src="<%logo%>"/><p><%user_name%><br>给你发了一个红包</p><span style="font-size: 24px;"><%text%></span></div><div class="hongbao_bao"><span class="hongbao_kai">開</span></div></div></div><div class="hongbao_details" style="display: none;"><div class="mui-bar mui-bar-nav" style="box-shadow: none;background: #D84E43;"><span class="mui-icon mui-icon-left-nav mui-pull-left" style="color: #FDDCAC;"></span><h1 class="mui-title" style="padding-left: 1em;text-align: left;color: #FDDCAC;line-height: 1.4;"><span style="position: absolute;left: .2em;top: 20%;width: 1em;height: 60%;border-left: 1px solid;"></span>红包详情<br><small style="font-size: 0.8em;">WiCARE红包</small></h1></div><div class="hongbao_describe"><div class="back_yuan"></div><div style="position: relative;"><img class="logo" src="<%logo%>"/><h4 style="font-weight: 100;"><%user_name%>的红包</h4><p style="font-size: 14px;" class="text"><%text%></p><p style="font-size: 60px;margin-top: .8em;color: #000000;"><%value%><small style="font-size: 14px;"><%name%></small></p><a style="font-size: 12px;color: #6B85BA;"><%msg%></a></div><div style="margin-top: 1.6em;padding: .9em;border-top: 1px solid #eee;">留言</div></div><div style="padding: 1.6em;text-align: center;"><a style="font-size: 15px;color: #6B85BA;" href="'+WiStorm.root+'src/baba/wallet.html?needUser=true&temporary=1">查看我的钱包</a></div></div>';
 	this.className="cover_paper alert_box";//设置div的class属性
 	this.innerHTML=html.replace(/(\<|&lt;)\%.*?\%(&gt;|\>)/g,function(word){
 		word=word.replace(/(\<|&lt;|&gt;|\>|%)/g,'');
@@ -34,25 +30,18 @@ _ui_hongbao.prototype.setData=function(opt){
 	});
 	this.querySelector(".hongbao_kai").addEvent("click",function(){
 		var kai=this;
-		function open(text){
-			kai.classList.add("hongbao_active");
-			that._open=setTimeout(function(){that.open();},1000);
-			
-			//根据code到后台领取红包
-			Wapi.lottery.receive(function(res){
-				
-				that.open();
-			},data);
+		kai.classList.add("hongbao_active");
+		that._open=setTimeout(function(){that.open();},1000);
+		
+		var data={
+			code: that.data.code,
+			open_id: that.data.open_id,
+			cust_id: that.data.cust_id
 		}
-		W.prompt({
-			"title":"请输入验证码",
-			"content":"<img style='width: 70%;' src='"+that.data.img+"'>",
-			"y":"确定",
-			"n":"取消",
-			"callback":function(res){
-				open(res);
-			}
-		});
+		//根据code到后台领取红包
+		Wapi.lottery.receive(function(res){
+			that.open();
+		},data);
 	});
 	this.querySelector('.mui-icon-left-nav').addEvent('click',function(){
 		that.close();
@@ -92,19 +81,18 @@ _ui_hongbao.prototype.close=function(notEvent){
 		this.dispatchEvent(evt);
 	}
 };
-//var res={
-//code: "001B438299"
-//log_id: 23
-//msg: "恭喜您获得16微豆，100微豆可兑换成1微元"
-//name: "微豆"
-//status_code: 0
-//type: 1
-//value: 16}
+
 _ui_hongbao.draw=function(data){
 	Wapi.lottery.draw(function(res){
+		if(!res.code){
+			W.alert(res.msg);
+			return;
+		}
 		res.logo='http://h5.bibibaba.cn/baba/wx/img/logo.jpg';
 		res.user_name='WiCARE';
 		res.text='恭喜发财，大吉大利！';
+		res.open_id=data.open_id;
+		res.cust_id=data.cust_id;
 		new _ui_hongbao(res);
 	},data);
 }

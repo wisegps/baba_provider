@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<title>mode1</title>
+		<script src="../../wslib/WiStorm.js"></script>		
+		<script src="../../wslib/api/newWapi.js"></script>
+		<script>link("W.css")</script>
+		<style>
+	.content{
+		width: 100%;
+	    height: 100%;
+	    left: 0px;
+	    top: 0px;
+	    background-color: #385A9A;
+	    position: absolute;	
+	    overflow: hidden;			
+	}
+	.con_box{
+		touch-action: pan-x;
+	    -webkit-user-select: none;
+	    -webkit-user-drag: none;
+	    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	    display: block;		
+	}
+	.top_box{
+	    position: absolute;
+	    background-color: #CBE015;
+	    width: 223px;
+	    height: 99px;
+	    top: -25px;
+	    left: -69px;
+	    transform: rotate(150deg);
+	    -moz-transform:rotate(150deg);
+	    -webkit-transform:rotate(150deg);
+	    -o-transform:rotate(150deg);	    		
+		animation:myfirst 2s;
+		-moz-animation:myfirst 2s; 
+		-webkit-animation:myfirst 2s; 
+		-o-animation:myfirst 2s; 
+		}
+	.bot_left_box{
+	    position: absolute;
+	    background-color: #476AAD;
+	    width: 360px;
+	    height: 200px;
+	    top: 80%;
+	    left: -116px;
+	    transform: rotate(30deg);
+	    -moz-transform:rotate(30deg);
+	    -webkit-transform:rotate(30deg);
+	    -o-transform:rotate(30deg);
+	    filter:alpha(opacity=80);       
+  		-moz-opacity:0.8;              
+  		-webkit-opacity:0.8;              
+		opacity: 0.8;          		
+		}
+
+	.bot_right_box{
+		position: absolute;
+	    background-color: #2C4B86;
+	    width: 550px;
+	    height: 260px;
+	    top: 75%;
+	    left: -8px;
+	    transform: rotate(150deg);		
+	    -moz-transform:rotate(150deg);
+	    -webkit-transform:rotate(150deg);
+	    -o-transform:rotate(150deg);	
+	    }
+	.theme{
+	    position: absolute;
+	    width: 250px;
+	    top: 107px;
+	    left:10%;	
+	    text-align: left;	
+	}
+	#time_p{
+	    position: absolute;
+	    bottom: 2em;
+	    width: 100%;	
+	    z-index: 100;
+   		right: 0;
+   		text-align: center;
+   		}
+	@keyframes myfirst{from {top:-150px;}to {top:-25px;}}
+	@-moz-keyframes myfirst {from {top:-150px;}to {top:-25px;}}	
+	@-webkit-keyframes myfirst {from {top:-150px;}to {top:-25px;}}	
+	@-o-keyframes myfirst {from {top:-150px;}to {top:-25px;}}
+	@keyframes mytwo{from {top:200%;}to {top:75%;}}	/*底部右半边斜角*/
+	@-moz-keyframes mytwo {from {top:200%;}to {top:75%;}}
+	@-webkit-keyframes mytwo {from {top:200%;}to {top:75%;}}
+	@-o-keyframes mytwo {from {top:200%;}to {top:75%;}}
+	@keyframes mythree{from {top:200%;}to {top:80%;}}  /*底部左半边斜角*/
+	@-moz-keyframes mythree {from {top:200%;}to {top:80%;}}
+	@-webkit-keyframes mythree {from {top:200%;}to {top:80%;}}	
+	@-o-keyframes mythree {from {top:200%;}to {top:80%;}}	
+	@keyframes times{from {right:100%;}to {right:0}}
+	@-moz-keyframes times {from {right:100%;}to {right:0;}}
+	@-webkit-keyframes times {from {right:100%;}to {right:0;}}	
+	@-o-keyframes times {from {right:100%;}to {right:0;}}
+	@keyframes themes{from {left:100%;}to {left:10%;}}
+	@-moz-keyframes themes {from {left:100%;}to {left:10%;}}
+	@-webkit-keyframes themes {from {left:100%;}to {left:10%;}}	
+	@-o-keyframes themes {from {left:100%;}to {left:10%;}}
+	</style>
+	</head>
+	<body>
+	<div class="content">
+		<div class="con_box">
+			<div class="top_box"></div>
+			<div class="theme">
+				<h1 id="title" style="color: #F0AD4E;margin-bottom: .8em;">WICARE</h1><!--标题-->
+				<div id="text" style="color: #fff;font-size: 13px;max-height: 200px;overflow: auto;">Wicare关注您的气质</div>
+			</div>
+			<p id="time_p" style="color: #fff;">截止日期：<span id="begin_time" style="color: #F0AD4E;">2016-5-18</span>&nbsp;—&nbsp;<span style="color: #DD524D;"  id="end_time">2016-6-12</span></p>
+			<div class="bot_left_box"></div>
+			<div class="bot_right_box"></div>
+		</div>
+	</div>
+	</body>
+	<script>			
+		var dom={
+			blt:W(".bot_left_box"),/*底部左半边斜角*/
+			brt:W(".bot_right_box"),/*底部右半边斜角*/
+			th:W(".theme")
+		};
+		if(_g.intent=='preview'){
+			var d=JSON.parse(_g.data);
+			if(d.title)
+				W("#title").innerHTML=d.title;
+			if(d.remark)
+				W("#text").innerHTML=d.remark;
+			if(d.start_time)
+				W("#begin_time").innerHTML=d.start_time;
+			if(d.invalid_time)
+				W("#end_time").innerHTML=d.invalid_time;
+		}
+		
+		window.onload=function (){
+			if(_g.intent=='preview')return;
+			if(_g.game_id)
+				var id=_g.game_id;
+			var data={
+				game_id:id
+			};
+			var op={
+				fields:'title,remark,start_time,invalid_time'
+			}
+			Wapi.game.get(function (res){
+				W("title").innerHTML=W("#title").innerHTML=res.title;
+				W("#text").innerHTML=res.remark;
+				var begin=NewDate(res.start_time);
+				W("#begin_time").innerHTML=begin.getFullYear()+"-"+(begin.getMonth()+1)+"-"+begin.getDate();
+				var end=NewDate(res.invalid_time);
+				W("#end_time").innerHTML=end.getFullYear()+"-"+(end.getMonth()+1)+"-"+end.getDate();
+			},data,op);
+			animation(dom.th,'themes 2s');
+
+			animation(dom.brt,'mytwo 2s');	
+
+			animation(dom.blt,'mythree 3s');
+			
+			animation(W("#time_p"),'times 3s')
+		}
+		//animation兼容
+		function animation(obj,time){
+			obj.style.animation=time;
+			obj.style.MozAnimation=time;
+			obj.style.WebkitAnimation=time;
+			obj.style.oAnimation=time;
+			return obj;
+		}
+	</script>
+</html>

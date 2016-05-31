@@ -1,0 +1,59 @@
+<!--
+	作者：江海
+	时间：2016-5-13
+	描述：订单发货首页
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+
+		<title>订单发货导航</title>
+		<script src="../../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+		<script>link("W.css")</script>
+		
+		<script src="../../wslib/api/newWapi.js" defer="defer"></script>
+		<script src="../../wslib/toolkit/WxSdk.js" defer="defer"></script>
+		<link rel="stylesheet" href="css/iconfont.css" />
+	</head>
+	<style>
+	body{text-align: center;}
+	.card{width: 33.33%;float: left;background: #f9f9f9;padding: 2em 0;border-bottom: 1px solid #eee;font-size: 13px;color:#333; border-left: 1px solid #eee;}
+	.card:active{background:#f9f9f9}
+	.card-name{line-height: 2em;}
+	.iconfont{display: block; font-size: 30px;}
+	</style>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+			<h1 class="mui-title">订单/发货导航</h1>
+		</header>
+		<div  style="margin-top:44px;">
+			<div class="card-row">
+				<a class="card" href="order_list.html">
+					<span class="mui-icon iconfont icon-weifenxiaopcjiemianzhuanhuan" style="color: #42D7C1;"></span>
+					<span class="card-name">订单管理</span>
+				</a>
+				<a class="card" href="order_print.html">
+					<span class="mui-icon iconfont icon-dayinji" style="color: #FFCC4F;"></span>
+					<span class="card-name">订单打印</span>
+				</a>
+				<a class="card" href="warehouse.html">
+					<span class="mui-icon iconfont icon-daifahuo" style="color: #FF5D5B;"></span>
+					<span class="card-name">试用发货</span>
+				</a>
+			</div>
+			<div class="card-row">
+				<a class="card" href="customer_code.html">
+					<span class="mui-icon iconfont icon-jikediancanicon41"></span>
+					<span class="card-name">用户二维码</span>
+				</a>
+			</div>
+		</div>
+	</body>
+</html>

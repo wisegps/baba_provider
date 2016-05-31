@@ -88,7 +88,7 @@ if(WiStorm.agent.weixin){//如果是微信端
 	script.src=WiStorm.config.wx_sdk;
 	W("head").appendChild(script);
 	
-	W.wx.ticket=W.getCookie("wxTicket");//获取jssdk的ticket，调用任何api都需要用到
+//	W.wx.ticket=W.getCookie("wxTicket");//获取jssdk的ticket，调用任何api都需要用到
 	if(!W.wx.ticket){//ticket过期，则重新获取ticket
 		W.getJSON(WiStorm.config.wx_ticket_url,"",
 			function(data){

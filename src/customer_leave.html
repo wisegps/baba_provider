@@ -29,7 +29,7 @@
 			同样尽量少引入js文件；
 			现在接口可能需要你们自己封装，参考wslib/api/WUserApi.js里的封装方式
 			-->
-		<script src="../wslib/api/Wapi.js" defer="defer"></script>
+		<script src="../wslib/api/newWapi.js" defer="defer"></script>
 		<!--默认的同步加载js（用于加载有严格加载顺序的外部js文件）-->
 		<script src="../wslib/ui/WiStormUI.js"></script>
 		<script src="../wslib/ui/DateTime.js"></script>
@@ -45,6 +45,7 @@
 			display: table;
 			background: white;
 			width: 100%;
+			text-align: center;
 		}
 		
 		.condition {
@@ -58,11 +59,12 @@
 			color: #999999;
 			border: 1px solid #999999;
 			border-radius: 15px;
+			padding: 0;
 		}
 		
 		.duration_div {
-			display: block;
 			background: white;
+			text-align: center;
 		}
 		
 		.time {
@@ -95,6 +97,8 @@
 			margin-bottom: 12px;
 			margin-top: 12px;
 			padding: 13px;
+			z-index: 1;
+    		position: relative;
 		}
 		
 		.tab_item {
@@ -110,113 +114,148 @@
 		[name='finish_leave'],[name='immediate_leave']{
 			width: 5.5em;
 		}
+		#search_box{
+   			margin-top: 12px;
+   			display: none;
+		}
+		.t_cell.active{
+			background: #eee;
+		}
+		.mui-icon.mui-icon-more-filled{
+			transform: rotate(90deg);
+		    position: absolute;
+		    right: 5px;
+		}
+		#type_box{
+			padding: 1em;
+			position: absolute;
+		    width: 100%;
+		    top: -96px;
+		    border-bottom: 1px solid #eee;
+		    border-top: 1px solid #eee;
+		}
+		#type_box>h4{
+			margin-bottom: 10px;
+    		margin-top: 0;
+		}
+		#content{
+			position:relative;
+		}
+		#type_box .active{
+			background: #50B7DF;
+		    color: #fff;
+		    border-color: #50B7DF;
+		}
+		#time_select>.active{
+			color: rgb(122, 201, 231);
+    		border-color: rgb(122, 201, 231);
+		}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav">
-			<a class="mui-icon mui-icon-left-nav mui-pull-left"></a>
-			<a class="mui-icon w_icon icon_add mui-pull-right" href="customer_add.html"></a>
+			<a class="mui-icon mui-icon-left-nav W_back"></a>
+			<a class="mui-icon mui-pull-right" href="customer_add.html" style="font-size: 16px;line-height: 24px;">新增客户</a>
 			<h1 class="mui-title">客户到店/离店</h1>
 		</header>
 		<div class="mui-content">
-			<center>
-				<div class="preview">
-					<div class="t_row">
-						<div class="t_cell">
-							<label class="t_value" id="arrive_today">0</label>
-							<br/>
-							<label class="t_label">
-								今日到店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="leave_today">0</label>
-							<br/>
-							<label class="t_label">
-								今日离店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="review_today">0</label>
-							<br/>
-							<label class="t_label">
-								今日评价
-							</label>
-						</div>
-
+			<div class="preview">
+				<div class="t_row">
+					<div class="t_cell" data-key="arrive_time" data-time="day">
+						<label class="t_value" id="arrive_today">0</label>
+						<br/>
+						<label class="t_label">
+							今日到店
+						</label>
 					</div>
-					<div class="t_row">
-						<div class="t_cell">
-							<label class="t_value" id="arrive_month">0</label>
-							<br/>
-							<label class="t_label">
-								当月到店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="leave_month">0</label>
-							<br/>
-							<label class="t_label">
-								当月离店
-							</label>
-						</div>
-						<div class="t_cell">
-							<label class="t_value" id="review_month">0</label>
-							<br/>
-							<label class="t_label">
-								当月评价
-							</label>
-						</div>
+					<div class="t_cell" data-key="leave_time" data-time="day">
+						<label class="t_value" id="leave_today">0</label>
+						<br/>
+						<label class="t_label">
+							今日离店
+						</label>
+					</div>
+					<div class="t_cell" data-key="evaluate_time" data-time="day">
+						<label class="t_value" id="review_today">0</label>
+						<br/>
+						<label class="t_label">
+							今日评价
+						</label>
+					</div>
+
+				</div>
+				<div class="t_row">
+					<div class="t_cell" data-key="arrive_time" data-time="mon">
+						<label class="t_value" id="arrive_month">0</label>
+						<br/>
+						<label class="t_label">当月到店</label>
+					</div>
+					<div class="t_cell" data-key="leave_time" data-time="mon">
+						<label class="t_value" id="leave_month">0</label>
+						<br/>
+						<label class="t_label">当月离店</label>
+					</div>
+					<div class="t_cell" data-key="evaluate_time" data-time="mon">
+						<label class="t_value" id="review_month">0</label>
+						<br/>
+						<label class="t_label">当月评价</label>
 					</div>
 				</div>
-
-			</center>
-			<div class="tab_inout">
-				<div style="display: table-row;">
-					<div class="tab_item" data-value="1|2|4" onclick="change(this)">
-						<label id="label_in" class="total_number">在店(0)</label>
-					</div>
-
-					<div class="tab_item" data-value="3" onclick="change(this)">
-						<label id="label_out" class="total_number" style="border-color: white">离店(0)</label>
-					</div>
-				</div>
-
 			</div>
-			<div class="condition" hidden="true">
-				<div class="duration_div">
+			<div id="search_box"></div>
+			<div id="content">
+				<div class="tab_inout">
+					<div style="display: table-row;">
+						<div class="tab_item" data-value="1|2|4" onclick="change(this)">
+							<label id="label_in" class="total_number">在店(0)</label>
+						</div>
+	
+						<div class="tab_item" data-value="3" onclick="change(this)">
+							<label id="label_out" class="total_number" style="border-color: white">离店(0)</label>
+						</div>
+						<span class="mui-icon mui-icon-more-filled"></span>
+					</div>
+				</div>
+				<div class="duration_div toDown hide" id="type_box">
+					<h4>按类型筛选</h4>
+					<button type="button" class="mui-btn mui-btn-label mui-btn-outlined" data-type="1">保养</button>
+					<button type="button" class="mui-btn mui-btn-label mui-btn-outlined" data-type="2">维修</button>
+					<button type="button" class="mui-btn mui-btn-label mui-btn-outlined" data-type="3">美容</button>
+					<button type="button" class="mui-btn mui-btn-label mui-btn-outlined" data-type="4">救援</button>
+				</div>
+				<div class="condition" hidden="true">
+					<div class="duration_div" id="time_select">
+						<button id="select_today" type="button" class="mui-btn mui-btn-label mui-btn-outlined active" data-index="0">今天</button>
+						<button id="select_week" type="button" class="mui-btn mui-btn-label mui-btn-outlined" data-index="1">1周内</button>
+						<button id="select_month" type="button" class="mui-btn mui-btn-label mui-btn-outlined" data-index="2">1个月内</button>
+						<button id="select_custom" type="button" class="mui-btn mui-btn-label mui-btn-outlined" data-index="3">自选</button>
+					</div>
+					<hr style="height:1px;border:none;border-top:1px solid #dddddd;" />
 					<center>
-
-						<button id="select_today" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(0)">今天</button>
-						<button id="select_week" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(1)">1周内</button>
-						<button id="select_month" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(2)">1个月内</button>
-						<button id="select_custom" type="button" class="mui-btn mui-btn-label mui-btn-outlined" onclick="select(3)">自选</button>
+						<div class="time_box" hidden="true">
+							<span class="time">
+							<script id="begin_time"  class="ctime" data-ccc="ccc" style=" text-align:right;border: 0px #000000 solid; border-radius: 5px; width: 45%;">
+										echo(new DateSelector())
+									</script>
+					</span>
+							<span class="time">至</span>
+							<span class="time" style="background: #007AFF;">
+							<script id="end_time"  class="ctime" data-ccc="ccc" style="border: 0px #000000 solid; border-radius: 5px;width: 45%;">
+										echo(new DateSelector())
+									</script>
+					</span>
+						</div>
 					</center>
 				</div>
-				<hr style="height:1px;border:none;border-top:1px solid #dddddd;" />
-				<center>
-					<div class="time_box" hidden="true">
-						<span class="time">
-						<script id="begin_time"  class="ctime" data-ccc="ccc" style=" text-align:right;border: 0px #000000 solid; border-radius: 5px; width: 45%;">
-									echo(new DateSelector())
-								</script>
-				</span>
-						<span class="time">至</span>
-						<span class="time" style="background: #007AFF;">
-						<script id="end_time"  class="ctime" data-ccc="ccc" style="border: 0px #000000 solid; border-radius: 5px;width: 45%;">
-									echo(new DateSelector())
-								</script>
-				</span>
-					</div>
-				</center>
+	
+				<div id="car_list"></div>
+	
+				<div id="car_list_left"></div>
+				<div class="null_tip" id = "null_tip" >
+					<h1>NULL</h1>
+					<p ><label class="tip_text"></label></p>
+				</div>
 			</div>
-
-			<div id="car_list"></div>
-
-			<div id="car_list_left"></div>
-			<div class="null_tip" id = "null_tip" >
-				<h1>NULL</h1>
-				<p ><label class="tip_text"></label></p>
-			</div>
+			
 
 		</div>
 
@@ -322,31 +361,81 @@
 		
 		var dom={
 			label_in:W("#label_in"),
-			label_out:W("#label_out")
+			label_out:W("#label_out"),
+			t_cell:W(".t_cell",true),
+			search_box:W("#search_box"),
+			content:W("#content"),
+			type_box:W("#type_box"),
+			null_tip:W("#null_tip"),
+			time_select:W("#time_select"),
+			time_box:W(".time_box"),
+			begin_time:W("#begin_time"),
+			end_time:W("#end_time")
 		}
 		window.addEventListener("DOMContentLoaded", function() {
-			if(_user.cust_type==3&&(!_user.privilege||_user.privilege[0]=="0")){
+			if(!(_user.cust_type==2||(_user.cust_type==3&&_user.privilege&&_user.privilege.cl))){
 				location="home.html";
 			}
 			//页面加载完
 			getShopData(); //获取并展示店铺当天、当月数据getBusinessData
 			getBusinessData(CarState);
-			W("#begin_time").addEvent("change", function() {
+			dom.begin_time.addEvent("change", function() {
 				select(4);
 			});
-			W("#end_time").addEvent("change", function() {
+			dom.end_time.addEvent("change", function() {
 				select(4);
 			});
-			setTimeout(function(){//为了解决在ios下微信中从车辆详情返回本页会直接触发本页的返回按钮的bug
-				W(".mui-icon-left-nav").addEvent("click",function(){location="home.html"});
-			},1000);
+			for(var i=0;i<dom.t_cell.length;i++){
+				dom.t_cell[i].addEvent('click',showSearch);
+			}
+			W(".mui-icon.mui-icon-more-filled").addEvent('click',showTypeBox);
+			dom.type_box.addEvent("click",searchType);
+			dom.time_select.addEvent("click",function(){
+				var t=event.target;
+				if(dom.time_select.querySelector('.active')==t)return;
+				var i=t.dataset.index;
+				if(typeof i!='undefined')
+					select(parseInt(i));
+			});
 		});
+		//显示类型筛选框
+		function showTypeBox(){
+			if(dom.type_box.classList.contains('fromDown')){
+				dom.type_box.classList.remove('fromDown');
+				dom.type_box.classList.add('toDown');
+				setTimeout(function(){
+					dom.type_box.classList.add('hide');
+				},500);
+			}else{
+				dom.type_box.classList.add('fromDown');
+				dom.type_box.classList.remove('toDown');
+				dom.type_box.classList.remove('hide');
+			}
+		}
+		function searchType(){
+			var t=event.target.dataset.type;
+			if(!t)return;
+			delete dom_arrived.min_id;
+			delete dom_left.min_id;
+			delete param.min_id;
+			if(event.target.classList.contains('active')){
+				delete param.business_type;
+				event.target.classList.remove('active');
+			}else{
+				param.business_type=t;
+				var lodT=dom.type_box.querySelector('.active');
+				if(lodT)
+					lodT.classList.remove('active');
+				event.target.classList.add('active');
+			}
+			getBusinessData(CarState);
+		}
+		
 		/**
 		 * 到店离店切换
 		 * @param {Object} obj
 		 */
 		function change(obj) {
-			W("#null_tip").style.display = "none";
 			var v = obj.getAttribute("data-value");
 			dom.label_in.style.borderColor = "white";
 			dom.label_out.style.borderColor = "white";
@@ -368,10 +457,64 @@
 				W("#car_list_left").style.display = "none";
 				W("#car_list").style.display = "block";
 				W(".condition").hidden = true;
-				if (!dom_arrived) {
+				if (!dom_arrived.min_id) {
+					delete param.leave_time;
 					getBusinessData(CarState);
 				}
 			}
+		}
+		//点击到店离店数量
+		function showSearch(){
+			var name=this.dataset.key;
+			var tot=parseInt(this.querySelector(".t_value").innerHTML);
+			if(tot==0||isNaN(tot)){
+				W.toast(W.trim(this.querySelector(".t_label").innerHTML)+"数量为0");
+				return;
+			}
+			
+			var last=W('.t_cell.active');
+			if(last){
+				last.classList.remove('active');
+				if(last==this){
+					dom.search_box.style.display='none';
+					dom.content.style.display='block';
+					return;
+				}
+			}
+			this.classList.add('active');
+			dom.search_box.style.display='block';
+			dom.content.style.display='none';
+			var param = {
+				seller_id: _user.seller_id,
+				access_token: _user.access_token
+			};
+			var op={
+				sorts:"-"+name,
+				page:name,
+				limit:"-1"
+			}
+			var start,now=new　Date();
+			var end=now.WtoString();
+			if(this.dataset.time=='day'){
+				start=end.slice(0,10)+" 00:00:00";
+			}else{
+				now.setDate(0);
+				start=now.WtoString().slice(0,10)+" 00:00:00";
+			}
+			param[name]=start+"@"+end;
+			Wapi.business.list(function(res){
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				var resData=res.data;
+				var list = document.createDocumentFragment();
+				for (var i =0; i<resData.length; i++) {
+					list.appendChild(new cv(resData[i])); //创建一个dv组件，并添加到DocumentFragment里
+				}
+				dom.search_box.innerHTML='';
+				dom.search_box.appendChild(list);
+			},param,op);
 		}
 		//车辆列表中的一项，的对象
 		function cv(data) {
@@ -386,7 +529,7 @@
 			return this.data;
 		}
 		cv.prototype.setData = function(data) {
-			if (CarState == StateCode.left) { //离店
+			if (data.status == 3) { //离店
 				this.innerHTML = W("#state_car_left").innerHTML;
 				initEvaluate_level(this,data);
 			} else {
@@ -450,9 +593,7 @@
 				start=null;
 			}else if(status==4){//如果是正在作业状态，删除离店按钮和开始作业按钮
 				start.parentElement.removeChild(start);
-				immediate_leave.parentElement.removeChild(immediate_leave);
 				start=null;
-				immediate_leave=null;
 			}else if(status==1){//如果是到店状态，删除完工按钮
 				finish_leave.parentElement.removeChild(finish_leave);
 				finish_leave=null;
@@ -508,8 +649,8 @@
 			
 			var b=W.parents(this,2);//业务卡片
 			var bdata=b.data;
-			Wapi.vehicle.updateBusiness(function(res) {//更新业务状态
-				if (res && res.status_code) {
+			Wapi.business.update(function(res) {//更新业务状态
+				if (res.status_code) {
 					W.errorCode(res);
 					return;
 				}
@@ -631,9 +772,9 @@
 			 */
 			if (target.data.length > 0) {
 				d.min_id = resData[resData.length-1].business_id;
-				W("#null_tip").style.display = "none";
+				dom.null_tip.style.display = "none";
 			}else{
-				W("#null_tip").style.display = "block";
+				dom.null_tip.style.display = "block";
 				showTip();
 			}
 			
@@ -642,9 +783,7 @@
 				var autoLoad;
 				if (target.autoLoad) {
 					autoLoad = target.autoLoad;
-				} else if (WiStorm.agent.ios)
-					autoLoad = new ui_autoLoad(W(".mui-content"), _load);
-				else
+				} else 
 					autoLoad = new ui_autoLoad(document, _load);
 				list.appendChild(autoLoad);
 				target.autoLoad = autoLoad;
@@ -665,12 +804,12 @@
 			param.query_type = status; //状态 1:在店 2:离店;
 			
 			
-			if(status==1){
+			if(status.toString().indexOf("1")!=-1){
 				showTipType = 5;
+			}else if(typeof select._index!=="undefined"){
+				showTipType=select._index;
 			}
 			
-			//			param.begin_time = begin_time;
-			//			param.end_time = end_time;
 			if (begin_time != undefined) {
 				param.leave_time = begin_time + "@" + end_time;
 			}
@@ -683,7 +822,7 @@
 				fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,evaluate_content,job_start_time,job_end_time',
 				sorts:"-business_id"
 			};
-			Wapi.vehicle.getBusinessList(function(res) {
+			Wapi.business.list(function(res) {
 				var carList = res.data;
 				setTotalText(res.total);
 				showMore(res);
@@ -702,7 +841,7 @@
 				fields:'business_id,business_type,obj_name,obj_id,mileage,evaluate_level,status,arrive_time,leave_time,cust_id,cust_name,business_content,car_brand_id,car_brand,car_series_id,car_series,car_type_id,car_type,evaluate_content,job_start_time,job_end_time',
 				sorts:"-business_id"
 			};
-			Wapi.vehicle.getBusinessList(function(res) {
+			Wapi.business.list(function(res) {
 				var carList = res.data;
 				setTotalText(res.total);
 				showMore(res);
@@ -732,7 +871,7 @@
 				access_token: _user.access_token,
 				seller_id: _user.seller_id
 			}
-			W.userApi.getBusinessTotal(function(res) {
+			Wapi.business.getBusinessTotal(function(res) {
 				W("#arrive_today").innerText = res.arrive_count;
 				//今天离店人数
 				var leaveNumber = res.leave_count;
@@ -751,7 +890,7 @@
 				end_time: end_time,
 				seller_id: _user.seller_id
 			}
-			W.userApi.getBusinessTotal(function(res) {
+			Wapi.business.getBusinessTotal(function(res) {
 				W("#arrive_month").innerText = res.arrive_count;
 				W("#leave_month").innerText = res.leave_count;
 				W("#review_month").innerText = res.evaluate_count;
@@ -764,64 +903,53 @@
 			/**
 			 * 其他label灰掉
 			 */
-			W("#select_today").style.color = "#999999";
-			W("#select_today").style.borderColor = "#999999";
-			W("#select_week").style.color = "#999999";
-			W("#select_week").style.borderColor = "#999999";
-			W("#select_month").style.color = "#999999";
-			W("#select_month").style.borderColor = "#999999";
-			W("#select_custom").style.color = "#999999";
-			W("#select_custom").style.borderColor = "#999999";
-			W(".time_box").hidden = true;
+			if (index != 4) {
+				dom.end_time.value = getFullCurrentTime();
+				var old=dom.time_select.querySelector('.active');
+				var n=dom.time_select.children[index];
+				old.classList.remove('active');
+				n.classList.add('active');
+			}
+			dom.time_box.style.display="none";
 			delete dom_left.min_id;
 			switch (index) {
 				case 0:
-					W("#select_today").style.color = "#7ac9e7";
-					W("#select_today").style.borderColor = "#7ac9e7";
-					W("#begin_time").value = getBeginToday();
+					dom.begin_time.value = getBeginToday();
 					break;
 				case 1:
-					W("#select_week").style.color = "#7ac9e7";
-					W("#select_week").style.borderColor = "#7ac9e7";
-					W("#begin_time").value = getBeginWeek();
+					dom.begin_time.value = getBeginWeek();
 					break;
 				case 2:
-					W("#select_month").style.color = "#7ac9e7";
-					W("#select_month").style.borderColor = "#7ac9e7";
-					W("#begin_time").value = getBeginMonth();
+					dom.begin_time.value = getBeginMonth();
 					break;
 				case 3:
-					W("#select_custom").style.color = "#7ac9e7";
-					W("#select_custom").style.borderColor = "#7ac9e7";
-					W(".time_box").hidden = false;
+					dom.time_box.style.display="block";
 					return;
 				case 4:
-					W("#select_custom").style.color = "#7ac9e7";
-					W("#select_custom").style.borderColor = "#7ac9e7";
-					W(".time_box").hidden = false;
+					dom.time_box.style.display="block";
 					break;
 			}
-			if (index != 4) {
-				W("#end_time").value = getFullCurrentTime();
-			}
-			var begin = W("#begin_time").value + " 00:00:00";
-			var end = W("#end_time").value;
+			var begin = dom.begin_time.value + " 00:00:00";
+			var end = dom.end_time.value;
 			
-			showTipType = index;
+			select._index= index;
 			getBusinessData(StateCode.left, begin, end);
 		}
 		/**
 		 * 显示提示：type： 0今天，1，本周，2本月，3自定义时间段  ，4自定义时间段  ，5在店，
 		 */
 		function showTip() {
-			W("#null_tip").style.display = "block";
-			var t0 = "您好，当天还没有离店车辆";
-			var t1 = "您好，本周还没有离店车辆";
-			var t2 = "您好，本月还没有离店车辆";
-			var t3 = "您好，该时段还没有离店车辆";
-			var t4 = "您好，该时段还没有离店车辆";
-			var t5 = "您好，您目前还没有在店车辆，客户都去哪儿了";
-			var tips = new Array(t0, t1, t2, t3, t4,t5);
+			dom.null_tip.style.display = "block";
+			var t=param.business_type||0;
+			var types=['','保养的','维修的','美容的','救援的'];
+			var tips =[
+				"您好，当天还没有"+types[t]+"离店车辆",
+				"您好，本周还没有"+types[t]+"离店车辆",
+				"您好，本月还没有"+types[t]+"离店车辆",
+				"您好，该时段没有"+types[t]+"离店车辆",
+				"您好，该时段没有"+types[t]+"离店车辆",
+				"您好，您目前还没有"+types[t]+"在店车辆，客户都去哪儿了",
+			]
 			W(".tip_text").innerText= tips[showTipType];
 		}
 	</script>

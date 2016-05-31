@@ -6,14 +6,24 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="viewport" content="initial-scale=1, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
-		<title>WiCARE-游戏</title>
+		<title>不拼不痛快</title>
+		<link rel="stylesheet" href="css/gameicon.css" />
 		<script src="../../wslib/WiStorm.js"></script>
 		<script>link("W.css")</script>
 		<script src="../../wslib/api/newWapi.js" defer="defer"></script>
 		<script src="../../wslib/toolkit/WxSdk.js" type="text/javascript" charset="utf-8"></script>
 		<script src="../ui/hongbao.js" defer="defer"></script>
-		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
 	</head>
+	<!--<script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.defer='defer';
+	  hm.src = "//hm.baidu.com/hm.js?a3849d479c43d999a7dd3d0478e08b45";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>-->
 	<style>
 		#game{
 			width: 90vmin;
@@ -21,18 +31,11 @@
 		}
 		#game_view{
 			font-size: 0;
-			margin: auto;
+			margin: 5px auto;
 			width: 90vmin;
 			height: 90vmin;
 			position: relative;
-			box-shadow: 0px 0px 10px rgba(0,0,0,.5);
-		}
-		#game>span{
-			display: inline-block;
-		    color: #333;
-		    font-size: 24px;
-		    padding: 5px;
-		    margin: 5px 0;
+			box-shadow: 5px 5px 12px rgba(0,0,0,.6);
 		}
 		#ratio:after{
 			content: "%";
@@ -74,7 +77,7 @@
 			width: 100%;
 		    text-align: center;
 		}
-		#title,#makeMyGame{width: 40%;display: inline-block;}
+		#title,#makeMyGame{width: 39%;display: inline-block;}
 		
 		#make_game{
 		    position: fixed;
@@ -97,7 +100,7 @@
 		    height: 40px;
 		    background-size: 100% 100%;
 		    position: relative;
-    		overflow: hidden;
+    		box-shadow: 0 0 0 2px #fff;
 		}
 		.rank>span{
 			z-index: 1;
@@ -109,43 +112,74 @@
     		text-shadow: 0 0 3px#000;
     		font-size: 14px;
 		}
-		.rankb{
-			width: 100%;
-		    height: 100%;
-		    background: rgba(0,0,0,.5);
-		}
-		#dou{
-			float: right;
-		}
 		#dou:before{
-			font-family: Muiicons;
-			content: '\e438';
+			font-family: gameicon;
+			content: '\e610';
 			color: #FFCA00;
 			vertical-align:top;
+			margin-right: 5px;
 		}
 		@keyframes like
 		{
 			0%   {transform:scale3d(1,1,1) translate3d(0,0,0);opacity: 1;}
-			100% {transform:scale3d(2,2,1) translate3d(-10px,-10px,0);opacity: 0;}
+			100% {transform:scale3d(2,2,1) translate3d(-25px,-20px,0);opacity: 0;}
 		}
 		
 		@-webkit-keyframes like
 		{
 			0%   {-webkit-transform:scale3d(1,1,1) translate3d(0,0,0);opacity: 1;}
-			100% {-webkit-transform:scale3d(2,2,1) translate3d(-10px,-10px,0);opacity: 0;}
+			100% {-webkit-transform:scale3d(2,2,1) translate3d(-25px,-20px,0);opacity: 0;}
 		}
 		
 		#game>.like{
 			position: absolute;
 		    top: 50%;
 		    left: 50%;
-		    color: #d9534f;
-		    text-shadow: 0 0 1px #fff;
-			animation: like 1s;
-			-webkit-animation: like 1s;
+		    color: #E2322D;
+		    font-weight: 700;
+		    font-size: 30px;
+		    text-shadow: 0 0 1px #333;
+			animation: like 2s;
+			-webkit-animation: like 2s;
 			animation-fill-mode: forwards;
 			-webkit-animation-fill-mode: forwards;
 		}
+		.game_msg{
+			font-family: gameicon;
+			display: table;
+			width: 100%;
+		}
+		.game_msg>div{
+			display: table-cell;
+			background: #333;
+			padding: 5px;
+			text-shadow: 0 0 3px #45B5FF;
+		}
+		.game_msg>div>div{
+			font-size: 18px;
+		    padding: 5px;
+		    background: #222;
+		    border-radius: 3px;
+		    color: #45B5FF;
+		    box-shadow: -1px 1px 3px rgba(0,0,0,.5) inset;
+		}
+		.progress-bar {
+		    background-image: -webkit-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+		    background-image: -o-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+		    background-image: linear-gradient(45deg,rgba(255,255,255,.4) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.4) 50%,rgba(255,255,255,.4) 75%,transparent 75%,transparent);
+		    -webkit-background-size: 40px 40px;
+		    background-size: 40px 40px;
+		    background-color: #428bca;
+		    border-radius: 4px;
+		    text-align: right;
+		    color: #fff;
+		    -webkit-transition: width .3s ease;
+		    -o-transition: width .3s ease;
+		    transition: width .3s ease;
+	    }
+	    .mui-content>button{box-shadow: 1px 2px 3px rgba(0,0,0,.5);}
+	    #make_game>button{box-shadow: 1px 1px 2px rgba(0,0,0,.2);}
+	    #lottery_box{width: 80%;;background: #e54346;}
 	</style>
 	<script>
 		var open_id=_g.openid;
@@ -158,24 +192,51 @@
 		}
 		_g.id=_g.id||0;
 	</script>
-	<body style="overflow: hidden;">
+	<body style="background: #333;">
 		<div class="mui-content">
-			<div class="ad" style="width: 100%;">
-				<a href="../buy.html?intent=logout">
-					<img src="../../img/ad.jpg" />
+			<div class="ad" style="width: 100%;height: 25vw;">
+				<a href="javascript:void(0);">
+					<img src="" />
 				</a>
 			</div>
 			<div id="game">
-				<span id="ratio">0</span>
-				<span id="s">0</span>
-				<span id="time">00:00</span>
-				<span id="dou">0</span>
+				<div class="game_msg">
+					<div style="width: 40%">
+						<div>
+							<div id="ratio" class="progress-bar">0</div>
+						</div>
+					</div>
+					<div>
+						<div>
+							<span id="s">0</span>
+						</div>
+					</div>
+					<div style="width: 4em;">
+						<div>
+							<span id="time">00:00</span>
+						</div>
+					</div>
+					<div>
+						<div>
+							<span id="dou">0</span>
+						</div>
+					</div>
+				</div>
 				<div id="game_view"></div>
 			</div>
-			<div id="rank"></div>
+			<div id="rank">
+				<span style="color: #aaa;text-shadow: 0 0 5px rgba(255,255,255,0.4);">点击授权查看排行榜</span>
+			</div>
 			<div style="text-align: center;">
-				<button type="button" id="title" class="mui-btn mui-btn-block w">设置分享标题</button>
-				<button type="button" id='makeMyGame' class="mui-btn mui-btn-block w" style="background: #d9534f;">制作我自己的游戏</button>
+				<button type="button" id="title" class="mui-btn mui-btn-block w">设置标题
+				</button><button type="button" id='makeMyGame' class="mui-btn mui-btn-block w" style="background: #d9534f;margin-left: 2%;">制作拼图</button>
+			</div>
+			<div style="text-align: center;margin-bottom: .5em;">
+				<button type="button" id="lottery_box"  class="mui-btn mui-btn-block w">微豆抽奖</button>
+			</div >
+			<div style="text-align: center;margin-bottom: 3em;">
+				<a href="game_draw.html?intent=logout" style="text-decoration: underline;font-size: 15px;margin-bottom: 5px;color: red;display: block;">参与活动抽大奖</a>
+				<a href="use_rule.html?intent=logout" style="text-decoration: underline;font-size: 15px;display: block;">代金券和微豆的使用规则</a>
 			</div>
 		</div>
 		<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
@@ -195,7 +256,7 @@
 				</li>
 			</ul>
 		</div>
-		<div id="make_game" class="child_view toRight">
+		<div id="make_game" class="child_view hide">
 			<div class="control">
 				<button type="button" data-val="3" style="background: #5cb85c;">幼儿水平</button>
 				<button type="button" data-val="4" style="background: #5bc0de;">来点挑战</button>
@@ -204,22 +265,16 @@
 				<button type="button" data-val="8" style="background: #000;">放弃治疗</button>
 				<button type="button" data-val="10" style="background: #fff;color: #000;">妈的智障</button>
 			</div>
-			<canvas id='myCanvas' width="400" height="200"></canvas>
-			<button type="button" id="upload" class="mui-btn mui-btn-block w">确定</button>
+			<canvas id='myCanvas' width="400" height="200" style="box-shadow: 2px 2px 10px rgba(0,0,0,.3);"></canvas>
+			<button type="button" id="cimg" style="background: #5cb85c;" class="mui-btn mui-btn-block w">选择图片制作</button>
+			<button type="button" id="upload" class="mui-btn mui-btn-block w" style="margin-bottom: 3em;">确定</button>
 		</div>
 		<template id="rankone">
 			<div class="rank" style="background-image: url(<%logo%>);">
-				<span><%completion%>%</span>
-				<svg viewBox="0,0,100,100" style="opacity: .5;">
-					<defs>
-						<clipPath id="clipPath">
-							<rect x="<%completion%>" y="0" width="100" height="100"/>
-						</clipPath>
-				  	</defs>
-				  	<circle cx="50" cy="50" r="50" clip-path="url(#clipPath)"></circle>
-				</svg>
+				<div class="name" style="display: none;position: absolute;width: 100%;color: #fff;top: -2em;text-shadow: 0 0 2px #000;"><%name%></div>
+				<span style="right: -0.5em;top: -0.5em;width: 1.5em;height: 1.5em;position: absolute;background-color: #F13F40;color: white;text-align: center;line-height: 1.5em;border-radius: 50%;font-size: 12px;"><%rank%></span>
+				<span><%duration%>s</span>
 			</div>
-			<div><%name%></div>
 		</template>
 	</body>
 	<script>
@@ -241,13 +296,10 @@
 			adimg:W(".ad img"),
 			rankone:W("#rankone"),
 			rank:W("#rank"),
-			dou:W("#dou")
+			dou:W("#dou"),
+			lottery:W("#lottery_box")
 		}
 		var vmin=dom.body.offsetWidth;
-		if(dom.mg.offsetWidth>dom.mg.offsetHeight)
-			vmin=dom.mg.offsetHeight;
-		else
-			vmin=dom.mg.offsetWidth;
 		
 		var img=_g.img||"pZuYoJ2XlqOYqQ.jpg",
 		img_w,img_h,game_id=_g.game_id;
@@ -273,6 +325,8 @@
 		var cxt=dom.canvas.getContext("2d");//画布
 		var socket;//socket对象
 		window.addEventListener("load",function(){
+			savePlayerInfo();
+			setShare.title=_g.title||'妖兽啦！分享标题被吃啦！';
 			setShare();
 			var b=W(".control button",true);
 			for(var i=0;i<b.length;i++){
@@ -293,7 +347,45 @@
 			resetImg();
 			getad();
 			dom.dou.innerHTML=W.ls('total_wi_dou',true)||0;
+			
+			dom.ad.addEvent('click',clickAd);
+			dom.lottery.addEvent('click',showRule);
+			W('#cimg').addEvent('click',showPicture);
+			dom.canvas.addEvent('click',showPicture);
+			makeRank();
+			W("#rank span").addEvent('click',function(){
+				W.wxLogin('getWxUser');
+			});
 		})
+		//点击微豆抽奖跳转到红包页面
+		function showRule(){
+			location.href='hongbao.html?intent=logout&needOpenId=true&openid='+open_id;		
+		}
+		window.onunload=function(){
+			if(_g.game_id==game_id)
+				W.setCookie(game_id+'Time',startTime,1);
+		}
+		
+		//保存已授权的用户数据
+		function savePlayerInfo(){
+			var info=W.ls('gamePlayerInfo');
+			if(info){
+				jsonConcat(_g,info);
+				W.debug(JSON.stringify(_g));
+				return;
+			}
+			if(!_g.nickname||!_g.headimgurl)return;
+			info={
+				nickname:_g.nickname,
+				openid:_g.openid,
+				headimgurl:_g.headimgurl,
+				sex:_g.sex,
+				province:_g.province,
+				city:_g.city,
+				privilege:_g.privilege
+			}
+			W.setLS('gamePlayerInfo',info);
+		}
 		//更换图片
 		function resetImg(){
 			c={
@@ -336,19 +428,15 @@
 			upset();
 			setShare();
 			W.loading();
-			
-			startTime=new Date().getTime();
-			var saveTime=W.ls(game_id+'startTime',true);
-			if(saveTime)
-				startTime=saveTime;
-			else 
-				W.setLS(game_id+'startTime',startTime);
 			timing();
 		}
 		
 		//计时
 		function timing(){
-			var t=parseInt((new Date().getTime()-startTime)/1000);
+			if(win.win)return;
+			if(isNaN(startTime))startTime=0;
+			stopTiming();
+			var t=++startTime;
 			var m=parseInt(t/60);
 			var s=t%60;
 			var h=0;
@@ -356,6 +444,10 @@
 				h=parseInt(m/60);
 				m=m%60;
 			}
+			if(h>99)h=0;
+			if(s<10)s='0'+s.toString();
+			if(m<10)m='0'+m.toString();
+			if(h<10)h='0'+h.toString();
 			dom.time.innerHTML=h+':'+m+':'+s;
 			timeId=setTimeout(timing,1000);
 		}
@@ -364,7 +456,8 @@
 		}
 		
 		function setX(){
-			W.loading(true);
+			if(!fileUpload._byUser)return;
+			W.loading('绘制图片中，视图片大小3秒至15秒不等……');
 			x=parseInt(this.dataset.val);
 			win.win=true;
 			setTimeout(resetGame,50);
@@ -372,8 +465,13 @@
 		
 		//画布上画出所有卡片
 		function drawImage(){
-			if(img.search(/data:image/)==-1)
+			if(!fileUpload._byUser){
+				cxt.font = "48px 微软雅黑";
+				cxt.textAlign='center';
+				cxt.fillText("点击选择图片",gw/2,gw/2,gw);
 				return;
+			}
+				
 			for (var i =0;i<l;i++) {
 				cards[i].draw();
 			}
@@ -381,19 +479,29 @@
 		
 		//打乱顺序
 		function upset(){
+			startTime=parseInt(W.getCookie(game_id+'Time'))||0;
+			if(!startTime){
+				clearGame();
+				startTime=0;
+			}
+			
 			var j;
 			for(var i=0;i<l;i++){
 				j=getRandom(0,l-1);
 				cards[i].move(j);
 			}
-			loadGame();
+			if(!fileUpload._byUser){
+				loadGame();
+				win.win=false;
+			}
+			
 			win.s=W.ls(game_id+'wins',true);
 			var p=W.ls(game_id+'completion',true);
 			if(win.s=='undefined'||!win.s)win.s=0;
 			if(p=='undefined'||!p)p=0;
 			dom.s.innerHTML=win.s.toString();
 			dom.ratio.innerText=p;
-			win.win=false;
+			dom.ratio.style.width=p+'%';
 			makeSequence();
 			drawImage();
 		}
@@ -481,6 +589,7 @@
 		}
 		
 		card.move=function(){
+			if(win.win)return;
 			if(card.active){
 				this.move(card.active.i);
 				card.send();
@@ -507,6 +616,7 @@
 				W.toast('服务器同步失败');
 			}else{
 				dom.ratio.innerText=res.completion;
+				dom.ratio.style.width=res.completion+'%';
 				W.setLS(game_id+'completion',res.completion,true);
 				if(res.completion<100)
 					return;
@@ -515,13 +625,22 @@
 				stopTiming();
 				dom.dou.innerHTML=res.total_wi_dou;
 				dom.game.appendChild(like(res.add_wi_dou));
-				W.toast('赢了！！！可以点击下面的等级按钮挑战不同级别哦！也可以制作自己的游戏分享出去，摧残他们的意志吧少年！');
-				W.setLS(game_id+'completion','',true);
-				W.setLS(game_id+'startTime','',true);
-				W.setLS(game_id,'',true);
-				W.setLS(game_id+'wins','',true);
-				W.setLS('total_wi_dou',res.total_wi_dou,true)
+				if(res.total_wi_dou>99){
+					W.alert('满100微豆可以抽奖哦!点击下面的抽奖按钮去抽奖吧!');
+				}
+				W.toast('任务完成，还可以制作自己的游戏分享出去噢，摧残他们的意志吧少年！');
+				W.setLS('total_wi_dou',res.total_wi_dou,true);
+				clearGame();
+				makeRank();
 			}
+		}
+		//清除游戏进度
+		function clearGame(){
+			W.setLS(game_id+'completion','',true);
+			W.setLS(game_id,'',true);
+			W.setLS(game_id+'wins','',true);
+			W.setCookie(game_id+'Time',0,1);
+			startTime=0;
 		}
 		
 		function like(num){
@@ -530,7 +649,7 @@
 			p.innerHTML='+'+num+'微豆';
 			setTimeout(function(){
 				p.parentNode.removeChild(p);
-			},1000);
+			},2000);
 			return p;
 		}
 		
@@ -551,11 +670,14 @@
 		
 		/*****设置分享******/
 		function setShare(){
-			if(img.search(/data:image/)==0)
+			if(fileUpload._byUser)
 				return;
 			var name=_user?_user.cust_name:"";
-			var share_url=location.origin+location.pathname+'?intent=logout&needOpenId=true&id='+open_id+'&name='+name+'&x='+x+'&game_id='+game_id+'&img='+encodeURIComponent(img);
-			history.pushState(null,"",share_url);
+			var src='';
+			if(!_g.src_id&&_user)
+				src='&src_id='+_user.cust_id;
+			var share_url=location.origin+location.pathname+'?intent=logout&needOpenId=true&id='+open_id+'&name='+encodeURIComponent(name)+'&x='+x+'&game_id='+game_id+'&title='+encodeURIComponent(setShare.title)+'&img='+encodeURIComponent(img)+src;
+			
 			if(!W.fillFriend.fill){
 				W.fillFriend(_g.id,open_id,_g.name,name);
 				W.fillFriend.fill=true;
@@ -564,10 +686,9 @@
 				window.addEventListener("nativeSdkReady",setShare);
 				return;
 			}
-			W.debug(open_id);
 			var op={
-			    title: setShare.title||'我的自拍不是那么容易发出来滴~', // 分享标题
-			    desc: 'WiCARE空气净化器', // 分享描述
+			    title: setShare.title, // 分享标题
+			    desc: '不拼不痛快', // 分享描述
 			    link: share_url, // 分享链接
 			    imgUrl:img, // 分享图标
 			    success: function(){},
@@ -585,6 +706,7 @@
 		/*******websocket部分******/
 		function Socket(callback){
 			var server="ws:gs.bibibaba.cn:8081";
+//			var server="ws:192.168.3.242:8081";
 			this.socket=new WebSocket(server);
 			this.socket.onopen=callback||W._noop;
 			this.msgid=0;
@@ -630,8 +752,9 @@
 			var cust_name=_g.nickname;
 			var logo=_g.headimgurl;
 			if(_user){
-				cust_name=_user.cust_name;
-				logo=_user.logo||_g.headimgurl;
+				cust_name=_g.nickname||_user.cust_name;
+				logo=_g.headimgurl||_user.logo;
+				W.debug('_user====='+JSON.stringify(_user));
 			}
 			socket=new Socket(function(){
 				socket.sendMsg({
@@ -651,13 +774,7 @@
 			socket.onmessage=function(data){
 				//服务器主动推送的信息(排行榜或者是序列)
 				if(data.type=="FINISH"){
-					var r=data.ranks;
-					var l=document.createDocumentFragment();
-					for(var i=0;i<r.length;i++){
-						l.appendChild(new rank(r[i]));
-					}
-					dom.rank.innerHTML='';
-					dom.rank.appendChild(l);
+					
 				}else if(data.type==''){
 					
 				}
@@ -666,24 +783,61 @@
 			socket.onclose=login;
 		}
 		
+		function makeRank(){
+			if(!_user&&!_g.headimgurl)return;
+			Wapi.gamelog.list(function(res){
+				if (res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				var r=res.data;
+				if(!r||!r.length){
+					W("#rank span").innerText='当前还没有人完成这个游戏哦~';
+					return;
+				}
+				var l=document.createDocumentFragment();
+				for(var i=0;i<r.length;i++){
+					if(!r[i].name&&!r[i].open_id)
+						continue;
+					r[i].rank=i+1;
+					l.appendChild(new rank(r[i]));
+				}
+				dom.rank.innerHTML='';
+				dom.rank.appendChild(l);
+			},{'game_id':game_id,completion:100},{limit:5});
+			
+		}
+		
 		function rank(data){
 			var obj=new WiStormUI("div");
 			obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+			if(!data.logo)data.logo='http://h5.bibibaba.cn/baba/wx/img/logo.jpg';
+			if(!data.name)data.name='玩家'+data.open_id.slice(-1);
 			obj.template(dom.rankone,data);
+			obj.addEvent('touchstart',rank.s);
 			return obj;
+		}
+		rank.s=function(){
+			var t=this.querySelector('.name');
+			if(t.style.display=='none')
+				t.style.display='block';
+			else 
+				t.style.display='none';
 		}
 		
 		
 		/*****上传图片*****/
 		function showMakeGame(){
 			dom.mg.classList.remove("toRight");
+			dom.mg.classList.remove("hide");
 			dom.mg.classList.add("fromRight");
-			setTimeout(showPicture,600);
+//			setTimeout(showPicture,600);
 			history.pushState(null,location,location);
 			window.addEventListener("popstate",hideMakeGame);
 		}
 		
 		function hideMakeGame(){
+			repalaceCanvas();
 			dom.mg.classList.remove("fromRight");
 			dom.mg.classList.add("toRight");
 			window.removeEventListener('popstate',hideMakeGame);
@@ -717,7 +871,10 @@
 			reader.onload = function (e){
 				W.loading();
 				img=e.target.result;
+				fileUpload._byUser=true;
 				resetImg();
+				repalaceCanvas(1);
+				win.win=true;
 			}
 		}
 		
@@ -741,7 +898,7 @@
 		}
 		//上传图片
 		function fileUpload(){
-			if(img.search(/data:image/)!=0){
+			if(!fileUpload._byUser){
 				W.toast('请上传文件再提交');
 				return;
 			}
@@ -758,6 +915,7 @@
 					return;
 				}
 				img=res.image_file_url;
+				fileUpload._byUser=false;
 				Wapi.game.add(function(res){
 					W.loading();
 					if (!res||res.status_code) {
@@ -765,10 +923,12 @@
 						return;
 					}
 					game_id=res.game_id;
+					clearGame();
 					resetImg();
 					dom.mg.classList.add("toRight");
 					dom.mg.classList.remove("fromRight");
-					W.toast('游戏创建成功，右上角就可以分享出去给朋友玩啦！还可以分别分享不同难度哦~~记得设置分享标题哦~');
+					W.alert('游戏创建成功，分享出去从外部点进来才可以玩噢！记得设置分享标题哦~');
+					repalaceCanvas();
 				},{
 					'open_id':open_id,
 					type:'1',
@@ -779,6 +939,22 @@
 			},data,function(s){
 				W.loading("正在上传文件，请稍等……"+parseInt(s*100)+'%');
 			});
+		}
+		
+		function repalaceCanvas(b){
+			if(b){
+				dom.canvas.style.opacity=0;
+				dom.gv.style.zIndex=998;
+				dom.gv.style.position='fixed';
+				dom.gv.style.top='96px';
+				dom.gv.style.boxShadow='2px 2px 10px rgba(0,0,0,.3)';
+			}else{
+				dom.canvas.style.opacity=1;
+				dom.gv.style.zIndex=0;
+				dom.gv.style.position='relative';
+				dom.gv.style.top='0';
+				dom.gv.style.boxShadow='5px 5px 12px rgba(0,0,0,.6)';
+			}
 		}
 		
 		//写出答案序列
@@ -809,23 +985,85 @@
 			}
 		}
 		
+		var adp={
+			'open_id':open_id,
+			src_id:_g.src_id,
+			game_id:_g.game_id
+		}
 		//获取广告
 		function getad(){
 			Wapi.ad.list(function(res){
-				console.log(res);
-				getad.ad=res.data;
+				getad.ad=upsetAd(res.data);
 				resetAd.i=0;
+				adp.city=res.city;
 				resetAd();
 			});
 		}
 		
+		function upsetAd(arr){
+			//按概率随机出一个放到第一个
+			var ads=[];
+			var p = Math.random() * 100;
+            var w = 0;
+            var doc = null;
+            for(var i = 0; i < arr.length; i++){
+                w = w + arr[i].probability;
+                if(p < w){
+                    doc = arr[i];
+                    arr.splice(i,1);
+                    break;
+                }
+            }
+			ads.push(doc);
+			//后面的随机排
+			var j,tem;
+			var L=arr.length;
+			for(var i=0;i<L;i++){
+				j=getRandom(0,arr.length-1);
+				ads.push(arr[j]);
+				arr.splice(j,1);
+			}
+			return ads;
+		}
+		
+//		function testad(arr){
+//			var ca=[];
+//			var a=[0,0,0,0];
+//			for(var i=0;i<100000;i++){
+//				ca=arr.concat();
+//				a[upsetAd(ca)[0].ad_id-1]++;
+//			}
+//			console.log(a);
+//		}
+		
+		//显示广告
 		function resetAd(){
 			if(resetAd.i>=getad.ad.length)
 				resetAd.i=0;
 			var ad=getad.ad[resetAd.i++];
-			dom.ad.href=ad.url;
+			dom.ad._ad=ad;
 			dom.adimg.src=ad.image;
-			setTimeout(resetAd,30000);
+			setTimeout(resetAd,6000);
+			if(ad._view)
+				return;
+			adp.ad_id=ad.ad_id;
+			adp.type=1,
+			Wapi.adLog.add(function(res){
+				if (res.status_code) {
+					return;
+				}
+				ad._view=true;
+			},adp);
+		}
+		
+		//点击广告
+		function clickAd(){
+			var that=this;
+			adp.ad_id=this._ad.ad_id;
+			adp.type=2;
+			Wapi.adLog.add(function(){
+				location=that._ad.url;
+			},adp);
 		}
 	</script>
 </html>

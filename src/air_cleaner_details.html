@@ -1,0 +1,143 @@
+<!--
+	作者：小刘
+	时间：2016-04-13
+	描述：设备介绍详情
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+			
+		<title>WiCARE Air, 开启智能净化新时代</title>
+		<script src="../wslib/WiStorm.js"></script>
+		<script>link("W.css")</script>
+		<script>
+		var open_id=_g.openid;
+		if(!open_id)
+			W.getOpenId(true);
+		</script>
+		<script src="../wslib/api/newWapi.js"></script>
+		<script src="../wslib/toolkit/WxSdk.js"></script>
+		<style>
+			.mui-content{text-align: center;padding-bottom: 50px;}
+			img{display: block;width: 100%;z-index: 1024;}
+			.bottom_sidebar{
+				background-color: #fff;
+				text-align: right;
+				position: fixed;
+				bottom: 0;
+			    width: 100%;
+		        height: 51px
+			}
+			#buy{
+				text-align: center;
+				display: inline-block;
+				width: 100%;
+				line-height: 51px;
+				border: 0;
+			}
+			#backTop{
+				padding-right: .5em;
+				display: inline-block;
+				width: 60%;
+				color: #f15353;
+			}
+			.mui-spinner{
+			    width: 40px;
+			    height: 40px;
+			    position: absolute;		
+			    top: 45%;
+			    left: 45%;
+			    z-index:-1;		
+			}
+			.rel{position: relative;}
+		</style>
+	</head>
+	<body>
+		
+		<div class="mui-content">
+			<div class="rel"><img src="../img/长图_01.jpg"/><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="../img/长图_02.png" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="../img/长图_03.png" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="../img/长图_04.png" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="" /><span  class="mui-spinner"></span></div>
+			<div class="rel"><img src="" /><span  class="mui-spinner"></span></div>
+		</div>
+		<div class="bottom_sidebar">
+			<div id="buy" style="background-color: #e54346;color: #fff;">去购买</div>			
+		</div>
+		<script>
+		var dom={
+			parent:W(".mui-content")
+		};
+		W("#buy").addEvent("click",function (){
+			location.href='buy.html?intent=logout&needOpenId=true';
+		});
+		
+
+		window.onload=function(){
+			
+			del_ff(dom.parent);
+			var imgs=W(".mui-content img",true);
+			setTimeout(function(){
+				var a='';
+				for(var i=4;i<imgs.length;i++){
+					a=i+1;
+					if(a<10)
+						a='0'+a.toString();
+					else
+						a=a.toString();
+					imgs[i].src='../img/长图_'+a+".png";
+				}
+			},2000);
+			setShare();
+		}
+		
+		//去除父元素下的空白节点
+		function del_ff(elem){	
+			
+			var elem_child = elem.childNodes;			
+			for(var i=0; i<elem_child.length;i++){				
+				if(elem_child[i].nodeName == "#text" && !/\s/.test(elem_child.nodeValue))
+					elem.removeChild(elem_child[i]);
+			}
+		}			
+	/*****设置分享******/
+	function setShare(){
+		var name=_user?_user.cust_name:"";
+		var share_url=location.origin+location.pathname+'?intent=logout&needOpenId=true&id='+open_id+"&name="+name;
+		if(!W.fillFriend.fill){
+			W.fillFriend(_g.id,open_id,_g.name,name);
+			W.fillFriend.fill=true;
+		}
+		if(!W.native){
+			window.addEventListener("nativeSdkReady",setShare);
+			return;
+		}
+		history.pushState(null,"",share_url);
+		var op={
+		    title: 'WiCARE智能车载空气净化器，关爱车，更关爱你。', // 分享标题
+		    desc: 'WiCARE智能车载空气净化器', // 分享描述
+		    link: share_url, // 分享链接
+		    imgUrl:"http://img2.bibibaba.cn/photo/air/IMG_2515.jpg@!wicare", // 分享图标
+		    success: function(){},
+		    cancel: function(){}
+		}
+		wx.onMenuShareTimeline(op);
+		wx.onMenuShareAppMessage(op);
+	}
+	</script>
+	</body>
+</html>

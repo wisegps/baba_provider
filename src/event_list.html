@@ -1,0 +1,486 @@
+<!--
+	作者：江海
+	时间：2016-5-17
+	描述：活动列表页
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+			
+		<title>WiCARE商户版</title>
+		<!--必须最先引入WiStorm.js文件-->
+		<script src="../wslib/WiStorm.js"></script>
+		<script type="text/javascript" src="http://tajs.qq.com/h5?sId=500001220" charset="UTF-8" defer="defer"></script>
+		<!--使用link()引入css文件，无需写路径，直接写文件名即可,尽量少引入css，样式如果少（小于10k为少），
+		可以直接写在style元素里，放到body元素后面-->
+		<script>link("W.css")</script>
+		<script>link("ui.css")</script>
+		
+		<!--其他js文件需在css文件后面引入，如果是在加载完页面之后才会用到的，使用defer属性异步加载;或者直接放到body后面；
+			同样尽量少引入js文件；
+			现在接口可能需要你们自己封装，参考wslib/api/WUserApi.js里的封装方式
+			-->
+		<script src="../wslib/api/newWapi.js" defer="defer"></script>
+		<script src="ui/ui.js"></script>
+		<script src="../wslib/ui/DateTime.js" type="text/javascript" charset="utf-8"></script>
+		<style>
+		body{background-color: #EFEFF4;}
+		#select{
+			position: fixed;
+			top: 44px;
+			width: 100%;
+			background: #fff;
+		    padding: .5em;
+		    z-index: 1;
+		    box-shadow: 0 1px 10px rgba(0,0,0,.4);
+		    display: none;
+		}
+		#select h4{
+			text-align: right;
+		    padding-right: .5em;
+		    margin-top: .8em;
+		}
+		#select h4>input{
+			font-size: 18px;
+			color: #148BE2;
+			margin-left: 1em;
+		}
+		#clear{
+			margin-right: 1em;
+    		color: #dd524d;
+		}
+		#search_box,#act_list{
+			display: none;
+		}
+		#search_list{
+			background: #EFEFF4;
+		}
+		.checkin_box{
+			height: 28px;
+		    width: 28px;
+		    display: inline-block;
+		    border-radius: 50%;
+		    vertical-align: bottom;
+		}
+		.checkin_box>input[type='checkbox']{
+			top: 0;
+			left: 0;
+		}
+		#select_btn{
+			float: right;
+		    margin: 0 5px;
+		    line-height: 34px;
+		    border: none;
+		    background: #50B7DF;
+		    color: #fff;
+		}
+		#select .mui-input-row label{width: 40%;}
+		#select .mui-input-row label~input,.mui-input-row label~select{width: 60%;}
+		.mui-checkbox input[type=checkbox]:before {
+    		color: #007aff;
+		}
+		.checkin{
+			line-height: 28px;
+		    padding: 3px;
+		    margin-bottom: .5em;
+		    background: #fff;
+		}
+		#car_list .checkin_box{
+			display: none;
+		}
+		#fab{
+			width: 56px;
+		    height: 56px;
+		    border: none;
+		    border-radius: 50%;
+		    position: fixed;
+		    right: 5%;
+		    top: 100px;
+		    background: #1DB5E2;
+		    color: #fff;
+		    text-align: center;
+		    padding: 0;
+		    box-shadow: 1px 1px 10px rgba(0,0,0,.5);
+		    display: none;
+		}
+		#act_list .mui-table-view-cell{
+			padding: .5em;
+		}
+		#act_list>.mui-table-view-cell{
+			color: #148BE2;
+		    background: #fff;
+		    text-align: center;
+		    padding: .8em;
+		}
+		</style>
+	</head>
+	<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-icon mui-icon-left-nav" href="home.html"></a>
+			<a class="mui-pull-right" href="event_edit.html" style="margin:12px 5px 0 0;font-size:14px;color:#333;">添加</a>
+			<!--<a class="mui-pull-right" onclick="showMore();" style="margin:12px 5px 0 0;font-size:14px;color:#333;">更多</a>-->
+			<h1 class="mui-title">活动管理</h1>
+		</header>
+		<div class="mui-content">
+			<div>
+				<button type="button" id="select_btn">筛选</button>
+				<div class="mui-input-row mui-search">
+					<input type="search" class="mui-input-clear" id="search_input"  placeholder="输入车牌号查询车辆">
+				</div>
+			</div>
+			<div id="search_box">
+				<div class="checkin">
+					<div class="checkin_box mui-checkbox">
+						<input type="checkbox" id="check_all">
+					</div>
+					<label>全选</label>
+				</div>
+				<div id="search_list"></div>
+				<button type="button" id="fab">推送</button>
+			</div>
+			<div><p style="text-align: center;margin: 5px 0;">您当前<span id="total_state">未过期</span>的活动为<span id="total"></span>个</p></div>
+			<div id="car_list">
+				<div class="null_tip">
+					<h1>NULL</h1>
+					<p>您好，您目前还没有添加活动</p>
+					<p><a href="event_edit.html">点击添加活动</a></p>
+				</div>
+			</div>
+		</div>
+			
+		<aside id="select" class="fromTop mui-input-group">
+			
+			<ul id="select_date" class="mui-table-view mui-table-view-radio">
+				<li value="1" class="mui-table-view-cell">
+					<a class="mui-navigate-right">
+						未开始
+					</a>
+				</li>
+				<li value="0" class="mui-table-view-cell mui-selected">
+					<a class="mui-navigate-right">
+						进行中
+					</a>
+				</li>
+				<li value="-1" class="mui-table-view-cell">
+					<a class="mui-navigate-right">
+						已过期
+					</a>
+				</li>
+			</ul>
+			
+				<h4>
+					<input type="button" id="close" value="取消">
+					<input type="button" id="submit" value="确定">
+				</h4>
+		</aside>
+		<template id="event_view">
+			<table>
+				<tr>
+					<td style="width:100px; height:100px;text-align: center;vertical-align: middle;">
+						<img src="<%material_url%>" style="max-height: 100px; max-width: 100px;" />
+					</td>
+					<td style="width:70%; padding-left:2em; padding-top:1em;">
+						<div>名称:<span><%title%></span></div>
+						<div>开始时间:<span><%start_time%></span></div>
+						<div>结束时间:<span><%invalid_time%></span></div>
+					</td>
+				</tr>
+			</table>
+			<footer>
+				<button type="button" class="mui-btn mui-btn-danger" data-click='delete' style="float: left;">活动删除</button>
+				<button type="button" class="mui-btn mui-btn-warning" data-click='push'>活动推送</button>
+				<button type="button" class="mui-btn mui-btn-primary edit" data-click='editData'>活动编辑</button>
+			</footer>
+		</template>
+	</body>
+	<script>
+		var open_id=_g.openid;
+		var dom={
+			event_view:W("#event_view"),
+			searchList:W("#search_list"),
+			total:W("#total"),
+			select:W("#select"),
+			total_state:W("#total_state"),
+			select_date:W("#select_date")
+		};
+		var today=new Date().WtoString();
+		var actData={
+				cust_id:_user.seller_id,
+				access_token: _user.access_token,
+				invalid_time:today+"@3000-01-01 00:00:00",
+				type:4
+			}
+		var actOp={
+				fields:"cust_id,open_id,game_id,title,remark,activity_url,start_time,invalid_time,material_url,create_time",
+				sorts:"-create_time",
+				page:"create_time"
+			}
+		//监听 html加载完成事件
+		window.addEventListener("load",function(){
+			if(!(_user.cust_type==2||(_user.cust_type==3&&_user.privilege&&_user.privilege.el))){
+				location="home.html";
+			}
+			
+			W("#search_input").addEvent("keyup",searchInput);
+			W("#select_btn").addEvent('click',showSelect);
+			W("#close").addEvent('click',hideSelect);
+			W("#submit").addEvent('click',selectCar);
+			
+			
+			Wapi.game.list(function(res){
+				if (!res||res.status_code) {
+					W.errorCode(res);
+					return;
+				}
+				makeCarList(res);
+			},actData,actOp);
+			
+		});
+
+		
+		function cv(data){
+			var obj=new WiStormUI("div");//创建一个div组件
+			
+			obj.merge(this);//将原型cv.prototype中的方法赋予当前obj
+			
+			obj.className="ui_car_d";//设置div的class属性
+			
+			obj.setData(data);//设置obj的内容,setData()在下面cv.prototype中定义
+			obj.addEvent('click',cv.click);//事件委托
+			return obj;//最后记得要返回组件
+		}
+		//给组件添加对象方法
+		cv.prototype.getData=function(){
+			return this.data;
+		}
+		
+		cv.prototype.setData=function(data){
+			data.start_time=data.start_time.slice(0,10);
+			data.invalid_time=data.invalid_time.slice(0,10);
+			this.template(dom.event_view,data);
+
+			this.data=data;//直接把数据缓存进入组件（按需求，如果数据是需要重复用的就这样缓存）
+		}
+		cv.editData=function(){
+			W.setLS("cusAdd_data",this.data);
+			top.location="event_edit.html?intent=edit&data="+encodeURIComponent(JSON.stringify(this.data));
+		}
+		cv.click=function(){
+			var h=event.target.dataset.click;
+			if(h)
+				cv[h].call(this);
+			else
+				cv.preview.call(this);
+		}
+		cv.push=function(){
+			location="car_manage.html?intent=push&pushData="+encodeURIComponent(JSON.stringify(this.data));
+		}
+		cv.delete=function(){
+			var that=this;
+			var data={
+				game_id:this.data.game_id,
+				access_token:_user.access_token
+			}
+			W.confirm("确认删除该活动吗？",function(b){
+				if(!b)return;
+				Wapi.game.delete(function(res){
+					if (res.status_code) {
+						W.errorCode(res);
+						return;
+					}
+					that.parentElement.removeChild(that);
+					dom.total.innerHTML--;
+					W.toast('删除成功');
+				},data);
+			});
+		}
+		cv.preview=function(){
+			location=this.data.activity_url;
+		}
+		
+		//加载车标图片错误
+		function ierror(){
+			event.target.src="../img/icon_car_moren.png";
+			event.target.onerror=null;
+		}
+		
+//		var flag=0;
+		function makeCarList(res) {
+			console.log(res);
+			if (res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+//			if(flag==0){
+//				dom.total.innerText=res.total;
+//				flag=1;
+//			}
+			dom.total.innerText=res.total;
+			if (!dom.carList)
+				dom.carList = W("#car_list"); //缓存经常使用的元素;W()为元素选择器，使用css选择规则，有两个参数，具体查看WiStorm.js
+			var list = document.createDocumentFragment();
+			var events = res.data;
+			if(events.length){
+				W(".null_tip").style.display="none";
+			}
+			var data = dom.carList.data||new Array();
+			var MAX_ID=dom.carList.max_id||0;
+			var l=events.length-1;
+			for (var i = 0; i <=l; i++) {
+				list.appendChild(new cv(events[i])); //创建一个cv组件，并添加到DocumentFragment里
+			}
+			if(events.length)
+				MAX_ID=NewDate(events[events.length-1].create_time).WtoString();
+			dom.carList.data=data.concat(events);
+			if(res.total>dom.carList.data.length){
+				dom.carList.max_id=MAX_ID;
+				var autoLoad;
+				if(dom.carList.autoLoad){
+					autoLoad=dom.carList.autoLoad;
+				}else{
+					console.log("==========autoLoad");
+					autoLoad=new ui_autoLoad(document,_load);
+				}
+				actData.min_id=MAX_ID;
+				list.appendChild(autoLoad);
+				dom.carList.autoLoad=autoLoad;
+			}else if(dom.carList.autoLoad){
+				//删除自动加载组件,释放内存
+				dom.carList.autoLoad.remove();
+				delete dom.carList.autoLoad;
+			}
+			dom.carList.appendChild(list); //把整个列表添加到页面
+		}
+		
+		//自动加载下一页
+		function _load(){
+			Wapi.game.list(makeCarList,actData,actOp);
+		}
+		
+		//显示筛选列表
+		function showSelect(){
+			dom.select.style.display='block';
+			dom.select.classList.remove('toTop');
+			dom.select.classList.add('fromTop');
+		}
+		function hideSelect(){
+			dom.select.classList.remove('fromTop');
+			dom.select.classList.add('toTop');
+		}
+		
+		//输入搜索框时触发，搜索车牌号
+		function searchInput(){
+			var val=this.value;
+			if(val==""){
+				dom.carList.style.display="block";
+				dom.searchList.style.display="none";
+				return;
+			}
+			if(val.length<3){
+				return;
+			}
+			var data={
+				cust_id:_user.seller_id,
+				access_token: _user.access_token,
+				title:"^"+val
+			}
+			var op={
+				fields:"cust_id,open_id,game_id,title,remark,activity_url,start_time,invalid_time,material_url",
+				sorts:"-create_time"
+			}
+//			Wapi.game.list(showSearch,data);
+			Wapi.game.list(function(res){
+				dom.total_state.innerHTML="已选择";
+				changeCarList(res);
+			},data,actOp);
+		}
+		//筛选列表
+		function selectCar(eventOrHistory){
+			hideSelect();
+			W("#search_input").value="";
+			var par={
+				cust_id:_user.seller_id,
+				access_token: _user.access_token,
+				type:4
+			}
+			var state=W(".mui-selected").value;
+			
+			var now=new Date().WtoString();
+			var yesterday=new Date();
+			yesterday.setDate(yesterday.getDate()-1)
+			yesterday=yesterday.WtoString();
+			if(state=='1'){
+				dom.total_state.innerHTML="未开始";
+				par.start_time=now+"@3000-01-01 00:00:00";
+			}else if(state=='-1'){
+				dom.total_state.innerHTML="已过期";
+				par.invalid_time="2000-01-01 00:00:00@"+yesterday;
+			}else{
+				dom.total_state.innerHTML="进行中";
+				par.start_time="2000-01-01 00:00:00@"+now;
+				par.invalid_time=yesterday+"@3000-01-01 00:00:00";
+			}
+			
+			var op={
+				fields:"cust_id,open_id,game_id,title,remark,activity_url,start_time,invalid_time,material_url",
+				sorts:"-create_time",
+				limit: "-1"
+			}
+			if(eventOrHistory){
+				if(!selectCar._setHistory){
+					selectCar._setHistory=true;
+				}else{
+				}
+			}
+//			Wapi.game.list(showSearch,par,op);
+			Wapi.game.list(function(res){
+				if(res.data.length==0){
+					W.toast("暂无所选时间段的活动。");
+					return;
+				}
+				changeCarList(res);
+			},par,actOp);
+		}
+		function changeCarList(res){
+			var childs=dom.carList.childNodes;
+			for(var i=childs.length-1;i>=0;i--){
+				if(childs[i].className&&childs[i].className=="ui_car_d")
+				  dom.carList.removeChild(childs[i]);
+			}
+			makeCarList(res);
+		}
+		
+		function showSearch(res){
+			if (res && res.status_code) {
+				W.errorCode(res);
+				return;
+			}
+			var events=res.data;
+			console.log(res);
+			dom.carList.innerHTML="";
+			dom.carList.style.display="none";
+			dom.searchList.innerHTML="";
+			if(res.total){
+				dom.searchList.style.display="block";
+			}else{
+				dom.searchList.innerHTML='<div class="ui_car_d" style="text-align: center;"><a href="#"><span class="w_icon icon_add"></span><span>添加活动</span></a></div>';
+				return;
+			}
+			
+			var list=document.createDocumentFragment();
+			
+			for(var i=events.length-1;i>=0;i--){
+				list.appendChild(new cv(events[i]));//创建一个cv组件，并添加到DocumentFragment里
+			}
+			
+			dom.searchList.appendChild(list);//把整个列表添加到页面
+		}
+		
+		//至此，一个页面就基本完成了
+	</script>
+</html>

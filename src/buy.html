@@ -12,15 +12,15 @@
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 			
-		<title>购买设备</title>
+		<title>WiCARE Air, 开启智能净化新时代</title>
 		<script src="../wslib/WiStorm.js"></script>
 		<script>link("W.css")</script>
 		<script src="../wslib/api/newWapi.js" defer="defer"></script>
 		<script src="../wslib/toolkit/WxSdk.js" type="text/javascript" charset="utf-8"></script>
+		<script src="ui/coupon.js" defer="defer"></script>
 	</head>
 	<script>
-		var price=0.01;
-		var open_id=_g.openid;
+		var open_id=_g.openid||_user.login_id;
 		if(!open_id)
 			W.getOpenId(true);
 	</script>
@@ -40,7 +40,8 @@
 			background: #f05356;
 		}
 		.card{
-			padding: .5em;background: #fff;
+			padding: .5em .8em;
+			background: #fff;
 			margin-top: .5em;
 			border-top: 1px solid #ddd;
 			color: #333;
@@ -48,6 +49,7 @@
 		}
 		.card input{
 			width: auto;
+			border: none;
 		}
 		.pro_s{
 			height: 2.5em;
@@ -55,11 +57,12 @@
 		}
 		.pro_s>label{
 			color: #888;
+			margin-right: .5em;
 		}
 		.color{
 			border-radius: 4px;
 		    border: 1px solid #ccc;
-		    padding: 3px 8px;
+		    padding: .5em 1em;
     		margin-right: .5em;
 		}
 		.color.active{
@@ -86,8 +89,8 @@
 		    text-align: center;
 		}
 		.pro_count>span{
+			padding: 0 1em;
 			display: inline-block;
-			width: 26px;
 			background: #eee;
 		}
 		#minus{
@@ -98,6 +101,9 @@
 		}
 		#slider img{vertical-align: top;}
 		#slider{background: #fff;}
+		hr{border: none;border-top: 1px solid #ccc;margin-top:0}
+		#use_dou,#use_quan{margin-top: 6px;float: right;line-height: 21px;}
+		#voucher{background: #efefef;position: fixed;padding-top: 44px;}
 	</style>
 	<body>
 		<header class="mui-bar mui-bar-nav">
@@ -111,44 +117,68 @@
 				<div class="mui-slider-indicator mui-text-right"></div>
 			</div>
 			<div class="card" style="padding-bottom:.2em;margin: 0;">
-				<div id="title">WiCARE车载智能空气净化器</div>
+				<div id="title"></div>
+				<p style="color: #f15353;" id='remark'></p>
 				<h3 style="color: #f15353;margin-top: .3em;">
-					<small>￥</small>
-					<span id="price"></span>
+					<small>￥</small><span id="price"></span>
 				</h3>
 			</div>
-			<a class="card" style="line-height: 1.8em;">
+			<a class="card" style="line-height: 1.8em;" href="air_cleaner_details.html?intent=logout&needOpenId=true">
 				图文介绍<span class="icon_next w_icon" style="display: inline;float: right;"></span>
 			</a>
 			<div class="card">
 				<div class="pro_s" id="color">
-					<label>颜色：</label>
+					<label>颜色</label>
 				</div>
-				<div class="pro_s">
-					<label>数量：</label>
+				<div class="pro_s" style="margin-top: 5px;">
+					<label>数量</label>
 					<div class="pro_count">
 						<span id="minus">-</span><span id="count" style="background: #fff;">1</span><span id="plus">+</span>
 					</div>
 				</div>
-				<hr style="border: none;border-top: 1px solid #ccc;">
-				<div class="pro_s">
-					<label>收货人：</label>
+				<div class="pro_s" style="margin-top: 1em;">
+					<label>收货人</label>
 					<input type="text" id="name" style="width: 11em;" placeholder="收货人姓名">
-				</div>
+				</div><hr>
 				<div class="pro_s">
-					<label>手机号：</label>
+					<label>手机号</label>
 					<input type="text" id="mobile" style="width: 11em;" placeholder="收货人手机号码">
-				</div>
+				</div><hr>
 				<div class="pro_s" style="height: auto;">
-					<label>地址：</label>
-					<textarea type="text" id="address" style="margin: 0;" placeholder="请输入收货地址"></textarea>
-				</div>
+					<label>地址</label>
+					<textarea type="text" id="address" style="margin: 0;border-radius: 2px;" placeholder="请输入收货地址"></textarea>
+				</div><hr>
 				<div class="pro_s">
-					<label>运费：</label>
-					<span>5元</span>
+					<label>运费</label>
+					<span style="color:#f15353">0.00元</span>
 				</div>
 			</div>
-			<button type="button" class="mui-btn mui-btn-block w" id="buy">立即购买</button>
+			<div class="card">
+				<div class="pro_s" id='used'>
+					<label>使用微豆</label>
+					<span>最高抵扣200.00元</span>
+					<div class="mui-switch" id="use_dou">
+						<div class="mui-switch-handle"></div>
+					</div>
+				</div>
+				<div class="pro_s">
+					<label>使用微券</label>
+					<span id="quan_text"></span>
+					<div class="mui-switch" id="use_quan">
+						<div class="mui-switch-handle"></div>
+					</div>
+				</div>
+			</div>
+			<div class="card">
+				<button type="button" class="mui-btn mui-btn-block w" id="buy">立即购买</button>
+			</div>
+		</div>
+		<div class="child_view hide" id="voucher">
+			<div class="mui-bar mui-bar-nav onshadow">
+				<a class="mui-icon mui-icon-left-nav mui-pull-left W_back"></a>
+				<h1 class="mui-title">选择优惠券</h1>
+			</div>
+			<div id='voucher_view'></div>
 		</div>
 	</body>
 	<script>
@@ -161,9 +191,15 @@
 		name:W("#name"),
 		address:W("#address"),
 		buy:W("#buy"),
-		price:W("#price")
+		price:W("#price"),
+		use_dou:W("#use_dou"),
+		use_quan:W("#use_quan"),
+		used_text:W("#used span"),
+		voucher:W("#voucher"),
+		quan_text:W("#quan_text"),
+		voucher_view:W("#voucher_view")
 	}
-	
+	var product;
 	//api加载完马上获取数据
 	W.apiready(function(){
 		Wapi.product.get(function(res){
@@ -176,6 +212,7 @@
 			W(".mui-slider-indicator").innerHTML=ht;
 			mui('#slider').slider();
 			W("#title").innerText=res.product_name;
+			W("#remark").innerText=res.remark;
 			
 			var l=document.createDocumentFragment(),tem,f;
 			for(var i=0;i<res.sku_info.length;i++){
@@ -195,9 +232,12 @@
 			W(".mui-content").style.display="block";
 			W("#load").style.display="none";
 			W(".mui-indicator").classList.add("mui-active");
+			product=res;
 		},{status:0,product_id:7});
 	});
 	window.addEventListener("load",function(){
+		getUser();//获取用户信息，豆啊，优惠券之类
+		getVoucher();
 		setShare();
 		var data=W.ls("order_data");
 		if(data){
@@ -206,28 +246,127 @@
 			dom.mobile.value=data.tel;
 		}
 		
-		W("#color").addEvent("click",selectColor);
 		dom.minus.addEvent("click",minusC);
 		dom.plus.addEvent("click",plusC);
 		dom.buy.addEvent("click",order);
 		dom.mobile.addEvent("change",checkMobile);
+		dom.use_dou.addEvent('click',useDou);
+		dom.use_quan.addEvent('click',showVoucher);
 	});
+	
+	//获取授权用户的信息
+	function getUser(){
+		if(!_user)return;
+		dom.used_text.innerText='获取微豆数量中……';
+		Wapi.user.get(function(res){
+			if(res.status_code){
+				W.errorCode(res);
+				return;
+			}
+			jsonConcat(_user,res);
+			var y='0.00元';
+			if(_user.wi_dou<200000)
+				y=parseInt(_user.wi_dou/1000).toString()+'.00元';
+			dom.used_text.innerText='可抵扣'+y;
+		},{
+			login_id:(open_id||_user.login_id),
+			access_token:_user.access_token
+		},{
+			fields:'wi_dou'
+		});
+	}
+	
+	//获取用户优惠券
+	function getVoucher(){
+		if(!_user)return;
+		dom.voucher_view.innerText='获取优惠券中……';
+		_ui_coupon(dom.voucher_view,useVoucher,false);
+	}
+	
+	//使用微豆抵扣
+	function useDou(){
+		var that=this;
+		if(this.classList.contains('mui-active')){
+			if(!_user){
+				W.confirm('使用微豆需授权确认身份，跳转授权？',function(b){
+					if(b)
+						W.wxLogin();
+					else
+						that.classList.remove('mui-active');
+				});
+			}else{
+				useDou.dou=parseInt(_user.wi_dou/1000)*1000;
+			}
+		}else{
+			useDou.dou=0;
+		}
+	}
+	//使用优惠券
+	function useVoucher(ev){
+		if(this.data.is_used){
+			W.alert('该优惠券已经使用');
+			return;
+		}
+		useVoucher.voucher=this.data;
+		dom.quan_text.innerText=this.data.remark;
+		hideVoucher();
+	}
+	function hideVoucher(){
+		window.removeEventListener("popstate",hideVoucher);
+		dom.voucher.classList.remove('fromRight');
+		dom.voucher.classList.add('toRight');
+		if(!useVoucher.voucher){
+			dom.use_quan.classList.remove('mui-active');
+			var a=dom.use_quan.querySelector('.mui-switch-handle');
+			a.removeAttribute('style');
+		}
+	}
+	//展示优惠券
+	function showVoucher(){
+		var that=this;
+		if(this.classList.contains('mui-active')){
+			if(!_user){
+				W.confirm('使用优惠券需授权确认身份，跳转授权？',function(b){
+					if(b)
+						W.wxLogin();
+					else
+						that.classList.remove('mui-active');
+				});
+			}else{
+				//展示优惠券选择框
+				window.addEventListener("popstate",hideVoucher);
+				history.pushState(null,"",'#voucher');
+				dom.voucher.classList.add('fromRight');
+				dom.voucher.classList.remove('hide');
+				dom.voucher.classList.remove('toRight');
+			}
+		}else{
+			delete useVoucher.voucher;
+			dom.quan_text.innerText='';
+		}
+	}
 	
 	function sku(data){
 		var obj=new WiStormUI('span');
 		obj.merge(this);
 		obj.className='color';
+		if(data.stock<1){
+			obj.style.corlor='#ccc';
+			obj.style.border='1px dashed #ccc';
+		}else{
+			obj.addEvent("click",selectColor);
+		}
 		obj.innerText=data.color;
 		obj.data=data;
 		return obj;
 	}
 	
 	//选择颜色
-	function selectColor(e){
-		var t=e.target;
-		this.querySelector(".active").classList.remove("active");
-		t.classList.add("active");
-		dom.price.innerText=t.data.price.toFixed(2);
+	function selectColor(){
+		var e=this.parentElement;
+		e.querySelector(".active").classList.remove("active");
+		this.classList.add("active");
+		dom.price.innerText=this.data.price.toFixed(2);
 	}
 	
 	//增加数量
@@ -257,18 +396,18 @@
 	//下单购买
 	function order(){
 		var count=parseInt(dom.count.innerHTML);
-		var color=W(".pro_s .active").innerHTML;
+		var sku_data=W("#color .active").data;
 		var mobile=dom.mobile.value;
 		var address=dom.address.value;
 		var name=dom.name.value;
 		var data={
 			"receiver":name,
-			"remark":color,
+			"remark":product.remark,
 			"tel":mobile,
 			"address":address
 		}
 		W.setLS("order_data",data);
-		
+		jsonConcat(data,sku_data);
 		if(!checkMobile()||count==NaN)
 			return;
 		if(!address||!name||address==""||name==""){
@@ -284,15 +423,27 @@
 					return;
 				var cid=W._login?_user.cust_id:0;
 				var sid=_g.sid?_g.sid:0;
+				var d=useDou.dou||0;
 				var params={			
 					cust_id:cid,
 					saler_id:sid,
 					'open_id':open_id,
 					order_type:3,
-					product_name:W("#title").innerText,
-					unit_price: price,
+					product_name:product.product_name,
+					product_id:7,
+					unit_price: data.price,
 					quantity: count,
-					total_price: count*price,
+					total_price: count*data.price,
+					wi_dou:d,
+					act_pay:count*data.price-d/1000
+				}
+				if(!W._login)//没有登录
+					delete params.cust_id;
+				if(!params.saler_id)
+					delete params.saler_id;
+				if(useVoucher.voucher){
+					var v=useVoucher.voucher;
+					params.voucher=v.code;
 				}
 				jsonConcat(params,data);
 				Wapi.pay.pay(paySuccess,params);
@@ -316,7 +467,7 @@
 						return;
 					var opt={
 						title:"长按图片，识别二维码关注",
-						content:"<img style='width: 80%;' src='http://a.hiphotos.baidu.com/baike/w%3D268/sign=b0ccc8a2239759ee4a5067cd8afa434e/2934349b033b5bb571dc8c5133d3d539b600bc12.jpg'>"
+						content:"<img style='width: 80%;' src='"+WiStorm.root+"img/图片1.png'>"
 					}
 					W.alert(opt);
 				}
@@ -333,7 +484,6 @@
 		if(W._login&&_user.cust_type==4)
 			sid="&sid="+_user.cust_id
 		var share_url=location.origin+location.pathname+'?intent=logout&needOpenId=true&id='+open_id+"&name="+name+sid;
-		history.pushState(null,"",share_url);
 		if(!W.fillFriend.fill){
 			W.fillFriend(_g.id,open_id,_g.name,name);
 			W.fillFriend.fill=true;
@@ -342,6 +492,7 @@
 			window.addEventListener("nativeSdkReady",setShare);
 			return;
 		}
+		history.pushState(null,"",share_url);
 		var op={
 		    title: 'WiCARE智能车载空气净化器，关爱车，更关爱你。', // 分享标题
 		    desc: 'WiCARE智能车载空气净化器', // 分享描述

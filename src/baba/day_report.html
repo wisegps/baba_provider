@@ -136,9 +136,7 @@
 						var autoLoad;						//把加载的存起来		
 						if(dom.tab.autoLoad){
 							autoLoad=dom.tab.autoLoad;
-						}else if(WiStorm.agent.ios)
-							autoLoad=new ui_autoLoad(W(".mui-content"),mileageCar);
-						else
+						}else
 							autoLoad=new ui_autoLoad(document,mileageCar);
 							
 						W(".mui-content").appendChild(autoLoad);
